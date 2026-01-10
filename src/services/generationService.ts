@@ -44,7 +44,7 @@ export async function generateTryOn(options: GenerationOptions): Promise<Generat
 
         // Helper to get credit balance
         const getCreditBalance = async (userId: string): Promise<number> => {
-            const { data: ledgerData } = await supabase
+            const { data: ledgerData } = await supabase!
                 .from('credit_ledger')
                 .select('delta')
                 .eq('user_id', userId);

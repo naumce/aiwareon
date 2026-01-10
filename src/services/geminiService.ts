@@ -125,7 +125,7 @@ OUTPUT: High-quality editorial photo, studio lighting, photorealistic skin textu
             throw new Error("No candidates returned from AI model");
         }
 
-        for (const part of response.candidates[0].content.parts) {
+        for (const part of response.candidates[0]?.content?.parts || []) {
             if (part.inlineData) {
                 imageBase64 = `data:image/png;base64,${part.inlineData.data}`;
             } else if (part.text) {
@@ -198,7 +198,7 @@ Do NOT change the person, clothing, or composition. Only enhance quality.`
             throw new Error("No candidates returned from upscale");
         }
 
-        for (const part of response.candidates[0].content.parts) {
+        for (const part of response.candidates[0]?.content?.parts || []) {
             if (part.inlineData) {
                 imageBase64 = `data:image/png;base64,${part.inlineData.data}`;
                 break;

@@ -31,7 +31,7 @@ export async function savePersonImage(userId: string, imageBase64: string): Prom
         const blob = new Blob([byteArray], { type: 'image/jpeg' });
 
         // Upload to Supabase storage
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
             .from('media')
             .upload(fileName, blob, {
                 contentType: 'image/jpeg',
@@ -90,7 +90,7 @@ export async function getPersonImages(userId: string, limit: number = 3): Promis
         // Get public URLs
         const imagesWithUrls = await Promise.all(
             (data || []).map(async (img) => {
-                const { data: urlData } = supabase.storage
+                const { data: urlData } = supabase!.storage
                     .from('media')
                     .getPublicUrl(img.storage_path);
 

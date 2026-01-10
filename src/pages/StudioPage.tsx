@@ -19,12 +19,11 @@ export function StudioPage() {
         setPersonImage,
         setDressImage,
         generate,
-        upscale,
         clearResult
     } = useGenerationStore();
 
     const { balance, fetchBalance } = useCreditStore();
-    const { user, isAnonymous, signOut } = useAuthStore();
+    const { user, isAnonymous } = useAuthStore();
     const { savedImages, refreshImages } = usePersonImages();
 
     const [quality, setQuality] = useState<Quality>('standard');
@@ -37,7 +36,7 @@ export function StudioPage() {
     const controlsSectionRef = useRef<HTMLDivElement>(null);
     const [isImageLoading, setIsImageLoading] = useState(false);
 
-    const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
         setTimeout(() => {
             ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 100);
