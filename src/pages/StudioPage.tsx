@@ -133,11 +133,8 @@ export function StudioPage() {
 
 
             {/* Page Header */}
-            <div className="px-4 md:px-8 py-6 flex justify-between items-center shrink-0">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight uppercase italic">Atelier</h2>
-                    <p className="text-xs text-zinc-500 font-bold uppercase tracking-[0.2em] mt-1">Creation Space</p>
-                </div>
+            {/* Page Header - Removed Title */}
+            <div className="px-4 md:px-8 py-6 flex justify-end items-center shrink-0">
                 <div className="flex gap-4">
                     {isAnonymous && (
                         <Link to="/login" className="px-4 py-2 rounded-full glass glass-hover text-[10px] font-bold uppercase tracking-widest text-violet-400">

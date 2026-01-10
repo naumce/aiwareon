@@ -35,10 +35,7 @@ export function StudioLayout() {
             <header className="fixed top-0 left-0 right-0 h-16 bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 z-50 flex items-center justify-between px-4 md:px-8">
                 {/* Logo */}
                 <Link to="/" className="text-xl font-bold tracking-tighter flex items-center gap-2">
-                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                        <span className="text-zinc-950 font-black">A</span>
-                    </div>
-                    <span className="hidden md:block">AIWEAR</span>
+                    <span className="font-black italic">AIWEAR</span>
                 </Link>
 
                 {/* Center Navigation (Pills) */}
