@@ -29,7 +29,8 @@ export function StudioLayout() {
     ];
 
     return (
-        <div className="min-h-screen bg-zinc-950 flex flex-col text-white">
+        <div className="fixed inset-0 bg-zinc-950 flex flex-col text-white overflow-hidden"
+            style={{ height: '100dvh' }}>
             {/* Top Header */}
             <header className="fixed top-0 left-0 right-0 h-16 bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 z-50 flex items-center justify-between px-4 md:px-8">
                 {/* Logo */}
@@ -136,7 +137,7 @@ export function StudioLayout() {
             </header>
 
             {/* Main Content Area (padded for fixed header) */}
-            <main className="flex-1 pt-16 relative flex flex-col min-w-0">
+            <main className="flex-1 pt-16 relative flex flex-col min-w-0 overflow-y-auto overflow-x-hidden">
                 <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-violet-500/5 blur-[120px] rounded-full -z-10" />
                 <Outlet />
             </main>

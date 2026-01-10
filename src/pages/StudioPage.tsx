@@ -128,7 +128,7 @@ export function StudioPage() {
     const canGenerate = personImage && dressImage && state === 'idle' && balance > 0;
 
     return (
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col h-full w-full overflow-hidden">
             {/* Sidebar - Desktop */}
 
 
@@ -147,8 +147,8 @@ export function StudioPage() {
                 </div>
             </div>
 
-            <div className="flex-1 p-4 md:p-8 pt-0 overflow-y-auto">
-                <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
+            <div className="flex-1 p-4 md:p-8 pt-0 overflow-y-auto overflow-x-hidden">
+                <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 w-full">
                     {/* Person Selection */}
                     <div className="space-y-6 min-w-0 overflow-hidden">
                         <div className="flex justify-between items-center px-1">
@@ -161,11 +161,10 @@ export function StudioPage() {
                             <div className="space-y-3 min-w-0">
                                 <div className="flex items-center justify-between px-1">
                                     <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">My Photos</p>
-                                    <span className="text-[9px] text-zinc-600">{savedImages.length} items</span>
                                 </div>
 
                                 {/* Responsive Container: Scroll on Mobile, Grid on Desktop */}
-                                <div className="w-full max-w-full min-w-0 flex lg:grid lg:grid-cols-4 gap-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 scrollbar-hide snap-x px-1">
+                                <div className="w-full max-w-full overflow-x-auto flex lg:grid lg:grid-cols-4 gap-3 pb-4 lg:pb-0 scrollbar-hide snap-x px-1 overscroll-x-contain">
                                     {/* Add New Button - Toggle Menu */}
                                     <div className="flex-shrink-0 snap-start w-24 lg:w-full aspect-[3/4] rounded-2xl border border-dashed border-white/20 relative overflow-hidden">
                                         {!showAddMenu ? (
@@ -291,7 +290,7 @@ export function StudioPage() {
                     </div>
 
                     {/* Dress Upload */}
-                    <div className="space-y-4" ref={garmentSectionRef}>
+                    <div className="space-y-4 min-w-0 overflow-hidden" ref={garmentSectionRef}>
                         <div className="flex justify-between items-center px-2">
                             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">02 / Garment</span>
                             {dressImage && <button onClick={() => setDressImage('')} className="text-[10px] text-zinc-600 hover:text-white uppercase tracking-widest underline">Clear</button>}
@@ -322,9 +321,9 @@ export function StudioPage() {
                         </div>
 
                         {/* Example Garments */}
-                        <div className="space-y-3 min-w-0">
+                        <div className="space-y-3 min-w-0 w-full overflow-hidden">
                             <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider px-1">Example Garments</p>
-                            <div className="w-full max-w-full min-w-0 flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x px-1">
+                            <div className="w-full max-w-full overflow-x-auto flex gap-3 pb-4 scrollbar-hide snap-x px-1 overscroll-x-contain">
                                 {EXAMPLE_GARMENT_IMAGES.map((img) => (
                                     <button
                                         key={img.id}
@@ -356,39 +355,39 @@ export function StudioPage() {
                     </div>
 
                     {/* Column 3: Controls & Creation */}
-                    <div className="space-y-8 pt-8 lg:pt-0">
+                    <div className="space-y-8 pt-8 lg:pt-0 min-w-0 overflow-hidden">
                         <div className="flex flex-col items-center gap-4">
                             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest self-start px-2">03 / Controls</span>
 
                             {/* Quality Selector */}
-                            <div className="glass rounded-2xl p-2 inline-flex gap-2 w-full justify-center">
+                            <div className="glass rounded-2xl p-1.5 flex gap-1.5 w-full">
                                 <button
                                     onClick={() => setQuality('standard')}
-                                    className={`flex-1 px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all
+                                    className={`flex-1 px-2 py-3 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all
                                 ${quality === 'standard'
                                             ? 'bg-white/10 text-white shadow-lg'
                                             : 'text-zinc-500 hover:text-zinc-300'}`}
                                 >
                                     Standard
-                                    <span className="block text-[9px] text-violet-400 mt-1">1 Credit</span>
+                                    <span className="block text-[8px] text-violet-400 mt-0.5">1 Credit</span>
                                 </button>
                                 <button
                                     onClick={() => setQuality('studio')}
-                                    className={`flex-1 px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all
+                                    className={`flex-1 px-2 py-3 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all
                                 ${quality === 'studio'
                                             ? 'bg-violet-500/20 text-violet-300 shadow-lg'
                                             : 'text-zinc-500 hover:text-zinc-300'}`}
                                 >
                                     Studio
-                                    <span className="block text-[9px] text-violet-400 mt-1">2 Credits</span>
+                                    <span className="block text-[8px] text-violet-400 mt-0.5">2 Credits</span>
                                 </button>
                             </div>
 
                             {/* Model Selector */}
-                            <div className="glass rounded-2xl p-2 inline-flex gap-2 w-full justify-center">
+                            <div className="glass rounded-2xl p-1.5 flex gap-1.5 w-full">
                                 <button
                                     onClick={() => setModelType('fal')}
-                                    className={`flex-1 px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all
+                                    className={`flex-1 px-1 py-3 rounded-xl text-[9px] font-bold uppercase tracking-wider transition-all
                                 ${modelType === 'fal'
                                             ? 'bg-violet-500/20 text-violet-300 shadow-lg'
                                             : 'text-zinc-500 hover:text-zinc-300'}`}
@@ -397,7 +396,7 @@ export function StudioPage() {
                                 </button>
                                 <button
                                     onClick={() => setModelType('gemini2')}
-                                    className={`flex-1 px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all
+                                    className={`flex-1 px-1 py-3 rounded-xl text-[9px] font-bold uppercase tracking-wider transition-all
                                 ${modelType === 'gemini2'
                                             ? 'bg-blue-500/20 text-blue-300 shadow-lg'
                                             : 'text-zinc-500 hover:text-zinc-300'}`}
@@ -407,7 +406,7 @@ export function StudioPage() {
                                 <button
                                     onClick={() => setModelType('geminipro')}
                                     disabled={true}
-                                    className={`flex-1 px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all opacity-30 cursor-not-allowed
+                                    className={`flex-1 px-1 py-3 rounded-xl text-[9px] font-bold uppercase tracking-wider transition-all opacity-30 cursor-not-allowed
                                 ${modelType === 'geminipro'
                                             ? 'bg-emerald-500/20 text-emerald-300 shadow-lg'
                                             : 'text-zinc-500'}`}
