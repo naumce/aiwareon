@@ -8,7 +8,7 @@ export function LoginPage() {
     const location = useLocation();
     const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/studio';
 
-    const [mode, setMode] = useState<'quick' | 'email'>('email');
+    const [mode, setMode] = useState<'quick' | 'email'>('quick');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSignUp, setIsSignUp] = useState(false);
