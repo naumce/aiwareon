@@ -417,10 +417,10 @@ export function StudioPage() {
 
                             {/* Fal Category Selector */}
                             {modelType === 'fal' && (
-                                <div className="glass rounded-2xl p-2 inline-flex gap-2 w-full justify-center">
+                                <div className="glass rounded-2xl p-1.5 flex gap-1.5 w-full justify-center">
                                     <button
                                         onClick={() => setFalCategory('tops')}
-                                        className={`flex-1 px-2 py-2 rounded-xl flex flex-col items-center gap-1 transition-all
+                                        className={`flex-1 px-1 py-2 rounded-xl flex flex-col items-center gap-1 transition-all
                                 ${falCategory === 'tops'
                                                 ? 'bg-violet-500/20 text-violet-300 shadow-lg'
                                                 : 'text-zinc-500 hover:text-zinc-300'}`}
@@ -432,7 +432,7 @@ export function StudioPage() {
                                     </button>
                                     <button
                                         onClick={() => setFalCategory('bottoms')}
-                                        className={`flex-1 px-2 py-2 rounded-xl flex flex-col items-center gap-1 transition-all
+                                        className={`flex-1 px-1 py-2 rounded-xl flex flex-col items-center gap-1 transition-all
                                 ${falCategory === 'bottoms'
                                                 ? 'bg-violet-500/20 text-violet-300 shadow-lg'
                                                 : 'text-zinc-500 hover:text-zinc-300'}`}
@@ -444,7 +444,7 @@ export function StudioPage() {
                                     </button>
                                     <button
                                         onClick={() => setFalCategory('one-pieces')}
-                                        className={`flex-1 px-2 py-2 rounded-xl flex flex-col items-center gap-1 transition-all
+                                        className={`flex-1 px-1 py-2 rounded-xl flex flex-col items-center gap-1 transition-all
                                 ${falCategory === 'one-pieces'
                                                 ? 'bg-violet-500/20 text-violet-300 shadow-lg'
                                                 : 'text-zinc-500 hover:text-zinc-300'}`}
