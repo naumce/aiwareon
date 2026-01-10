@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, RefObject } from 'react';
+import { useState, useRef, useCallback, type RefObject } from 'react';
 
 interface UseCameraReturn {
     isSupported: boolean;
@@ -8,7 +8,7 @@ interface UseCameraReturn {
     capturePhoto: () => Promise<string | null>;
     stopCamera: () => void;
     error: string | null;
-    videoRef: RefObject<HTMLVideoElement>;
+    videoRef: RefObject<HTMLVideoElement | null>;
 }
 
 export function useCamera(): UseCameraReturn {

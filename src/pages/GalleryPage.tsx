@@ -14,8 +14,8 @@ interface MediaItem {
 }
 
 export function GalleryPage() {
-    const { user, signOut } = useAuthStore();
-    const { balance, fetchBalance } = useCreditStore();
+    const { user } = useAuthStore();
+    const { fetchBalance } = useCreditStore();
     const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
     const [imageUrls, setImageUrls] = useState<Map<string, string>>(new Map());
     const [loading, setLoading] = useState(true);
