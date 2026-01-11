@@ -2,10 +2,12 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { useCreditStore } from '../stores/creditStore';
 import { useEffect } from 'react';
+import { useInstall } from '../hooks/useInstall';
 
 export function AccountPage() {
     const { user, signOut } = useAuthStore();
     const { balance, fetchBalance } = useCreditStore();
+    const { canInstall, isInstalled, handleInstall, IOSInstructions } = useInstall();
 
     useEffect(() => {
         fetchBalance();
@@ -55,6 +57,28 @@ export function AccountPage() {
                         </div>
                     </div>
 
+                    {/* Install App Card */}
+                    {canInstall && !isInstalled && (
+                        <div className="glass rounded-2xl p-6 border border-violet-500/20 bg-gradient-to-br from-violet-500/5 to-transparent">
+                            <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Install App</h3>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-bold text-lg mb-1">Add to Home Screen</p>
+                                    <p className="text-xs text-zinc-400">Faster access & offline mode</p>
+                                </div>
+                                <button
+                                    onClick={handleInstall}
+                                    className="px-6 py-3 rounded-xl gradient-primary text-white text-[10px] font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center gap-2"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    Install
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Quick Links */}
                     <div className="glass rounded-2xl p-6 border border-white/5">
                         <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Quick Links</h3>
@@ -90,6 +114,9 @@ export function AccountPage() {
 
                 </div>
             </div>
+
+            {/* iOS Install Instructions Modal */}
+            <IOSInstructions />
         </div>
     );
 }

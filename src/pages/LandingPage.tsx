@@ -43,10 +43,10 @@ export function LandingPage() {
     }, [selectedSet, selectedDress]);
 
     return (
-        <div className="min-h-screen w-full flex flex-col relative bg-zinc-950 overflow-x-hidden overflow-y-auto">
+        <div className="min-h-screen w-full relative bg-zinc-950">
             {/* Background Glows - pointer-events-none so they don't block scrolling */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-500/10 blur-[120px] rounded-full animate-mesh pointer-events-none" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-pink-500/10 blur-[120px] rounded-full animate-mesh pointer-events-none" />
+            <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-500/10 blur-[120px] rounded-full animate-mesh pointer-events-none" />
+            <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-pink-500/10 blur-[120px] rounded-full animate-mesh pointer-events-none" />
 
             {/* Navigation */}
             <nav className="relative z-10 px-6 py-8 flex justify-between items-center max-w-7xl mx-auto w-full">
@@ -66,7 +66,7 @@ export function LandingPage() {
             </nav>
 
             {/* Hero Section */}
-            <main className="flex-1 flex flex-col items-center justify-center px-4 relative z-10 text-center py-20">
+            <main className="relative z-10 px-4 text-center py-20 max-w-7xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
