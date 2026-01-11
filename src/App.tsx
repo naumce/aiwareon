@@ -7,6 +7,7 @@ import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { StudioPage } from './pages/StudioPage';
 import { GalleryPage } from './pages/GalleryPage';
+import { AccountPage } from './pages/AccountPage';
 import { StudioLayout } from './components/StudioLayout';
 
 function App() {
@@ -49,12 +50,7 @@ function App() {
             </ProtectedRoute>
           }>
             <Route path="/studio" element={<StudioPage />} />
-            <Route path="/studio/library" element={
-              <div className="min-h-screen p-6">
-                <h1 className="text-2xl font-bold">Library</h1>
-                <p className="text-zinc-400 mt-2">Coming soon...</p>
-              </div>
-            } />
+            <Route path="/studio/account" element={<AccountPage />} />
             <Route path="/studio/history" element={<GalleryPage />} />
           </Route>
 

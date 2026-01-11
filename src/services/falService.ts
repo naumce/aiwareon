@@ -160,48 +160,53 @@ export const virtualTryOn = async (
 
         // If geminiCategory is one of the valid raw categories (meaning passed manually or detected), use it.
         // If passed manually, we skip the router detection to save time/cost.
+        // Step B: Run the "Router" to detect if garment has model
         const validCategories = ['tops', 'bottoms', 'one-pieces'];
-        let finalCategory = geminiCategory;
+        let internalCategory = geminiCategory;
 
         if (validCategories.includes(geminiCategory)) {
             console.log(`Manual/Pre-set Category used: ${geminiCategory} (Skipping Auto-Detection)`);
-            finalCategory = geminiCategory;
+            internalCategory = geminiCategory;
         } else {
-            // Step B: Run the "Router" to detect if garment has model
             const detectedCategory = await detectClothingCategory(garmentUrl);
             console.log(`Auto-detected Category: ${detectedCategory}`);
-            finalCategory = detectedCategory === 'one-pieces' ? 'one-pieces' : geminiCategory;
+            internalCategory = detectedCategory === 'one-pieces' ? 'one-pieces' : geminiCategory;
         }
 
-        console.log(`Final Category: ${finalCategory}`);
+        // MAP TO IDM-VTON API VALUES
+        // IDM-VTON expects: 'upper_body', 'lower_body', 'dresses'
+        const categoryMapping: Record<string, string> = {
+            'tops': 'upper_body',
+            'bottoms': 'lower_body',
+            'one-pieces': 'dresses'
+        };
+
+        const finalCategory = categoryMapping[internalCategory] || 'dresses'; // Default to dresses
+        console.log(`Final Category (API): ${finalCategory} (mapped from ${internalCategory})`);
 
         // Quality-based resolution (EXACT 9:16 aspect ratio for body proportion preservation)
-        // 9:16 = 0.5625 ratio
         const width = quality === 'studio' ? 1024 : 768;
-        const height = quality === 'studio' ? 1820 : 1365; // Exact 9:16! (1024/1820=0.5626, 768/1365=0.5626)
-        const steps = quality === 'studio' ? 50 : 40;
+        const height = quality === 'studio' ? 1820 : 1365;
+        const steps = quality === 'studio' ? 50 : 30;
 
-        console.log(`Quality: ${quality} → Resolution: ${width}x${height} (exact 9:16), Steps: ${steps}`);
+        console.log(`Using Model: fal-ai/idm-vton | Quality: ${quality} | Resolution: ${width}x${height}`);
 
-        // Step C: Run IDM-VTON with BODY PROPORTION PRESERVATION settings
+        // Step C: Run IDM-VTON (Proven Stable Model)
         const result: any = await fal.subscribe("fal-ai/idm-vton", {
             input: {
                 human_image_url: personUrl,
                 garment_image_url: garmentUrl,
-                description: description,           // Clean text description
-                category: finalCategory,            // Proper category
-                garment_photo_type: "model",        // Optimized for selfies
+                description: description,
+                category: finalCategory,
+                garment_photo_type: "model",
 
-                // STRICT BODY PROPORTION PRESERVATION
-                width: width,                       // Standard: 768, Studio: 1024
-                height: height,                     // Standard: 1365, Studio: 1820 (EXACT 9:16!)
-
-                //ULTRA-PRO Settings - Body proportion preservation
-                num_inference_steps: quality === 'studio' ? 50 : 40,  // Studio: Max quality
-                guidance_scale: 2.0,                // Lower = better body preservation (was 2.5)
-                segmentation_free: true,            // Keeps background stable
+                // Resolution & Quality
+                width: width,
+                height: height,
+                num_inference_steps: steps,
+                guidance_scale: 2.0,
                 seed: 42,
-                output_format: "png"                // High quality output
+                output_format: "png"
             },
             logs: true,
             onQueueUpdate: (update: any) => {

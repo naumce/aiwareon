@@ -29,7 +29,7 @@ export function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden bg-zinc-950">
+        <div className="h-[100dvh] w-full flex items-center justify-center px-4 relative overflow-y-auto overflow-x-hidden bg-zinc-950">
             {/* Background Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg h-full max-h-lg bg-violet-500/10 blur-[120px] rounded-full -z-10" />
 

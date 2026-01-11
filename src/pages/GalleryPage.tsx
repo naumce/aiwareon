@@ -125,6 +125,37 @@ export function GalleryPage() {
                                                     </p>
                                                 </div>
                                             </div>
+                                            {/* Delete Button */}
+                                            <button
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    if (!confirm('Delete this creation?')) return;
+
+                                                    try {
+                                                        // Delete from storage
+                                                        await supabase.storage
+                                                            .from('aiwear-media')
+                                                            .remove([item.object_path]);
+
+                                                        // Delete from database
+                                                        await supabase
+                                                            .from('media_items')
+                                                            .delete()
+                                                            .eq('id', item.id);
+
+                                                        // Refresh gallery
+                                                        fetchMediaItems();
+                                                    } catch (err) {
+                                                        console.error('Failed to delete:', err);
+                                                    }
+                                                }}
+                                                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-red-500/80 hover:bg-red-500 text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:scale-110 z-10"
+                                                title="Delete"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
                                         </>
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
