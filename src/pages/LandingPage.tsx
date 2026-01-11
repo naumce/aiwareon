@@ -43,10 +43,10 @@ export function LandingPage() {
     }, [selectedSet, selectedDress]);
 
     return (
-        <div className="min-h-screen w-full flex flex-col relative bg-zinc-950">
-            {/* Background Glows */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-500/10 blur-[120px] rounded-full animate-mesh" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-pink-500/10 blur-[120px] rounded-full animate-mesh" />
+        <div className="min-h-screen w-full flex flex-col relative bg-zinc-950 overflow-x-hidden overflow-y-auto">
+            {/* Background Glows - pointer-events-none so they don't block scrolling */}
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-500/10 blur-[120px] rounded-full animate-mesh pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-pink-500/10 blur-[120px] rounded-full animate-mesh pointer-events-none" />
 
             {/* Navigation */}
             <nav className="relative z-10 px-6 py-8 flex justify-between items-center max-w-7xl mx-auto w-full">
