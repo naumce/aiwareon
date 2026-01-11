@@ -4,7 +4,7 @@ import { useCreditStore } from '../stores/creditStore';
 import { useEffect } from 'react';
 
 export function AccountPage() {
-    const { user, profile, signOut } = useAuthStore();
+    const { user, signOut } = useAuthStore();
     const { balance, fetchBalance } = useCreditStore();
 
     useEffect(() => {
@@ -32,7 +32,7 @@ export function AccountPage() {
                             <div>
                                 <p className="font-bold text-lg">{user?.email}</p>
                                 <p className="text-xs text-zinc-500 uppercase tracking-widest">
-                                    {profile?.plan || 'Free'} Plan
+                                    Free Plan
                                 </p>
                             </div>
                         </div>

@@ -132,6 +132,7 @@ export function GalleryPage() {
                                                     if (!confirm('Delete this creation?')) return;
 
                                                     try {
+                                                        if (!supabase) return;
                                                         // Delete from storage
                                                         await supabase.storage
                                                             .from('aiwear-media')
