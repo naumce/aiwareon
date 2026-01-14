@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Navigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
+import { PasswordInput, EmailInput, LoadingButton, SuccessBanner } from '../components/auth';
+import { validatePassword } from '../utils/passwordValidation';
 
 export function LoginPage() {
     const { user, signInWithGoogle, signInWithEmail, signUpWithEmail, isLoading } = useAuthStore();
@@ -14,19 +16,76 @@ export function LoginPage() {
     const [isSignUp, setIsSignUp] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [emailValid, setEmailValid] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
-    if (user) return <Navigate to={from} replace />;
+    // All hooks must be called before any conditional returns
+    const handleEmailValidation = useCallback((isValid: boolean) => {
+        setEmailValid(isValid);
+    }, []);
 
-    const handleEmailAuth = async (e: React.FormEvent) => {
+    const handleGoogleSignIn = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        const result = await signInWithGoogle();
+        if (result.error) setError(result.error);
+        setLoading(false);
+    }, [signInWithGoogle]);
+
+    const handleEmailAuth = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
+
+        // Validate password strength for sign-up
+        if (isSignUp) {
+            const validation = validatePassword(password);
+            if (!validation.isValid) {
+                setError('Please create a stronger password (12+ characters with uppercase, lowercase, and numbers)');
+                setLoading(false);
+                return;
+            }
+        }
+
         const result = isSignUp
             ? await signUpWithEmail(email, password)
             : await signInWithEmail(email, password);
-        if (result.error) setError(result.error);
+
+        if (result.error) {
+            setError(result.error);
+        } else if (isSignUp) {
+            setShowSuccess(true);
+        }
         setLoading(false);
-    };
+    }, [isSignUp, password, email, signUpWithEmail, signInWithEmail]);
+
+    // Early return after all hooks are called
+    if (user && !showSuccess) return <Navigate to={from} replace />;
+
+    // Success state after sign-up
+    if (showSuccess) {
+        return (
+            <div className="h-[100dvh] w-full flex items-center justify-center px-4 relative overflow-y-auto overflow-x-hidden bg-zinc-950">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg h-full max-h-lg bg-violet-500/10 blur-[120px] rounded-full -z-10" />
+
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    className="max-w-md w-full"
+                >
+                    <SuccessBanner
+                        title="Account Created"
+                        message="Welcome to AIWEAR. Your atelier is ready."
+                        ctaText="Continue to Studio"
+                        ctaLink="/studio"
+                        showEmailVerification={false}
+                        onClose={() => setShowSuccess(false)}
+                    />
+                </motion.div>
+            </div>
+        );
+    }
 
     return (
         <div className="h-[100dvh] w-full flex items-center justify-center px-4 relative overflow-y-auto overflow-x-hidden bg-zinc-950">
@@ -94,17 +153,13 @@ export function LoginPage() {
                                 <div className="flex-1 h-px bg-white/5" />
                             </div>
 
-                            <button
-                                onClick={async () => {
-                                    setLoading(true);
-                                    setError(null);
-                                    const result = await signInWithGoogle();
-                                    if (result.error) setError(result.error);
-                                    setLoading(false);
-                                }}
+                            <LoadingButton
+                                onClick={handleGoogleSignIn}
+                                loading={loading}
+                                loadingText="Connecting..."
                                 disabled={loading || isLoading}
-                                className="w-full px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-[10px] uppercase tracking-[0.3em]
-                             transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                                variant="glass"
+                                className="w-full"
                             >
                                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                                     <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -113,7 +168,7 @@ export function LoginPage() {
                                     <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                                 </svg>
                                 Google
-                            </button>
+                            </LoadingButton>
                         </div>
 
                         <div className="flex flex-col items-center gap-6">
@@ -137,44 +192,43 @@ export function LoginPage() {
                 ) : (
                     <form onSubmit={handleEmailAuth} className="space-y-6">
                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest px-2">Account Email</label>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    className="w-full px-5 py-4 rounded-2xl bg-zinc-900/50 border border-white/5
-                             text-white placeholder-zinc-700 focus:outline-none focus:border-violet-500/50 transition-colors text-sm"
-                                    placeholder="EX: COUTURE@AIWEAR.COLLECTIVE"
-                                />
-                            </div>
+                            <EmailInput
+                                label="Account Email"
+                                value={email}
+                                onChange={setEmail}
+                                onValidationChange={handleEmailValidation}
+                            />
 
-                            <div className="space-y-2">
-                                <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest px-2">Secure Code</label>
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    minLength={6}
-                                    className="w-full px-5 py-4 rounded-2xl bg-zinc-900/50 border border-white/5
-                             text-white placeholder-zinc-700 focus:outline-none focus:border-violet-500/50 transition-colors text-sm"
-                                    placeholder="••••••••"
-                                />
-                            </div>
+                            <PasswordInput
+                                label="Secure Code"
+                                value={password}
+                                onChange={setPassword}
+                                showStrengthMeter={isSignUp}
+                                showRequirements={isSignUp}
+                            />
+
+                            {/* Forgot Password Link - Only show on sign-in */}
+                            {!isSignUp && (
+                                <div className="flex justify-end px-2">
+                                    <Link
+                                        to="/forgot-password"
+                                        className="text-[9px] font-bold text-zinc-500 hover:text-violet-400 uppercase tracking-widest transition-colors"
+                                    >
+                                        Forgot Secure Code?
+                                    </Link>
+                                </div>
+                            )}
                         </div>
 
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                        <LoadingButton
                             type="submit"
-                            disabled={loading}
-                            className="w-full px-8 py-5 rounded-2xl gradient-primary text-white font-bold text-xs uppercase tracking-[0.3em]
-                         hover:opacity-90 transition-all disabled:opacity-50 shadow-2xl shadow-violet-500/20"
+                            loading={loading}
+                            loadingText={isSignUp ? 'Creating Account...' : 'Signing In...'}
+                            disabled={loading || (isSignUp && !emailValid)}
+                            className="w-full"
                         >
-                            {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Sign In'}
-                        </motion.button>
+                            {isSignUp ? 'Create Account' : 'Sign In'}
+                        </LoadingButton>
 
                         <div className="flex flex-col items-center gap-6">
                             <button

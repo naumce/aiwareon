@@ -18,6 +18,9 @@ interface AuthState {
     signUpWithEmail: (email: string, password: string) => Promise<{ error: string | null }>;
     signOut: () => Promise<void>;
     upgradeAnonymousUser: (email: string, password: string) => Promise<{ error: string | null }>;
+    // Password recovery
+    requestPasswordReset: (email: string) => Promise<{ error: string | null }>;
+    resetPassword: (newPassword: string) => Promise<{ error: string | null }>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -109,12 +112,13 @@ export const useAuthStore = create<AuthState>()(
                 });
 
                 if (error) {
-                    // Check if this is an OAuth-only account
-                    if (error.message.includes('Invalid login credentials') ||
-                        error.message.includes('Email not confirmed')) {
-                        return {
-                            error: 'This email is registered with Google sign-in. Please use "Sign in with Google" instead.'
-                        };
+                    console.error('Sign in error:', error);
+                    // Return user-friendly error messages
+                    if (error.message.includes('Invalid login credentials')) {
+                        return { error: 'Invalid email or password. Please check your credentials and try again.' };
+                    }
+                    if (error.message.includes('Email not confirmed')) {
+                        return { error: 'Please verify your email before signing in. Check your inbox for a confirmation link.' };
                     }
                     return { error: error.message };
                 }
@@ -189,6 +193,34 @@ export const useAuthStore = create<AuthState>()(
                     user: data.user,
                     isAnonymous: false
                 });
+
+                return { error: null };
+            },
+
+            requestPasswordReset: async (email: string) => {
+                if (!supabase) return { error: 'Supabase not configured' };
+
+                const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/reset-password`,
+                });
+
+                if (error) {
+                    return { error: error.message };
+                }
+
+                return { error: null };
+            },
+
+            resetPassword: async (newPassword: string) => {
+                if (!supabase) return { error: 'Supabase not configured' };
+
+                const { error } = await supabase.auth.updateUser({
+                    password: newPassword,
+                });
+
+                if (error) {
+                    return { error: error.message };
+                }
 
                 return { error: null };
             },

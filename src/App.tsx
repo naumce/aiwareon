@@ -5,6 +5,8 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { InstallPrompt } from './components/InstallPrompt';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { StudioPage } from './pages/StudioPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { AccountPage } from './pages/AccountPage';
@@ -33,6 +35,8 @@ function App() {
           {/* Public routes per 09_ROUTING_PATTERN.md */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/pricing" element={
             <div className="min-h-screen flex items-center justify-center">
               <div className="text-center">
