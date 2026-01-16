@@ -39,7 +39,7 @@ export function StudioPage() {
     const [isImageLoading, setIsImageLoading] = useState(false);
     const [showCamera, setShowCamera] = useState(false);
     const [showAddMenu, setShowAddMenu] = useState(false);
-    const { videoRef, isCapturing, startCamera, capturePhoto, stopCamera, flipCamera, facingMode, isSupported: isCameraSupported } = useCamera();
+    const { videoRef, isCapturing, capturePhoto, stopCamera, flipCamera, facingMode, isSupported: isCameraSupported } = useCamera();
 
     const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
         setTimeout(() => {
@@ -114,11 +114,6 @@ export function StudioPage() {
                 refreshImages();
             }
         }
-    };
-
-    const handleStartCamera = async () => {
-        setShowCamera(true);
-        await startCamera();
     };
 
     const handleCloseCamera = () => {
