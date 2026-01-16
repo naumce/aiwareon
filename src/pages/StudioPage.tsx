@@ -32,6 +32,7 @@ export function StudioPage() {
     const [falCategory, setFalCategory] = useState<'tops' | 'bottoms' | 'one-pieces'>('one-pieces');
 
     const personInputRef = useRef<HTMLInputElement>(null);
+    const cameraInputRef = useRef<HTMLInputElement>(null);
     const dressInputRef = useRef<HTMLInputElement>(null);
     const garmentSectionRef = useRef<HTMLDivElement>(null);
     const controlsSectionRef = useRef<HTMLDivElement>(null);
@@ -194,7 +195,7 @@ export function StudioPage() {
                                                 {/* Camera Option */}
                                                 {isCameraSupported && (
                                                     <button
-                                                        onClick={() => { handleStartCamera(); setShowAddMenu(false); }}
+                                                        onClick={() => { cameraInputRef.current?.click(); setShowAddMenu(false); }}
                                                         className="w-full flex-1 rounded-xl bg-pink-500/20 hover:bg-pink-500/40 flex flex-col items-center justify-center gap-1 transition-all"
                                                     >
                                                         <svg className="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -283,7 +284,8 @@ export function StudioPage() {
                                 </div>
                             </div>
                         </div>
-                        <input ref={personInputRef} type="file" accept="image/*" capture="user" onChange={(e) => handleImageUpload(e, setPersonImage, true)} className="hidden" />
+                        <input ref={personInputRef} type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setPersonImage, true)} className="hidden" />
+                        <input ref={cameraInputRef} type="file" accept="image/*" capture="user" onChange={(e) => handleImageUpload(e, setPersonImage, true)} className="hidden" />
                     </div>
 
                     {/* Dress Upload */}
