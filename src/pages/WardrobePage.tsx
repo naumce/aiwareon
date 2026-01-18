@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 import { useWardrobeStore } from '../stores/wardrobeStore';
-import { EXAMPLE_WARDROBE_ITEMS, type WardrobeCategory } from '../services/wardrobeService';
+import { type WardrobeCategory, EXAMPLE_WARDROBE_ITEMS } from '../services/wardrobeService';
 import { compressForWardrobe } from '../utils/imageOptimizer';
 import { getDisplayUrl } from '../utils/imageUrl';
+import { categorizeItem, ALL_CATEGORIES, getCategoryGroup, type CategoryResult } from '../services/categorizeService';
 
 const CATEGORIES: { id: WardrobeCategory | 'all'; label: string; icon: string }[] = [
     { id: 'all', label: 'All', icon: '✨' },
@@ -12,8 +13,10 @@ const CATEGORIES: { id: WardrobeCategory | 'all'; label: string; icon: string }[
     { id: 'bottoms', label: 'Bottoms', icon: '👖' },
     { id: 'dresses', label: 'Dresses', icon: '👗' },
     { id: 'outerwear', label: 'Outerwear', icon: '🧥' },
-    { id: 'shoes', label: 'Shoes', icon: '👟' },
-    { id: 'accessories', label: 'Accessories', icon: '👜' },
+    { id: 'bags', label: 'Bags', icon: '👜' },
+    { id: 'glasses', label: 'Glasses', icon: '👓' },
+    { id: 'heels', label: 'Heels', icon: '👠' },
+    { id: 'sneakers', label: 'Sneakers', icon: '👟' },
 ];
 
 export function WardrobePage() {
@@ -22,11 +25,16 @@ export function WardrobePage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
 
-    // Simplified state - just track pending upload for category selection
+    // Upload state
     const [pendingImage, setPendingImage] = useState<string | null>(null);
     const [pendingBlob, setPendingBlob] = useState<Blob | null>(null);
     const [isAdding, setIsAdding] = useState(false);
     const [isCompressing, setIsCompressing] = useState(false);
+
+    // AI categorization state
+    const [aiResult, setAiResult] = useState<CategoryResult | null>(null);
+    const [isCategorizing, setIsCategorizing] = useState(false);
+    const [selectedCat, setSelectedCat] = useState<WardrobeCategory | null>(null);
 
     useEffect(() => {
         if (user) {
@@ -34,24 +42,22 @@ export function WardrobePage() {
         }
     }, [user, fetchItems]);
 
-    // SIMPLIFIED: Tap "Upload" → opens file picker directly
+    // Upload button click
     const handleUploadClick = () => {
         fileInputRef.current?.click();
     };
 
-    // Tap "Camera" → opens native camera
+    // Camera button click
     const handleCameraClick = () => {
         cameraInputRef.current?.click();
     };
 
-    // After selecting file, compress and show quick category picker
+    // After selecting file, compress and AI categorize
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Reset input so same file can be selected again
         e.target.value = '';
-
         setIsCompressing(true);
 
         try {
@@ -65,30 +71,48 @@ export function WardrobePage() {
 
             // Compress the image
             const optimized = await compressForWardrobe(dataUrl);
-
             console.log(`Image compressed: ${Math.round(optimized.originalSize / 1024)}KB → ${Math.round(optimized.optimizedSize / 1024)}KB`);
 
             setPendingImage(optimized.dataUrl);
             setPendingBlob(optimized.blob);
-        } catch (error) {
-            console.error('Error compressing image:', error);
-        } finally {
             setIsCompressing(false);
+
+            // AI categorize
+            setIsCategorizing(true);
+            const result = await categorizeItem(optimized.dataUrl);
+            setAiResult(result);
+            setSelectedCat(result.category as WardrobeCategory);
+            setIsCategorizing(false);
+        } catch (error) {
+            console.error('Error processing image:', error);
+            setIsCompressing(false);
+            setIsCategorizing(false);
         }
     };
 
-    // SIMPLIFIED: One tap on category → saves item instantly with auto-generated name
-    const handleQuickAdd = async (category: WardrobeCategory) => {
-        if (!user || !pendingBlob) return;
+    // Confirm and save item
+    const handleConfirmAdd = async () => {
+        if (!user || !pendingBlob || !selectedCat) return;
 
         setIsAdding(true);
-        const categoryLabel = CATEGORIES.find(c => c.id === category)?.label || category;
-        const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        const autoName = `${categoryLabel} • ${timestamp}`;
+        const name = aiResult?.suggestedName || `New ${selectedCat}`;
+        const categoryGroup = getCategoryGroup(selectedCat);
 
-        await addItem(user.id, autoName, category, pendingBlob);
+        await addItem(
+            user.id,
+            name,
+            selectedCat,
+            categoryGroup,
+            pendingBlob,
+            true, // ai_suggested
+            aiResult?.confidence
+        );
+
+        // Reset state
         setPendingImage(null);
         setPendingBlob(null);
+        setAiResult(null);
+        setSelectedCat(null);
         setIsAdding(false);
     };
 
@@ -96,6 +120,8 @@ export function WardrobePage() {
     const handleCancelUpload = () => {
         setPendingImage(null);
         setPendingBlob(null);
+        setAiResult(null);
+        setSelectedCat(null);
     };
 
     const handleDeleteItem = async (itemId: string) => {
@@ -115,7 +141,7 @@ export function WardrobePage() {
 
                 {/* COMPRESSING INDICATOR */}
                 <AnimatePresence>
-                    {isCompressing && (
+                    {(isCompressing || isCategorizing) && (
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
@@ -124,15 +150,17 @@ export function WardrobePage() {
                         >
                             <div className="glass rounded-3xl p-4 border border-violet-500/30 flex items-center justify-center gap-3">
                                 <div className="w-5 h-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
-                                <span className="text-sm text-zinc-400">Optimizing image...</span>
+                                <span className="text-sm text-zinc-400">
+                                    {isCompressing ? 'Optimizing image...' : 'AI detecting category...'}
+                                </span>
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                {/* PENDING UPLOAD - Inline Category Quick Picker */}
+                {/* PENDING UPLOAD - AI Category Confirmation */}
                 <AnimatePresence>
-                    {pendingImage && (
+                    {pendingImage && aiResult && (
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
@@ -146,30 +174,46 @@ export function WardrobePage() {
                                         <img src={pendingImage} alt="New item" className="w-full h-full object-cover" />
                                     </div>
 
-                                    {/* Category Quick Select */}
+                                    {/* AI Result + Category Picker */}
                                     <div className="flex-1">
-                                        <p className="text-[10px] font-bold text-violet-400 uppercase tracking-widest mb-2">
-                                            What type is this? (1 tap to save)
+                                        {/* AI Detected */}
+                                        <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-1">
+                                            ✨ AI Detected: {aiResult.suggestedName}
                                         </p>
-                                        <div className="flex flex-wrap gap-1.5">
-                                            {CATEGORIES.filter(c => c.id !== 'all').map((cat) => (
+
+                                        {/* Category Selector */}
+                                        <div className="flex flex-wrap gap-1.5 mb-3">
+                                            {ALL_CATEGORIES.map((cat) => (
                                                 <button
                                                     key={cat.id}
-                                                    onClick={() => handleQuickAdd(cat.id as WardrobeCategory)}
-                                                    disabled={isAdding}
-                                                    className="px-3 py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-violet-500 text-white transition-all duration-200 disabled:opacity-50 flex items-center gap-1.5"
+                                                    onClick={() => setSelectedCat(cat.id as WardrobeCategory)}
+                                                    className={`px-2 py-1 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1
+                                                        ${selectedCat === cat.id
+                                                            ? 'bg-violet-500 text-white ring-2 ring-violet-400'
+                                                            : 'bg-white/10 text-zinc-400 hover:bg-white/20'}`}
                                                 >
-                                                    <span>{cat.icon}</span>
+                                                    <span>{cat.emoji}</span>
                                                     <span className="hidden sm:inline">{cat.label}</span>
                                                 </button>
                                             ))}
                                         </div>
-                                        <button
-                                            onClick={handleCancelUpload}
-                                            className="mt-2 text-[10px] text-zinc-500 hover:text-white uppercase tracking-wider"
-                                        >
-                                            ✕ Cancel
-                                        </button>
+
+                                        {/* Actions */}
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleConfirmAdd}
+                                                disabled={isAdding || !selectedCat}
+                                                className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-violet-500 to-pink-500 text-white hover:scale-[1.02] transition-transform disabled:opacity-50"
+                                            >
+                                                {isAdding ? 'Saving...' : '✓ Add to Wardrobe'}
+                                            </button>
+                                            <button
+                                                onClick={handleCancelUpload}
+                                                className="px-3 py-2 text-xs text-zinc-500 hover:text-white uppercase tracking-wider"
+                                            >
+                                                ✕ Cancel
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

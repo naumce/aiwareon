@@ -90,22 +90,16 @@ export function isStoragePath(url: string): boolean {
 /**
  * Get the appropriate display URL for an image
  * Handles both old base64/external URLs and new storage paths
+ * 
+ * NOTE: Using direct URLs since Image Transformations require Supabase Pro.
+ * For optimization, images are compressed on upload using imageOptimizer.ts
  */
-export function getDisplayUrl(imageUrl: string, size: 'thumbnail' | 'preview' | 'full' = 'thumbnail'): string {
+export function getDisplayUrl(imageUrl: string, _size: 'thumbnail' | 'preview' | 'full' = 'thumbnail'): string {
     // If it's already a full URL (external or data URL), return as-is
     if (imageUrl.startsWith('http') || imageUrl.startsWith('data:')) {
         return imageUrl;
     }
 
-    // It's a storage path, generate optimized URL
-    switch (size) {
-        case 'thumbnail':
-            return getThumbnailUrl(imageUrl);
-        case 'preview':
-            return getPreviewUrl(imageUrl);
-        case 'full':
-            return getFullUrl(imageUrl);
-        default:
-            return getThumbnailUrl(imageUrl);
-    }
+    // Return direct storage URL (no transformations - free tier)
+    return getStorageUrl(imageUrl);
 }

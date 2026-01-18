@@ -5,7 +5,8 @@ import {
     deleteWardrobeItem,
     EXAMPLE_WARDROBE_ITEMS,
     type WardrobeItem,
-    type WardrobeCategory
+    type WardrobeCategory,
+    type CategoryGroup
 } from '../services/wardrobeService';
 
 interface WardrobeState {
@@ -14,12 +15,21 @@ interface WardrobeState {
     selectedCategory: WardrobeCategory | 'all';
 
     fetchItems: (userId: string) => Promise<void>;
-    addItem: (userId: string, name: string, category: WardrobeCategory, imageBlob: Blob) => Promise<WardrobeItem | null>;
+    addItem: (
+        userId: string,
+        name: string,
+        category: WardrobeCategory,
+        categoryGroup: CategoryGroup,
+        imageBlob: Blob,
+        aiSuggested?: boolean,
+        aiConfidence?: number
+    ) => Promise<WardrobeItem | null>;
     removeItem: (itemId: string) => Promise<boolean>;
     setCategory: (category: WardrobeCategory | 'all') => void;
 
     // Computed
     getFilteredItems: () => WardrobeItem[];
+    getItemsByGroup: (group: CategoryGroup) => WardrobeItem[];
     getExampleItems: () => typeof EXAMPLE_WARDROBE_ITEMS;
 }
 
@@ -34,8 +44,16 @@ export const useWardrobeStore = create<WardrobeState>((set, get) => ({
         set({ items, isLoading: false });
     },
 
-    addItem: async (userId: string, name: string, category: WardrobeCategory, imageBlob: Blob) => {
-        const newItem = await addWardrobeItem(userId, name, category, imageBlob);
+    addItem: async (
+        userId: string,
+        name: string,
+        category: WardrobeCategory,
+        categoryGroup: CategoryGroup,
+        imageBlob: Blob,
+        aiSuggested: boolean = false,
+        aiConfidence?: number
+    ) => {
+        const newItem = await addWardrobeItem(userId, name, category, categoryGroup, imageBlob, aiSuggested, aiConfidence);
         if (newItem) {
             set(state => ({ items: [newItem, ...state.items] }));
         }
@@ -58,6 +76,11 @@ export const useWardrobeStore = create<WardrobeState>((set, get) => ({
         const { items, selectedCategory } = get();
         if (selectedCategory === 'all') return items;
         return items.filter(item => item.category === selectedCategory);
+    },
+
+    getItemsByGroup: (group: CategoryGroup) => {
+        const { items } = get();
+        return items.filter(item => item.category_group === group);
     },
 
     getExampleItems: () => EXAMPLE_WARDROBE_ITEMS,

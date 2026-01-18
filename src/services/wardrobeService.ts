@@ -1,14 +1,25 @@
 import { supabase } from './supabaseClient';
 
-export type WardrobeCategory = 'tops' | 'bottoms' | 'dresses' | 'outerwear' | 'shoes' | 'accessories';
+// Clothing categories
+export type ClothingCategory = 'tops' | 'bottoms' | 'dresses' | 'outerwear';
+// Accessory categories
+export type AccessoryCategory = 'bags' | 'glasses' | 'jewelry' | 'hats' | 'scarves';
+// Footwear categories
+export type FootwearCategory = 'heels' | 'flats' | 'sneakers' | 'boots';
+
+export type WardrobeCategory = ClothingCategory | AccessoryCategory | FootwearCategory;
+export type CategoryGroup = 'clothing' | 'accessories' | 'footwear';
 
 export interface WardrobeItem {
     id: string;
     user_id: string;
     name: string;
     category: WardrobeCategory;
-    image_url: string; // Now stores storage path, not base64!
+    category_group: CategoryGroup;
+    image_url: string; // Storage path
     is_example: boolean;
+    ai_suggested: boolean;
+    ai_confidence?: number;
     created_at: string;
 }
 
@@ -33,13 +44,15 @@ export async function getWardrobeItems(userId: string): Promise<WardrobeItem[]> 
 
 /**
  * Upload image to Supabase Storage and add wardrobe item
- * Now accepts a Blob instead of base64 for better performance
  */
 export async function addWardrobeItem(
     userId: string,
     name: string,
     category: WardrobeCategory,
-    imageBlob: Blob
+    categoryGroup: CategoryGroup,
+    imageBlob: Blob,
+    aiSuggested: boolean = false,
+    aiConfidence?: number
 ): Promise<WardrobeItem | null> {
     if (!supabase) return null;
 
@@ -70,8 +83,11 @@ export async function addWardrobeItem(
                 user_id: userId,
                 name,
                 category,
+                category_group: categoryGroup,
                 image_url: filename, // Store path, not full URL!
-                is_example: false
+                is_example: false,
+                ai_suggested: aiSuggested,
+                ai_confidence: aiConfidence
             })
             .select()
             .single();
@@ -92,7 +108,7 @@ export async function addWardrobeItem(
 
 /**
  * Legacy function for base64 uploads (backwards compatibility)
- * Converts base64 to blob and uploads
+ * Converts base64 to blob and uploads - defaults to clothing group
  */
 export async function addWardrobeItemFromBase64(
     userId: string,
@@ -101,10 +117,19 @@ export async function addWardrobeItemFromBase64(
     base64: string
 ): Promise<WardrobeItem | null> {
     try {
+        // Determine category group from category
+        const clothingCats = ['tops', 'bottoms', 'dresses', 'outerwear'];
+        const accessoryCats = ['bags', 'glasses', 'jewelry', 'hats', 'scarves'];
+        const categoryGroup: CategoryGroup = clothingCats.includes(category)
+            ? 'clothing'
+            : accessoryCats.includes(category)
+                ? 'accessories'
+                : 'footwear';
+
         // Convert base64 to blob
         const response = await fetch(base64);
         const blob = await response.blob();
-        return addWardrobeItem(userId, name, category, blob);
+        return addWardrobeItem(userId, name, category, categoryGroup, blob, false);
     } catch (error) {
         console.error('Error converting base64 to blob:', error);
         return null;
@@ -152,26 +177,15 @@ export async function deleteWardrobeItem(itemId: string): Promise<boolean> {
     return true;
 }
 
-// Example items - these use external URLs (no storage needed)
+// Example items - minimal set for demo
 export const EXAMPLE_WARDROBE_ITEMS: Omit<WardrobeItem, 'id' | 'user_id' | 'created_at'>[] = [
-    // Tops
-    { name: 'Classic White Tee', category: 'tops', image_url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400', is_example: true },
-    { name: 'Black Hoodie', category: 'tops', image_url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400', is_example: true },
-    { name: 'Navy Blazer', category: 'tops', image_url: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400', is_example: true },
-    // Bottoms
-    { name: 'Blue Jeans', category: 'bottoms', image_url: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400', is_example: true },
-    { name: 'Black Joggers', category: 'bottoms', image_url: 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=400', is_example: true },
-    { name: 'Khaki Chinos', category: 'bottoms', image_url: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400', is_example: true },
-    // Dresses
-    { name: 'Little Black Dress', category: 'dresses', image_url: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400', is_example: true },
-    { name: 'Summer Floral', category: 'dresses', image_url: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400', is_example: true },
-    // Outerwear
-    { name: 'Leather Jacket', category: 'outerwear', image_url: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400', is_example: true },
-    { name: 'Trench Coat', category: 'outerwear', image_url: 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400', is_example: true },
-    // Shoes
-    { name: 'White Sneakers', category: 'shoes', image_url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400', is_example: true },
-    { name: 'Black Boots', category: 'shoes', image_url: 'https://images.unsplash.com/photo-1542840843-3349799cded6?w=400', is_example: true },
+    // Clothing
+    { name: 'Classic White Tee', category: 'tops', category_group: 'clothing', image_url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400', is_example: true, ai_suggested: false },
+    { name: 'Blue Jeans', category: 'bottoms', category_group: 'clothing', image_url: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400', is_example: true, ai_suggested: false },
+    { name: 'Little Black Dress', category: 'dresses', category_group: 'clothing', image_url: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400', is_example: true, ai_suggested: false },
+    // Footwear
+    { name: 'White Sneakers', category: 'sneakers', category_group: 'footwear', image_url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400', is_example: true, ai_suggested: false },
     // Accessories
-    { name: 'Designer Tote', category: 'accessories', image_url: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400', is_example: true },
-    { name: 'Classic Sunglasses', category: 'accessories', image_url: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400', is_example: true },
+    { name: 'Designer Tote', category: 'bags', category_group: 'accessories', image_url: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400', is_example: true, ai_suggested: false },
+    { name: 'Classic Sunglasses', category: 'glasses', category_group: 'accessories', image_url: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400', is_example: true, ai_suggested: false },
 ];

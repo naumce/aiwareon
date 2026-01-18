@@ -24,6 +24,7 @@ export function StudioLayout() {
 
     const navItems = [
         { id: 'atelier', label: 'Atelier', path: '/studio' },
+        { id: 'tonight', label: '✨ Tonight', path: '/studio/tonight' },
         { id: 'wardrobe', label: 'Wardrobe', path: '/studio/wardrobe' },
         { id: 'outfits', label: 'Outfits', path: '/studio/outfits' },
         { id: 'gallery', label: 'Gallery', path: '/studio/history' },
