@@ -39,19 +39,33 @@ export function validatePassword(password: string): PasswordValidation {
   };
 
   const metRequirements = Object.values(requirements).filter(Boolean).length;
+  const allRequirementsMet = metRequirements === 5;
   const result = zxcvbn(password);
 
-  const strengthMap: Record<number, PasswordValidation['strength']> = {
-    0: 'weak',
-    1: 'weak',
-    2: 'fair',
-    3: 'good',
-    4: 'strong',
-  };
+  // Hybrid strength: use zxcvbn but boost if all requirements met
+  let strength: PasswordValidation['strength'];
+
+  if (allRequirementsMet) {
+    // If all requirements met, minimum strength is 'good', or better if zxcvbn agrees
+    strength = result.score >= 4 ? 'strong' : result.score >= 3 ? 'strong' : 'good';
+  } else if (metRequirements >= 4 && password.length >= 12) {
+    // Most requirements met - at least 'fair'
+    strength = result.score >= 3 ? 'good' : 'fair';
+  } else {
+    // Otherwise use zxcvbn mapping
+    const strengthMap: Record<number, PasswordValidation['strength']> = {
+      0: 'weak',
+      1: 'weak',
+      2: 'fair',
+      3: 'good',
+      4: 'strong',
+    };
+    strength = strengthMap[result.score] || 'weak';
+  }
 
   return {
     isValid: metRequirements >= 4 && password.length >= 12,
-    strength: strengthMap[result.score] || 'weak',
+    strength,
     requirements,
     score: result.score,
     feedback: result.feedback.suggestions,

@@ -1,9 +1,11 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Navigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 import { PasswordInput, EmailInput, LoadingButton, SuccessBanner } from '../components/auth';
 import { validatePassword } from '../utils/passwordValidation';
+
+const REMEMBERED_EMAIL_KEY = 'aiwear-remembered-email';
 
 export function LoginPage() {
     const { user, signInWithGoogle, signInWithEmail, signUpWithEmail, isLoading } = useAuthStore();
@@ -18,6 +20,15 @@ export function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [emailValid, setEmailValid] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [rememberMe, setRememberMe] = useState(true);
+
+    // Pre-fill email from localStorage
+    useEffect(() => {
+        const savedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY);
+        if (savedEmail) {
+            setEmail(savedEmail);
+        }
+    }, []);
 
     // All hooks must be called before any conditional returns
     const handleEmailValidation = useCallback((isValid: boolean) => {
@@ -53,11 +64,19 @@ export function LoginPage() {
 
         if (result.error) {
             setError(result.error);
-        } else if (isSignUp) {
-            setShowSuccess(true);
+        } else {
+            // Save email if Remember Me is checked
+            if (rememberMe) {
+                localStorage.setItem(REMEMBERED_EMAIL_KEY, email);
+            } else {
+                localStorage.removeItem(REMEMBERED_EMAIL_KEY);
+            }
+            if (isSignUp) {
+                setShowSuccess(true);
+            }
         }
         setLoading(false);
-    }, [isSignUp, password, email, signUpWithEmail, signInWithEmail]);
+    }, [isSignUp, password, email, signUpWithEmail, signInWithEmail, rememberMe]);
 
     // Early return after all hooks are called
     if (user && !showSuccess) return <Navigate to={from} replace />;
@@ -200,21 +219,32 @@ export function LoginPage() {
                             />
 
                             <PasswordInput
-                                label="Secure Code"
+                                label="Password"
                                 value={password}
                                 onChange={setPassword}
                                 showStrengthMeter={isSignUp}
                                 showRequirements={isSignUp}
                             />
 
-                            {/* Forgot Password Link - Only show on sign-in */}
+                            {/* Remember Me + Forgot Password - Only show on sign-in */}
                             {!isSignUp && (
-                                <div className="flex justify-end px-2">
+                                <div className="flex items-center justify-between px-2">
+                                    <label className="flex items-center gap-2 cursor-pointer group">
+                                        <input
+                                            type="checkbox"
+                                            checked={rememberMe}
+                                            onChange={(e) => setRememberMe(e.target.checked)}
+                                            className="w-4 h-4 rounded border-white/20 bg-zinc-900 text-violet-500 focus:ring-violet-500 focus:ring-offset-0 cursor-pointer"
+                                        />
+                                        <span className="text-[9px] font-bold text-zinc-500 group-hover:text-zinc-400 uppercase tracking-widest transition-colors">
+                                            Remember me
+                                        </span>
+                                    </label>
                                     <Link
                                         to="/forgot-password"
                                         className="text-[9px] font-bold text-zinc-500 hover:text-violet-400 uppercase tracking-widest transition-colors"
                                     >
-                                        Forgot Secure Code?
+                                        Forgot Password?
                                     </Link>
                                 </div>
                             )}

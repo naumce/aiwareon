@@ -10,6 +10,8 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { StudioPage } from './pages/StudioPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { AccountPage } from './pages/AccountPage';
+import { WardrobePage } from './pages/WardrobePage';
+import { OutfitsPage } from './pages/OutfitsPage';
 import { StudioLayout } from './components/StudioLayout';
 
 function App() {
@@ -54,6 +56,8 @@ function App() {
             </ProtectedRoute>
           }>
             <Route path="/studio" element={<StudioPage />} />
+            <Route path="/studio/wardrobe" element={<WardrobePage />} />
+            <Route path="/studio/outfits" element={<OutfitsPage />} />
             <Route path="/studio/account" element={<AccountPage />} />
             <Route path="/studio/history" element={<GalleryPage />} />
           </Route>

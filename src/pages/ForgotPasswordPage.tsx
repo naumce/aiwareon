@@ -95,7 +95,7 @@ export function ForgotPasswordPage() {
                         >
                             <div className="text-center mb-6">
                                 <h2 className="text-lg font-bold text-white uppercase tracking-wide mb-2">
-                                    Forgot Secure Code?
+                                    Forgot Password?
                                 </h2>
                                 <p className="text-[10px] text-zinc-500 uppercase tracking-widest">
                                     Enter your email and we'll send you a recovery link

@@ -34,17 +34,19 @@ export function StudioPage() {
     const personInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const dressInputRef = useRef<HTMLInputElement>(null);
+    const dressCameraInputRef = useRef<HTMLInputElement>(null);
     const garmentSectionRef = useRef<HTMLDivElement>(null);
     const controlsSectionRef = useRef<HTMLDivElement>(null);
     const [isImageLoading, setIsImageLoading] = useState(false);
     const [showCamera, setShowCamera] = useState(false);
     const [showAddMenu, setShowAddMenu] = useState(false);
+    const [showGarmentAddMenu, setShowGarmentAddMenu] = useState(false);
     const { videoRef, isCapturing, capturePhoto, stopCamera, flipCamera, facingMode, isSupported: isCameraSupported } = useCamera();
 
     const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
         setTimeout(() => {
             ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
+        }, 300);
     };
 
     useEffect(() => {
@@ -156,10 +158,10 @@ export function StudioPage() {
                                     <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">My Photos</p>
                                 </div>
 
-                                {/* Responsive Container: Scroll on Mobile, Grid on Desktop */}
-                                <div className="w-full max-w-full overflow-x-auto flex lg:grid lg:grid-cols-4 gap-3 pb-4 lg:pb-0 scrollbar-hide snap-x px-1 overscroll-x-contain">
-                                    {/* Add New Button - Toggle Menu */}
-                                    <div className="flex-shrink-0 snap-start w-24 lg:w-full aspect-[3/4] rounded-2xl border border-dashed border-white/20 relative overflow-hidden">
+                                {/* Fixed Add Button + Scrollable Photos */}
+                                <div className="flex gap-3 w-full">
+                                    {/* Add New Button - FIXED, doesn't scroll */}
+                                    <div className="flex-shrink-0 w-24 lg:w-28 aspect-[3/4] rounded-2xl border border-dashed border-white/20 relative overflow-hidden">
                                         {!showAddMenu ? (
                                             <button
                                                 onClick={() => setShowAddMenu(true)}
@@ -214,70 +216,92 @@ export function StudioPage() {
                                         )}
                                     </div>
 
-                                    {/* Saved Images */}
-                                    {savedImages.map((img) => (
-                                        <button
-                                            key={img.id}
-                                            onClick={() => handleSavedImageSelect(img.url || '', img.id)}
-                                            className={`flex-shrink-0 snap-start w-24 lg:w-full aspect-[3/4] rounded-2xl overflow-hidden border transition-all duration-300 relative group
-                                            ${personImage === img.url
-                                                    ? 'border-violet-500 ring-2 ring-violet-500/30 shadow-lg shadow-violet-500/20 scale-[1.02]'
-                                                    : 'border-white/5 hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/10'}`}
-                                        >
-                                            <img
-                                                src={img.url}
-                                                alt="Saved"
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                            />
-                                            <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${personImage === img.url ? 'opacity-100' : ''}`} />
+                                    {/* Scrollable Photos Container */}
+                                    <div className="flex-1 overflow-x-auto scrollbar-hide">
+                                        <div className="flex gap-3 pb-2">
+                                            {/* Saved Images */}
+                                            {savedImages.map((img) => (
+                                                <button
+                                                    key={img.id}
+                                                    onClick={() => handleSavedImageSelect(img.url || '', img.id)}
+                                                    className={`flex-shrink-0 w-24 aspect-[3/4] rounded-2xl overflow-hidden border transition-all duration-300 relative group
+                                                    ${personImage === img.url
+                                                            ? 'border-violet-500 ring-2 ring-violet-500/30 shadow-lg shadow-violet-500/20 scale-[1.02]'
+                                                            : 'border-white/5 hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/10'}`}
+                                                >
+                                                    <img
+                                                        src={img.url}
+                                                        alt="Saved"
+                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                    />
+                                                    <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${personImage === img.url ? 'opacity-100' : ''}`} />
 
-                                            {personImage === img.url && (
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    <div className="bg-violet-500 text-white rounded-full p-1.5 shadow-lg transform scale-100 transition-transform">
-                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M5 13l4 4L19 7" /></svg>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </button>
-                                    ))}
+                                                    {personImage === img.url && (
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <div className="bg-violet-500 text-white rounded-full p-1.5 shadow-lg transform scale-100 transition-transform">
+                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M5 13l4 4L19 7" /></svg>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Example Models */}
-                            <div className="space-y-3 min-w-0">
-                                <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider px-1">Example Models</p>
-                                <div className="w-full max-w-full min-w-0 flex lg:grid lg:grid-cols-4 gap-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 scrollbar-hide snap-x px-1">
-                                    {EXAMPLE_PERSON_IMAGES.map((img) => (
-                                        <button
-                                            key={img.id}
-                                            onClick={() => { setPersonImage(img.url); scrollToSection(garmentSectionRef); }}
-                                            className={`flex-shrink-0 snap-start w-24 lg:w-full aspect-[3/4] rounded-2xl overflow-hidden border transition-all duration-300 relative group
-                                            ${personImage === img.url
-                                                    ? 'border-violet-500 ring-2 ring-violet-500/30 shadow-lg shadow-violet-500/20 scale-[1.02]'
-                                                    : 'border-white/5 hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/10'}`}
-                                            title={img.label}
-                                        >
-                                            <img
-                                                src={img.url}
-                                                alt={img.label}
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                            />
-                                            <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${personImage === img.url ? 'opacity-100' : ''}`} />
-
-                                            {personImage === img.url && (
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    <div className="bg-violet-500 text-white rounded-full p-1.5 shadow-lg transform scale-100 transition-transform">
-                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M5 13l4 4L19 7" /></svg>
-                                                    </div>
-                                                </div>
-                                            )}
-                                            <div className="absolute bottom-0 left-0 right-0 p-2 text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <span className="text-[8px] font-bold text-white uppercase tracking-wider drop-shadow-md">{img.label}</span>
-                                            </div>
-                                        </button>
-                                    ))}
+                            {/* Show checkmark overlay for newly uploaded photo (base64) */}
+                            {personImage && personImage.startsWith('data:') && (
+                                <div className="relative w-24 lg:w-full aspect-[3/4] rounded-2xl overflow-hidden border-2 border-violet-500 ring-2 ring-violet-500/30 shadow-lg shadow-violet-500/20">
+                                    <img src={personImage} alt="Uploaded" className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                        <div className="bg-violet-500 text-white rounded-full p-1.5 shadow-lg">
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M5 13l4 4L19 7" /></svg>
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-2 left-0 right-0 text-center">
+                                        <span className="text-[8px] font-bold text-white uppercase tracking-wider drop-shadow-md">Just Uploaded</span>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
+
+                            {/* Example Models - Only show when no user photo is selected */}
+                            {(!personImage || EXAMPLE_PERSON_IMAGES.some(img => img.url === personImage)) && (
+                                <div className="space-y-3 min-w-0">
+                                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider px-1">Example Models</p>
+                                    <div className="w-full max-w-full min-w-0 flex lg:grid lg:grid-cols-4 gap-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 scrollbar-hide snap-x px-1">
+                                        {EXAMPLE_PERSON_IMAGES.map((img) => (
+                                            <button
+                                                key={img.id}
+                                                onClick={() => { setPersonImage(img.url); scrollToSection(garmentSectionRef); }}
+                                                className={`flex-shrink-0 snap-start w-24 lg:w-full aspect-[3/4] rounded-2xl overflow-hidden border transition-all duration-300 relative group
+                                                ${personImage === img.url
+                                                        ? 'border-violet-500 ring-2 ring-violet-500/30 shadow-lg shadow-violet-500/20 scale-[1.02]'
+                                                        : 'border-white/5 hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/10'}`}
+                                                title={img.label}
+                                            >
+                                                <img
+                                                    src={img.url}
+                                                    alt={img.label}
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                />
+                                                <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${personImage === img.url ? 'opacity-100' : ''}`} />
+
+                                                {personImage === img.url && (
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <div className="bg-violet-500 text-white rounded-full p-1.5 shadow-lg transform scale-100 transition-transform">
+                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M5 13l4 4L19 7" /></svg>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                <div className="absolute bottom-0 left-0 right-0 p-2 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <span className="text-[8px] font-bold text-white uppercase tracking-wider drop-shadow-md">{img.label}</span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <input ref={personInputRef} type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setPersonImage, true)} className="hidden" />
                         <input ref={cameraInputRef} type="file" accept="image/*" capture="user" onChange={(e) => handleImageUpload(e, setPersonImage, true)} className="hidden" />
@@ -289,29 +313,73 @@ export function StudioPage() {
                             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">02 / Garment</span>
                             {dressImage && <button onClick={() => setDressImage('')} className="text-[10px] text-zinc-600 hover:text-white uppercase tracking-widest underline">Clear</button>}
                         </div>
-                        <div
-                            onClick={() => dressInputRef.current?.click()}
-                            className={`aspect-[3/4.5] rounded-[2rem] border-2 border-dashed cursor-pointer relative group
-                           transition-all duration-500 overflow-hidden
-                           ${dressImage
-                                    ? 'border-transparent shadow-2xl'
-                                    : 'border-white/5 bg-zinc-900/20 hover:bg-zinc-900/40 hover:border-white/10'}`}
-                        >
-                            {dressImage ? (
-                                <>
-                                    <img src={dressImage} alt="Garment" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <p className="text-[10px] text-white font-bold uppercase tracking-[0.3em]">Change Item</p>
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center text-zinc-600">
-                                    <svg className="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.4em]">Choose Garment</p>
+                        {/* Garment Upload - Same pattern as Person section */}
+                        <div className="space-y-3 min-w-0">
+                            {/* Responsive Container */}
+                            <div className="w-full max-w-full overflow-x-auto flex lg:grid lg:grid-cols-4 gap-3 pb-4 lg:pb-0 scrollbar-hide snap-x px-1 overscroll-x-contain">
+                                {/* Add New Button - Toggle Menu */}
+                                <div className="flex-shrink-0 snap-start w-24 lg:w-full aspect-[3/4] rounded-2xl border border-dashed border-white/20 relative overflow-hidden">
+                                    {!showGarmentAddMenu ? (
+                                        <button
+                                            onClick={() => setShowGarmentAddMenu(true)}
+                                            className="w-full h-full flex flex-col items-center justify-center gap-2 group hover:border-violet-500/50 hover:bg-white/5 transition-all"
+                                            title="Add Garment"
+                                        >
+                                            <div className="absolute inset-0 bg-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <div className="w-10 h-10 rounded-full bg-zinc-900 ring-1 ring-white/10 flex items-center justify-center group-hover:bg-violet-500 group-hover:text-white text-zinc-500 transition-all duration-300 shadow-lg">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                </svg>
+                                            </div>
+                                            <span className="text-[7px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-violet-200 transition-colors">Add</span>
+                                        </button>
+                                    ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-zinc-900/80 p-2">
+                                            {/* Upload Option */}
+                                            <button
+                                                onClick={() => { dressInputRef.current?.click(); setShowGarmentAddMenu(false); }}
+                                                className="w-full flex-1 rounded-xl bg-violet-500/20 hover:bg-violet-500/40 flex flex-col items-center justify-center gap-1 transition-all"
+                                            >
+                                                <svg className="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                <span className="text-[7px] font-bold uppercase tracking-wider text-violet-300">Upload</span>
+                                            </button>
+
+                                            {/* Camera Option */}
+                                            <button
+                                                onClick={() => { dressCameraInputRef.current?.click(); setShowGarmentAddMenu(false); }}
+                                                className="w-full flex-1 rounded-xl bg-pink-500/20 hover:bg-pink-500/40 flex flex-col items-center justify-center gap-1 transition-all"
+                                            >
+                                                <svg className="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                <span className="text-[7px] font-bold uppercase tracking-wider text-pink-300">Camera</span>
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+
+                                {/* Selected Garment Preview */}
+                                {dressImage && (
+                                    <button
+                                        onClick={() => dressInputRef.current?.click()}
+                                        className="flex-shrink-0 snap-start w-24 lg:w-full aspect-[3/4] rounded-2xl overflow-hidden border-2 border-violet-500 ring-2 ring-violet-500/30 shadow-lg shadow-violet-500/20 relative group"
+                                    >
+                                        <img src={dressImage} alt="Selected Garment" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-100" />
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="bg-violet-500 text-white rounded-full p-1.5 shadow-lg">
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M5 13l4 4L19 7" /></svg>
+                                            </div>
+                                        </div>
+                                        <div className="absolute bottom-2 left-0 right-0 text-center">
+                                            <span className="text-[8px] font-bold text-white uppercase tracking-wider drop-shadow-md">Selected</span>
+                                        </div>
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         {/* Example Garments */}
@@ -346,6 +414,7 @@ export function StudioPage() {
                         </div>
 
                         <input ref={dressInputRef} type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setDressImage)} className="hidden" />
+                        <input ref={dressCameraInputRef} type="file" accept="image/*" capture="environment" onChange={(e) => handleImageUpload(e, setDressImage)} className="hidden" />
                     </div>
 
                     {/* Column 3: Controls & Creation */}
