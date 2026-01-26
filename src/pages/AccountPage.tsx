@@ -28,7 +28,7 @@ export function AccountPage() {
                     <div className="glass rounded-2xl p-6 border border-white/5">
                         <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Profile</h3>
                         <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 rounded-full bg-violet-500 flex items-center justify-center text-2xl font-bold">
+                            <div className="w-16 h-16 rounded-full bg-indigo-500 flex items-center justify-center text-2xl font-bold">
                                 {user?.email?.[0]?.toUpperCase() || 'U'}
                             </div>
                             <div>
@@ -45,7 +45,7 @@ export function AccountPage() {
                         <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Credits</h3>
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-4xl font-bold text-violet-400">{balance}</p>
+                                <p className="text-4xl font-bold text-indigo-400">{balance}</p>
                                 <p className="text-xs text-zinc-500 mt-1">Available credits</p>
                             </div>
                             <Link
@@ -59,7 +59,7 @@ export function AccountPage() {
 
                     {/* Install App Card */}
                     {canInstall && !isInstalled && (
-                        <div className="glass rounded-2xl p-6 border border-violet-500/20 bg-gradient-to-br from-violet-500/5 to-transparent">
+                        <div className="glass rounded-2xl p-6 border border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 to-transparent">
                             <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Install App</h3>
                             <div className="flex items-center justify-between">
                                 <div>

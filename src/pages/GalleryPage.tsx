@@ -85,7 +85,7 @@ export function GalleryPage() {
             <div className="flex-1 p-8 pt-0 overflow-y-auto">
                 {loading ? (
                     <div className="flex items-center justify-center h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-2 border-violet-500 border-t-transparent" />
+                        <div className="animate-spin rounded-full h-12 w-12 border-2 border-indigo-500 border-t-transparent" />
                     </div>
                 ) : mediaItems.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -109,7 +109,7 @@ export function GalleryPage() {
                                     key={item.id}
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    className="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-zinc-900/40 border border-white/5 cursor-pointer hover:border-violet-500/30 transition-all"
+                                    className="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-zinc-900/40 border border-white/5 cursor-pointer hover:border-indigo-500/30 transition-all"
                                 >
                                     {url ? (
                                         <>
@@ -160,7 +160,7 @@ export function GalleryPage() {
                                         </>
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-2 border-violet-500 border-t-transparent" />
+                                            <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-500 border-t-transparent" />
                                         </div>
                                     )}
                                 </motion.div>

@@ -136,7 +136,7 @@ export function WardrobePage() {
         : EXAMPLE_WARDROBE_ITEMS.filter(item => item.category === selectedCategory);
 
     return (
-        <div className="flex-1 p-4 md:p-8 pt-0 overflow-y-auto">
+        <div className="flex-1 p-4 md:p-8 pt-6 overflow-y-auto">
             <div className="max-w-6xl mx-auto">
 
                 {/* COMPRESSING INDICATOR */}

@@ -3,19 +3,33 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 import { useCreditStore } from '../stores/creditStore';
+import { PWAInstallFloater } from './PWAInstallFloater';
 
 export function StudioLayout() {
     const location = useLocation();
     const { user, signOut } = useAuthStore();
     const { balance } = useCreditStore();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const profileRef = useRef<HTMLDivElement>(null);
+    const mobileMenuRef = useRef<HTMLDivElement>(null);
+    const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
 
-    // Close dropdown on click outside
+    // Close dropdowns on click outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
+            // Close profile dropdown
             if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
                 setIsProfileOpen(false);
+            }
+            // Close mobile menu (but not if clicking the toggle button)
+            if (
+                mobileMenuRef.current &&
+                !mobileMenuRef.current.contains(event.target as Node) &&
+                mobileMenuButtonRef.current &&
+                !mobileMenuButtonRef.current.contains(event.target as Node)
+            ) {
+                setIsMobileMenuOpen(false);
             }
         }
         document.addEventListener('mousedown', handleClickOutside);
@@ -24,66 +38,79 @@ export function StudioLayout() {
 
     const navItems = [
         { id: 'atelier', label: 'Atelier', path: '/studio' },
-        { id: 'tonight', label: '✨ Tonight', path: '/studio/tonight' },
+        { id: 'tonight', label: 'Tonight', path: '/studio/tonight' },
         { id: 'wardrobe', label: 'Wardrobe', path: '/studio/wardrobe' },
         { id: 'outfits', label: 'Outfits', path: '/studio/outfits' },
-        { id: 'gallery', label: 'Gallery', path: '/studio/history' },
-        { id: 'account', label: 'Account', path: '/studio/account' },
+        { id: 'gallery', label: 'History', path: '/studio/history' },
     ];
 
     return (
-        <div className="fixed inset-0 bg-zinc-950 flex flex-col text-white overflow-hidden"
+        <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col text-white overflow-hidden"
             style={{ height: '100dvh' }}>
-            {/* Top Header */}
-            <header className="fixed top-0 left-0 right-0 h-16 bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 z-50 flex items-center justify-between px-4 md:px-8">
+
+            {/* Veogen-Style Navigation */}
+            <header className="fixed top-0 left-0 right-0 h-16 z-50 flex items-center justify-between px-4 md:px-8"
+                style={{
+                    background: 'rgba(10, 10, 10, 0.8)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                }}>
+
                 {/* Logo */}
-                <Link to="/" className="text-xl font-bold tracking-tighter flex items-center gap-2">
-                    <span className="font-black italic">AIWEAR</span>
+                <Link to="/" className="text-xl font-bold tracking-tight flex items-center gap-2 hover:opacity-80 transition-opacity">
+                    <span className="font-extrabold">AIWEAR</span>
                 </Link>
 
-                {/* Center Navigation (Pills) */}
-                <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5">
+                {/* Desktop Navigation */}
+                <nav className="hidden md:flex items-center gap-1">
                     {navItems.map((item) => {
-                        const isActive = location.pathname === item.path || (item.path !== '/studio' && location.pathname.startsWith(item.path));
+                        const isActive = location.pathname === item.path ||
+                            (item.path !== '/studio' && location.pathname.startsWith(item.path));
                         return (
                             <Link
                                 key={item.id}
                                 to={item.path}
-                                className={`relative px-4 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors ${isActive ? 'text-zinc-950' : 'text-zinc-400 hover:text-white'}`}
+                                className={`relative px-4 py-2 text-sm font-medium transition-colors ${isActive
+                                    ? 'text-white'
+                                    : 'text-zinc-400 hover:text-white'
+                                    }`}
                             >
+                                {item.label}
                                 {isActive && (
                                     <motion.div
-                                        layoutId="nav-pill"
-                                        className="absolute inset-0 bg-white rounded-full"
+                                        layoutId="nav-underline"
+                                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 to-violet-500"
                                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                     />
                                 )}
-                                <span className="relative z-10">{item.label}</span>
                             </Link>
                         );
                     })}
                 </nav>
 
-                {/* Mobile Title (visible when nav hidden) */}
-                <div className="md:hidden text-xs font-bold uppercase tracking-widest text-zinc-500">
-                    {navItems.find(i => i.path === location.pathname)?.label || 'Studio'}
-                </div>
-
-                {/* Right: User Profile */}
-                <div className="flex items-center gap-4">
-                    {/* Credits (Desktop) */}
-                    <div className="hidden md:flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
-                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Credits</span>
-                        <span className="text-xs font-bold text-white">{balance}</span>
+                {/* Right Side Actions */}
+                <div className="flex items-center gap-3">
+                    {/* Credits Badge */}
+                    <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-sm"
+                        style={{
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)'
+                        }}>
+                        <span className="text-xs text-zinc-500 font-medium">Credits</span>
+                        <span className="font-semibold text-white">{balance}</span>
                     </div>
 
                     {/* Profile Dropdown */}
                     <div className="relative" ref={profileRef}>
                         <button
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
-                            className="w-9 h-9 rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center hover:border-violet-500/50 transition-colors"
+                            className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:ring-2 hover:ring-indigo-500/50"
+                            style={{
+                                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                            }}
                         >
-                            <span className="text-xs font-bold text-zinc-400">
+                            <span className="text-sm font-bold text-white">
                                 {user?.email?.[0].toUpperCase() || 'U'}
                             </span>
                         </button>
@@ -94,35 +121,33 @@ export function StudioLayout() {
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    className="absolute right-0 top-full mt-2 w-56 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl overflow-hidden p-2 z-50"
+                                    className="absolute right-0 top-full mt-2 w-64 rounded-xl overflow-hidden z-50"
+                                    style={{
+                                        background: 'rgba(20, 20, 20, 0.95)',
+                                        backdropFilter: 'blur(20px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)'
+                                    }}
                                 >
-                                    <div className="px-3 py-2 border-b border-white/5 mb-2">
-                                        <p className="text-sm font-bold text-white truncate">{user?.email}</p>
-                                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1">Free Plan</p>
+                                    {/* User Info */}
+                                    <div className="px-4 py-3 border-b border-white/10">
+                                        <p className="text-sm font-semibold text-white truncate">{user?.email}</p>
+                                        <p className="text-xs text-zinc-500 mt-0.5">Free Plan</p>
                                     </div>
 
-                                    <div className="md:hidden px-3 py-2 bg-white/5 rounded-xl mb-2 flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-zinc-500 uppercase">Credits</span>
-                                        <span className="text-sm font-bold text-white">{balance}</span>
-                                    </div>
+                                    {/* Account Link */}
+                                    <Link
+                                        to="/studio/account"
+                                        onClick={() => setIsProfileOpen(false)}
+                                        className="block px-4 py-3 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+                                    >
+                                        Account Settings
+                                    </Link>
 
-                                    {/* Mobile Nav Links in Dropdown */}
-                                    <div className="md:hidden space-y-1 mb-2 border-b border-white/5 pb-2">
-                                        {navItems.map(item => (
-                                            <Link
-                                                key={item.id}
-                                                to={item.path}
-                                                onClick={() => setIsProfileOpen(false)}
-                                                className={`block px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider ${location.pathname === item.path ? 'bg-white text-black' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}
-                                            >
-                                                {item.label}
-                                            </Link>
-                                        ))}
-                                    </div>
-
+                                    {/* Sign Out */}
                                     <button
                                         onClick={() => signOut()}
-                                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
+                                        className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -133,14 +158,76 @@ export function StudioLayout() {
                             )}
                         </AnimatePresence>
                     </div>
+
+                    {/* Mobile Menu Toggle */}
+                    <button
+                        ref={mobileMenuButtonRef}
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {isMobileMenuOpen ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            )}
+                        </svg>
+                    </button>
                 </div>
             </header>
 
-            {/* Main Content Area (padded for fixed header) */}
+            {/* Mobile Menu Panel */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <motion.div
+                        ref={mobileMenuRef}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="md:hidden fixed top-16 left-0 right-0 z-40 px-4 pb-4"
+                        style={{
+                            background: 'rgba(10, 10, 10, 0.95)',
+                            backdropFilter: 'blur(20px)',
+                            borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                        }}
+                    >
+                        <nav className="flex flex-col gap-1 py-2">
+                            {navItems.map((item) => {
+                                const isActive = location.pathname === item.path ||
+                                    (item.path !== '/studio' && location.pathname.startsWith(item.path));
+                                return (
+                                    <Link
+                                        key={item.id}
+                                        to={item.path}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
+                                            ? 'bg-indigo-500/20 text-white'
+                                            : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                                            }`}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
+                        </nav>
+
+                        {/* Credits in mobile menu */}
+                        <div className="flex items-center justify-between px-4 py-3 mt-2 rounded-xl"
+                            style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
+                            <span className="text-sm text-zinc-500">Credits</span>
+                            <span className="text-sm font-semibold text-white">{balance}</span>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Main Content Area */}
             <main className="flex-1 pt-16 relative flex flex-col min-w-0 overflow-y-auto overflow-x-hidden">
-                <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-violet-500/5 blur-[120px] rounded-full -z-10" />
                 <Outlet />
             </main>
+
+            {/* PWA Install Floater */}
+            <PWAInstallFloater />
         </div>
     );
 }
