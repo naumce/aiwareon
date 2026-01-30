@@ -17,6 +17,7 @@ interface GenerationOptions {
     quality?: 'standard' | 'studio';
     modelType?: 'fal' | 'gemini2' | 'geminipro';
     category?: 'tops' | 'bottoms' | 'one-pieces';
+    userPrompt?: string;
 }
 
 /**
@@ -144,8 +145,8 @@ export async function generateTryOn(options: GenerationOptions): Promise<Generat
             console.log('📸 Person image length:', personImageBase64.substring(0, 50) + '...');
             console.log('👗 Dress image length:', dressImageBase64.substring(0, 50) + '...');
             console.log('🎯 Model type:', modelType);
-            console.log('🎯 Model type:', modelType);
-            resultImageUrl = await virtualTryOnGemini(personImageBase64, dressImageBase64, modelType);
+            console.log('💬 User prompt:', options.userPrompt || '(none)');
+            resultImageUrl = await virtualTryOnGemini(personImageBase64, dressImageBase64, modelType, 2, options.userPrompt);
         } else {
             // FAL PATH: Use analyzed description
             console.log('🟣 Using Fal AI IDM-VTON...');

@@ -14,10 +14,12 @@ interface GenerationStoreState {
     // Images for current generation
     personImage: string | null;
     dressImage: string | null;
+    userPrompt: string;
 
     // Actions
     setPersonImage: (base64: string) => void;
     setDressImage: (base64: string) => void;
+    setUserPrompt: (prompt: string) => void;
     generate: (
         quality?: 'standard' | 'studio',
         modelType?: 'fal' | 'gemini2' | 'geminipro',
@@ -35,6 +37,7 @@ export const useGenerationStore = create<GenerationStoreState>()((set, get) => (
     error: null,
     personImage: null,
     dressImage: null,
+    userPrompt: '',
 
     setPersonImage: (base64: string) => {
         set({ personImage: base64, error: null });
@@ -44,8 +47,12 @@ export const useGenerationStore = create<GenerationStoreState>()((set, get) => (
         set({ dressImage: base64, error: null });
     },
 
+    setUserPrompt: (prompt: string) => {
+        set({ userPrompt: prompt });
+    },
+
     generate: async (quality = 'standard', modelType = 'fal', category) => {
-        const { personImage, dressImage } = get();
+        const { personImage, dressImage, userPrompt } = get();
 
         if (!personImage || !dressImage) {
             set({
@@ -68,6 +75,7 @@ export const useGenerationStore = create<GenerationStoreState>()((set, get) => (
             quality,
             modelType,
             category,
+            userPrompt: userPrompt.trim() || undefined,
         });
 
         if (result.success) {

@@ -46,13 +46,15 @@ export const virtualTryOn = async (
     referencePhoto: string,
     dressBase64: string,
     modelType: 'gemini2' | 'geminipro' = 'gemini2',
-    retries: number = 2
+    retries: number = 2,
+    userPrompt?: string
 ): Promise<string> => {
     try {
         console.log('🔍 GEMINI SERVICE - virtualTryOn called');
         console.log('  📸 Person image:', referencePhoto.substring(0, 50) + '...');
         console.log('  👗 Dress image:', dressBase64.substring(0, 50) + '...');
         console.log('  🎯 Model type:', modelType);
+        console.log('  💬 User prompt:', userPrompt || '(none)');
 
         const ai = getAiClient();
         const targetModel = modelType === 'geminipro' ? 'gemini-3-pro-image-preview' : 'gemini-2.5-flash-image';
@@ -69,14 +71,8 @@ export const virtualTryOn = async (
         const pData = resizedRef.split(',')[1];
         const dData = resizedDress.split(',')[1];
 
-        const response = await ai.models.generateContent({
-            model: targetModel,
-            contents: {
-                parts: [
-                    { inlineData: { data: pData, mimeType: 'image/jpeg' } },
-                    { inlineData: { data: dData, mimeType: 'image/jpeg' } },
-                    {
-                        text: `VIRTUAL TRY-ON - EXACT GARMENT REPLACEMENT ONLY
+        // Build the prompt with optional user styling notes
+        let fullPrompt = `VIRTUAL TRY-ON - EXACT GARMENT REPLACEMENT ONLY
 
 CRITICAL RULES:
 - DO NOT add any clothing items not present in Image 2 (the garment)
@@ -99,8 +95,20 @@ REPLACEMENT:
 4. Blend skin at neckline/shoulders to match Image 1's skin tone
 5. Keep the phone and hand in the foreground, overlapping the new garment
 
-OUTPUT: High-quality editorial photo, studio lighting, photorealistic skin texture.`,
-                    },
+OUTPUT: High-quality editorial photo, studio lighting, photorealistic skin texture.`;
+
+        // Append user styling notes if provided
+        if (userPrompt) {
+            fullPrompt += `\n\nSTYLING CONTEXT FROM USER: ${userPrompt}`;
+        }
+
+        const response = await ai.models.generateContent({
+            model: targetModel,
+            contents: {
+                parts: [
+                    { inlineData: { data: pData, mimeType: 'image/jpeg' } },
+                    { inlineData: { data: dData, mimeType: 'image/jpeg' } },
+                    { text: fullPrompt },
 
                 ],
             },
