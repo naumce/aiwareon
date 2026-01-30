@@ -8,6 +8,7 @@ import { useCamera } from '../hooks/useCamera';
 import { savePersonImage, markPersonImageUsed } from '../services/personImageService';
 import { EXAMPLE_PERSON_IMAGES, EXAMPLE_GARMENT_IMAGES } from '../lib/exampleImages';
 import { Link } from 'react-router-dom';
+import { GalleryPicker } from '../components/GalleryPicker';
 
 // Showcase images for the carousel - these rotate while waiting for generation
 const SHOWCASE_IMAGES = [
@@ -204,6 +205,7 @@ function RotatingPlaceholderInput({
 }
 
 type Quality = 'standard' | 'studio';
+type GalleryTarget = 'person' | 'dress';
 
 export function StudioPage() {
     const {
@@ -227,6 +229,14 @@ export function StudioPage() {
     const [quality, setQuality] = useState<Quality>('standard');
     const [modelType, setModelType] = useState<'fal' | 'gemini2' | 'geminipro'>('gemini2');
     const [falCategory, setFalCategory] = useState<'tops' | 'bottoms' | 'one-pieces'>('one-pieces');
+
+    // Gallery Modal State
+    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+    const [galleryTarget, setGalleryTarget] = useState<GalleryTarget>('person');
+
+    // Input Selection Modal State
+    const [isInputMenuOpen, setIsInputMenuOpen] = useState(false);
+    const [activeInputType, setActiveInputType] = useState<'person' | 'dress'>('person');
 
     const personInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -368,59 +378,23 @@ export function StudioPage() {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-2 gap-2 sm:gap-3 max-w-xs">
-                                        {/* Upload Dropzone */}
-                                        <button
-                                            onClick={() => personInputRef.current?.click()}
-                                            className="aspect-[3/4] rounded-xl flex flex-col items-center justify-center gap-2 transition-all"
-                                            style={{
-                                                border: '2px dashed rgba(255, 255, 255, 0.2)',
-                                                background: 'rgba(255, 255, 255, 0.02)'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.5)';
-                                                e.currentTarget.style.background = 'rgba(99, 102, 241, 0.05)';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
-                                            }}
-                                        >
-                                            <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                                                <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-xs font-medium text-zinc-400">Upload Photo</span>
-                                        </button>
-
-                                        {/* Camera Button */}
-                                        {isCameraSupported && (
-                                            <button
-                                                onClick={() => cameraInputRef.current?.click()}
-                                                className="aspect-[3/4] rounded-xl flex flex-col items-center justify-center gap-2 transition-all"
-                                                style={{
-                                                    border: '2px dashed rgba(255, 255, 255, 0.2)',
-                                                    background: 'rgba(255, 255, 255, 0.02)'
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)';
-                                                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.05)';
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
-                                                }}
-                                            >
-                                                <div className="w-12 h-12 rounded-full bg-violet-500/20 flex items-center justify-center">
-                                                    <svg className="w-6 h-6 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    </svg>
-                                                </div>
-                                                <span className="text-xs font-medium text-zinc-400">Take Photo</span>
-                                            </button>
-                                        )}
+                                    <div
+                                        onClick={() => {
+                                            setActiveInputType('person');
+                                            setIsInputMenuOpen(true);
+                                        }}
+                                        className="aspect-[3/4] rounded-xl flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group"
+                                        style={{
+                                            border: '2px dashed rgba(255, 255, 255, 0.2)',
+                                            background: 'rgba(255, 255, 255, 0.02)'
+                                        }}
+                                    >
+                                        <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-xs font-medium text-zinc-400 group-hover:text-white transition-colors">Add Photo</span>
                                     </div>
                                 )}
 
@@ -495,29 +469,24 @@ export function StudioPage() {
                                         </div>
                                     </div>
                                 ) : (
-                                    <button
-                                        onClick={() => dressInputRef.current?.click()}
-                                        className="w-full aspect-[4/3] max-w-full sm:max-w-[280px] rounded-xl flex flex-col items-center justify-center gap-3 transition-all"
+                                    <div
+                                        onClick={() => {
+                                            setActiveInputType('dress');
+                                            setIsInputMenuOpen(true);
+                                        }}
+                                        className="w-full aspect-[4/3] rounded-xl flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group"
                                         style={{
                                             border: '2px dashed rgba(255, 255, 255, 0.2)',
                                             background: 'rgba(255, 255, 255, 0.02)'
                                         }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.5)';
-                                            e.currentTarget.style.background = 'rgba(99, 102, 241, 0.05)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
-                                        }}
                                     >
-                                        <div className="w-14 h-14 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                                            <svg className="w-7 h-7 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                             </svg>
                                         </div>
-                                        <span className="text-sm font-medium text-zinc-400">Upload Garment</span>
-                                    </button>
+                                        <span className="text-xs font-medium text-zinc-400 group-hover:text-white transition-colors">Add Garment</span>
+                                    </div>
                                 )}
 
                                 {/* Example Garments */}
@@ -587,8 +556,10 @@ export function StudioPage() {
                                     </button>
                                     <button
                                         onClick={() => setModelType('geminipro')}
-                                        disabled
-                                        className="flex-1 px-3 py-2 rounded-lg text-xs font-medium text-zinc-600 cursor-not-allowed"
+                                        className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all ${modelType === 'geminipro'
+                                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg text-white'
+                                            : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                            }`}
                                     >
                                         Pro
                                     </button>
@@ -808,7 +779,7 @@ export function StudioPage() {
                                                 src={resultUrl}
                                                 alt="Result"
                                                 onLoad={() => setIsImageLoading(false)}
-                                                className={`w-full h-full object-cover transition-all duration-500 ${isImageLoading ? 'blur-lg scale-105' : 'blur-0 scale-100'
+                                                className={`w-full h-full object-contain transition-all duration-500 ${isImageLoading ? 'blur-lg scale-105' : 'blur-0 scale-100'
                                                     }`}
                                             />
 
@@ -945,6 +916,112 @@ export function StudioPage() {
                             </button>
                         </div>
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            <GalleryPicker
+                isOpen={isGalleryOpen}
+                onClose={() => setIsGalleryOpen(false)}
+                onSelect={(url) => {
+                    if (galleryTarget === 'person') {
+                        setPersonImage(url);
+                    } else {
+                        setDressImage(url);
+                    }
+                    setIsGalleryOpen(false);
+                }}
+                title={galleryTarget === 'person' ? 'Select Model from Gallery' : 'Select Garment from Gallery'}
+            />
+
+            {/* Input Selection Modal */}
+            <AnimatePresence>
+                {isInputMenuOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                            onClick={() => setIsInputMenuOpen(false)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-sm bg-[#18181b] rounded-2xl border border-white/10 p-6 shadow-xl overflow-hidden"
+                        >
+                            <h3 className="text-lg font-bold text-white mb-4 text-center">
+                                {activeInputType === 'person' ? 'Add Photo' : 'Add Garment'}
+                            </h3>
+
+                            <div className="grid grid-cols-1 gap-3">
+                                {/* Upload Option */}
+                                <button
+                                    onClick={() => {
+                                        if (activeInputType === 'person') {
+                                            personInputRef.current?.click();
+                                        } else {
+                                            dressInputRef.current?.click();
+                                        }
+                                        setIsInputMenuOpen(false);
+                                    }}
+                                    className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+                                >
+                                    <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                        </svg>
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="font-medium text-white">Upload Selection</div>
+                                        <div className="text-xs text-zinc-400">Choose from your device</div>
+                                    </div>
+                                </button>
+
+                                {/* Camera Option - Only for Person */}
+                                {activeInputType === 'person' && isCameraSupported && (
+                                    <button
+                                        onClick={() => {
+                                            cameraInputRef.current?.click();
+                                            setIsInputMenuOpen(false);
+                                        }}
+                                        className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+                                    >
+                                        <div className="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <svg className="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </div>
+                                        <div className="text-left">
+                                            <div className="font-medium text-white">Take Photo</div>
+                                            <div className="text-xs text-zinc-400">Use your camera</div>
+                                        </div>
+                                    </button>
+                                )}
+
+                                {/* Gallery Option */}
+                                <button
+                                    onClick={() => {
+                                        setGalleryTarget(activeInputType);
+                                        setIsGalleryOpen(true);
+                                        setIsInputMenuOpen(false);
+                                    }}
+                                    className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+                                >
+                                    <div className="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <svg className="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="font-medium text-white">From Gallery</div>
+                                        <div className="text-xs text-zinc-400">Select from wardrobe</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </div>

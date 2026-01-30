@@ -163,10 +163,8 @@ Deno.serve(async (req) => {
                     throw new Error('GEMINI_API_KEY not configured');
                 }
 
-                // Use model based on user selection
-                const targetModel = modelType === 'geminipro'
-                    ? 'gemini-3-pro-image-preview'
-                    : 'gemini-2.5-flash-image';
+                // Use gemini-2.5-flash-image as requested by user (same as frontend)
+                const targetModel = 'gemini-2.5-flash-image';
 
                 // Remove base64 prefix
                 const personData = personImageBase64.replace(/^data:image\/\w+;base64,/, '');
