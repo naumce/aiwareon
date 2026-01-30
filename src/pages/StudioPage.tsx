@@ -238,6 +238,7 @@ export function StudioPage() {
     const [isInputMenuOpen, setIsInputMenuOpen] = useState(false);
     const [activeInputType, setActiveInputType] = useState<'person' | 'dress'>('person');
 
+    const previewRef = useRef<HTMLDivElement>(null);
     const personInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const dressInputRef = useRef<HTMLInputElement>(null);
@@ -666,7 +667,15 @@ export function StudioPage() {
                                 <motion.button
                                     whileHover={canGenerate ? { scale: 1.02, boxShadow: '0 10px 30px rgba(99, 102, 241, 0.3)' } : {}}
                                     whileTap={canGenerate ? { scale: 0.98 } : {}}
-                                    onClick={() => generate(quality, modelType, modelType === 'fal' ? falCategory : undefined)}
+                                    onClick={() => {
+                                        generate(quality, modelType, modelType === 'fal' ? falCategory : undefined);
+                                        // Auto-scroll to preview on mobile
+                                        if (window.innerWidth < 1024) {
+                                            setTimeout(() => {
+                                                previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                            }, 100);
+                                        }
+                                    }}
                                     disabled={!canGenerate}
                                     className={`w-full py-4 rounded-xl text-sm font-semibold transition-all ${canGenerate
                                         ? 'text-white'
@@ -697,7 +706,7 @@ export function StudioPage() {
                     {/* RIGHT: Preview Panel */}
                     <div className="space-y-6 animate-fade-in-up-delay-2">
                         {/* Preview Card */}
-                        <div className="rounded-2xl p-6" style={{
+                        <div ref={previewRef} className="rounded-2xl p-6" style={{
                             background: 'rgba(255, 255, 255, 0.03)',
                             border: '1px solid rgba(255, 255, 255, 0.08)'
                         }}>
