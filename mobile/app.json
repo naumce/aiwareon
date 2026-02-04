@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "AIWear",
+    "slug": "aiwear",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "aiwear",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0a0a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aiwear.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "AIWear needs camera access to capture photos for virtual try-on",
+        "NSPhotoLibraryUsageDescription": "AIWear needs photo library access to select images for virtual try-on",
+        "NSPhotoLibraryAddUsageDescription": "AIWear needs permission to save generated images to your gallery"
+      }
+    },
+    "android": {
+      "package": "com.aiwear.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0a0a0a"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": [
+      "expo-camera",
+      "expo-image-picker",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow AIWear to save generated images to your gallery.",
+          "savePhotosPermission": "Allow AIWear to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      "expo-iap"
+    ]
+  }
+}
