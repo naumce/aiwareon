@@ -25,20 +25,15 @@ async function toBase64(uri: string): Promise<string> {
     }
 
     // Remote URL or local file - fetch and convert
-    try {
-        const response = await fetch(uri);
-        const blob = await response.blob();
+    const response = await fetch(uri);
+    const blob = await response.blob();
 
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
-    } catch (error) {
-        console.error('Error converting to base64:', error);
-        throw error;
-    }
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
 }
 
 /**
@@ -53,12 +48,8 @@ export async function generateTryOn(params: GenerateParams): Promise<GenerateRes
     const { personImage, dressImage, quality, modelType, falCategory, userPrompt } = params;
 
     try {
-        console.log('📸 Converting images to base64...');
         const personBase64 = await toBase64(personImage);
         const dressBase64 = await toBase64(dressImage);
-        console.log('✅ Images ready');
-
-        console.log('🚀 Calling Edge Function with model:', modelType);
 
         // Call the Edge Function - same as web app
         const { data, error } = await supabase.functions.invoke('generate-image', {
@@ -73,8 +64,6 @@ export async function generateTryOn(params: GenerateParams): Promise<GenerateRes
         });
 
         if (error) {
-            console.error('Edge Function error:', error);
-
             return {
                 error: {
                     message: error.message || 'Generation failed',
@@ -86,7 +75,6 @@ export async function generateTryOn(params: GenerateParams): Promise<GenerateRes
         }
 
         if (!data?.success) {
-            console.error('Generation failed:', data?.error);
             return {
                 error: {
                     message: data?.error || 'Generation failed',
@@ -97,13 +85,8 @@ export async function generateTryOn(params: GenerateParams): Promise<GenerateRes
             };
         }
 
-        console.log('✅ Generation successful!');
-        console.log('🖼️ Result URL:', data.resultUrl?.substring(0, 80) + '...');
-        console.log('💳 Credits used:', data.creditsUsed);
-
         return { resultUrl: data.resultUrl };
     } catch (error) {
-        console.error('Generation error:', error);
         return {
             error: {
                 message: error instanceof Error ? error.message : 'Unknown error',

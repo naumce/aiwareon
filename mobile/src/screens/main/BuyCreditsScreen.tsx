@@ -47,8 +47,8 @@ export function BuyCreditsScreen() {
                     return realPrice ? { ...pack, price: realPrice } : pack;
                 }));
             }
-        } catch (error) {
-            console.error('Failed to initialize IAP:', error);
+        } catch {
+            // IAP initialization failed
         } finally {
             setLoading(false);
         }

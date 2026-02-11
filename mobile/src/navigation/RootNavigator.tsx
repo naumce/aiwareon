@@ -12,6 +12,9 @@ import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
 import { MainTabs } from './MainTabs';
 import { BuyCreditsScreen } from '../screens/main/BuyCreditsScreen';
 
+// Components
+import { SplashScreen } from '../components/SplashScreen';
+
 import type { RootStackParamList } from '../types';
 import { useTheme } from '../theme';
 
@@ -35,9 +38,9 @@ export function RootNavigator() {
         },
     };
 
-    // Show loading screen while initializing auth
+    // Show splash screen while initializing auth
     if (isLoading) {
-        return null; // Replace with splash screen component
+        return <SplashScreen />;
     }
 
     return (

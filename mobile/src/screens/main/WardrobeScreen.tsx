@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     ScrollView,
     FlatList,
-    Image,
     Dimensions,
     ActivityIndicator,
     Alert,
@@ -14,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { useWardrobeStore, useAuthStore } from '../../stores';
@@ -85,8 +85,7 @@ export function WardrobeScreen() {
                 category: result.category as WardrobeCategory,
                 confidence: result.confidence,
             });
-        } catch (error) {
-            console.error('Error processing image:', error);
+        } catch {
             Alert.alert('Error', 'Failed to process image. Please try again.');
         } finally {
             setIsCategorizing(false);
@@ -145,8 +144,7 @@ export function WardrobeScreen() {
             });
 
             setPendingItem(null);
-        } catch (error) {
-            console.error('Error adding item:', error);
+        } catch {
             Alert.alert('Error', 'Failed to add item. Please try again.');
         } finally {
             setIsAdding(false);
@@ -177,7 +175,7 @@ export function WardrobeScreen() {
             hapticType="light"
         >
             {item.image_url ? (
-                <Image source={{ uri: item.image_url }} style={styles.itemImage} />
+                <Image source={item.image_url} style={styles.itemImage} contentFit="cover" transition={200} cachePolicy="memory-disk" />
             ) : (
                 <View style={styles.itemPlaceholder}>
                     <IconSymbol name="Shirt" size={28} color={colors.text.muted} strokeWidth={1} />
@@ -443,7 +441,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     itemImage: {
         width: '100%',
         aspectRatio: 1,
-        resizeMode: 'cover',
+        // resizeMode handled by contentFit prop
     },
     itemPlaceholder: {
         width: '100%',

@@ -1,3 +1,18 @@
+/**
+ * StudioScreen - Apple HIG Compliant
+ *
+ * Design Decisions:
+ * - Large Title typography (34px, +0.40px letter-spacing) for header
+ * - SF Pro system font stack throughout
+ * - Apple system colors with automatic dark mode
+ * - 8pt grid spacing system (4/8/12/16/24/32px)
+ * - 44pt minimum touch targets for all interactive elements
+ * - Capsule-style primary button (9999px border-radius)
+ * - HIG-compliant segmented control for Quality selector
+ * - Proper card shadows and border radius
+ * - Minimal, content-focused design (Deference principle)
+ */
+
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View,
@@ -5,7 +20,6 @@ import {
     StyleSheet,
     TouchableOpacity,
     ScrollView,
-    Image,
     Dimensions,
     ActivityIndicator,
     Alert,
@@ -13,7 +27,8 @@ import {
     FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import * as MediaLibrary from 'expo-media-library';
@@ -21,9 +36,9 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { supabase } from '../../services/supabaseClient';
 import { useGenerationStore, useCreditStore, useAuthStore, useWardrobeStore } from '../../stores';
-import { useTheme, spacing, borderRadius, typography } from '../../theme';
 import { PERSON_EXAMPLES, GARMENT_EXAMPLES, SHOWCASE_RESULTS } from '../../lib/exampleImages';
 import { IconSymbol } from '../../components/ui';
+import { useTheme } from '../../theme/ThemeContext';
 import type { Quality, ModelType, FalCategory } from '../../types';
 
 const { width } = Dimensions.get('window');
@@ -44,6 +59,8 @@ const LOADING_MESSAGES = [
 ];
 
 export function StudioScreen() {
+    const { isDark } = useTheme();
+
     const { user } = useAuthStore();
     const {
         state,
@@ -61,7 +78,7 @@ export function StudioScreen() {
 
     const [quality, setQuality] = useState<Quality>('standard');
     const [modelType, setModelType] = useState<ModelType>('gemini2');
-    const [falCategory, setFalCategory] = useState<FalCategory>('tops');
+    const [falCategory, setFalCategory] = useState<FalCategory>('upper');
     const [messageIndex, setMessageIndex] = useState(0);
     const [showcaseIndex, setShowcaseIndex] = useState(0);
     const fadeAnim = useState(new Animated.Value(1))[0];
@@ -70,8 +87,61 @@ export function StudioScreen() {
     const [savedPersonPhotos, setSavedPersonPhotos] = useState<PersonImage[]>([]);
     const [loadingData, setLoadingData] = useState(true);
 
-    const { colors } = useTheme();
+    // Apple System Colors
+    const colors = {
+        // Backgrounds
+        bgPrimary: isDark ? '#000000' : '#FFFFFF',
+        bgSecondary: isDark ? '#242426' : '#F2F2F7',
+        bgTertiary: isDark ? '#363638' : '#FFFFFF',
+
+        // Labels (Text)
+        labelPrimary: isDark ? '#FFFFFF' : '#000000',
+        labelSecondary: isDark ? 'rgba(235, 235, 245, 0.7)' : 'rgba(60, 60, 67, 0.6)',
+        labelTertiary: isDark ? 'rgba(235, 235, 245, 0.55)' : 'rgba(60, 60, 67, 0.3)',
+
+        // System Colors
+        systemBlue: isDark ? '#5CB8FF' : '#0088FF',
+        systemGray: isDark ? '#AEAEB2' : '#8E8E93',
+        systemGray5: isDark ? '#242426' : '#E5E5EA',
+
+        // Fills
+        fillTertiary: isDark ? 'rgba(118, 118, 128, 0.32)' : 'rgba(118, 118, 128, 0.12)',
+        fillQuaternary: isDark ? 'rgba(118, 118, 128, 0.26)' : 'rgba(116, 116, 128, 0.08)',
+
+        // Separator
+        separator: isDark ? 'rgba(255, 255, 255, 0.17)' : 'rgba(0, 0, 0, 0.12)',
+    };
+
     const styles = createStyles(colors);
+
+    const fetchSavedPersonPhotos = useCallback(async () => {
+        if (!user) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('person_images')
+                .select('id, storage_path')
+                .eq('user_id', user!.id)
+                .order('last_used_at', { ascending: false })
+                .limit(10);
+
+            if (error) return;
+
+            // Get signed URLs for each image
+            const photosWithUrls = await Promise.all(
+                (data || []).map(async (img) => {
+                    const { data: urlData } = await supabase.storage
+                        .from('media')
+                        .createSignedUrl(img.storage_path, 3600);
+                    return { ...img, url: urlData?.signedUrl };
+                })
+            );
+
+            setSavedPersonPhotos(photosWithUrls.filter(p => p.url));
+        } catch {
+            // Failed to load person photos
+        }
+    }, [user]);
 
     // Fetch user data on mount
     useEffect(() => {
@@ -85,39 +155,7 @@ export function StudioScreen() {
             setLoadingData(false);
         };
         loadData();
-    }, [fetchBalance, fetchWardrobe]);
-
-    const fetchSavedPersonPhotos = useCallback(async () => {
-        if (!user?.id) return;
-
-        try {
-            const { data, error } = await supabase
-                .from('person_images')
-                .select('id, storage_path')
-                .eq('user_id', user.id)
-                .order('last_used_at', { ascending: false })
-                .limit(10);
-
-            if (error) {
-                console.error('Error fetching person images:', error);
-                return;
-            }
-
-            // Get signed URLs for each image
-            const photosWithUrls = await Promise.all(
-                (data || []).map(async (img) => {
-                    const { data: urlData } = await supabase.storage
-                        .from('media')
-                        .createSignedUrl(img.storage_path, 3600);
-                    return { ...img, url: urlData?.signedUrl };
-                })
-            );
-
-            setSavedPersonPhotos(photosWithUrls.filter(p => p.url));
-        } catch (err) {
-            console.error('Error loading person photos:', err);
-        }
-    }, [user?.id]);
+    }, [fetchBalance, fetchWardrobe, fetchSavedPersonPhotos]);
 
     // Get wardrobe items with signed URLs
     const [wardrobeWithUrls, setWardrobeWithUrls] = useState<Array<{ id: string; url: string; category: string }>>([]);
@@ -127,15 +165,12 @@ export function StudioScreen() {
             const allItems = [...wardrobeItems, ...exampleItems];
             const itemsWithUrls = await Promise.all(
                 allItems.slice(0, 10).map(async (item) => {
-                    // image_url can be a storage path or a full URL
                     if (item.image_url && !item.image_url.startsWith('http')) {
-                        // It's a storage path - get signed URL from wardrobe bucket
                         const { data } = await supabase.storage
                             .from('wardrobe')
                             .createSignedUrl(item.image_url, 3600);
                         return { id: item.id, url: data?.signedUrl || '', category: item.category };
                     }
-                    // It's already a full URL (example items)
                     return { id: item.id, url: item.image_url || '', category: item.category };
                 })
             );
@@ -225,8 +260,12 @@ export function StudioScreen() {
         );
     };
 
+    const getModelCost = (model: ModelType) => model === 'gemini2' ? 1 : 2;
+    const getQualityCost = (q: Quality) => q === 'studio' ? 2 : 1;
+    const getCreditCost = () => getQualityCost(quality) + getModelCost(modelType);
+
     const handleGenerate = async () => {
-        const creditCost = quality === 'studio' ? 2 : 1;
+        const creditCost = getCreditCost();
         if (balance < creditCost) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             Alert.alert('Insufficient Credits', `This requires ${creditCost} credit${creditCost > 1 ? 's' : ''}.`);
@@ -239,7 +278,6 @@ export function StudioScreen() {
         await fetchBalance();
     };
 
-    // Save generated result to device gallery
     const handleSaveResult = async () => {
         if (!resultUrl) return;
 
@@ -254,7 +292,6 @@ export function StudioScreen() {
 
             let localUri = resultUrl;
 
-            // If it's a data URI, save to temp file first
             if (resultUrl.startsWith('data:')) {
                 const base64Data = resultUrl.split(',')[1];
                 const filename = `aiwear_${Date.now()}.jpg`;
@@ -263,7 +300,6 @@ export function StudioScreen() {
                     encoding: FileSystem.EncodingType.Base64,
                 });
             } else if (resultUrl.startsWith('http')) {
-                // Download remote URL
                 const filename = `aiwear_${Date.now()}.jpg`;
                 localUri = FileSystem.cacheDirectory + filename;
                 await FileSystem.downloadAsync(resultUrl, localUri);
@@ -272,14 +308,12 @@ export function StudioScreen() {
             await MediaLibrary.saveToLibraryAsync(localUri);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             Alert.alert('Saved!', 'Image saved to your photo library.');
-        } catch (err) {
-            console.error('Error saving result:', err);
+        } catch {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             Alert.alert('Error', 'Failed to save image.');
         }
     };
 
-    // Share generated result
     const handleShareResult = async () => {
         if (!resultUrl) return;
 
@@ -288,7 +322,6 @@ export function StudioScreen() {
         try {
             let localUri = resultUrl;
 
-            // If it's a data URI, save to temp file first
             if (resultUrl.startsWith('data:')) {
                 const base64Data = resultUrl.split(',')[1];
                 const filename = `aiwear_${Date.now()}.jpg`;
@@ -307,28 +340,28 @@ export function StudioScreen() {
             } else {
                 Alert.alert('Sharing unavailable', 'Sharing is not available on this device.');
             }
-        } catch (err) {
-            console.error('Error sharing result:', err);
+        } catch {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             Alert.alert('Error', 'Failed to share image.');
         }
     };
 
-    const canGenerate = personImage && dressImage && state !== 'generating' && balance > 0;
+    const creditCost = getCreditCost();
+    const canGenerate = personImage && dressImage && state !== 'generating' && balance >= creditCost;
     const isGenerating = state === 'generating';
-    const creditCost = quality === 'studio' ? 2 : 1;
 
     // Combine saved + example images for display
     const personOptions = [
+        { id: 'add-photo', url: '', label: 'Add' }, // Placeholder
         ...savedPersonPhotos.map(p => ({ id: p.id, url: p.url!, label: 'Saved' })),
         ...PERSON_EXAMPLES.map(e => ({ id: e.id, url: e.url, label: 'Example' })),
     ];
 
     const garmentOptions = [
+        { id: 'add-garment', url: '', label: 'Add' }, // Placeholder
         ...wardrobeWithUrls.map(w => ({ id: w.id, url: w.url, label: 'Wardrobe' })),
         ...GARMENT_EXAMPLES.map(e => ({ id: e.id, url: e.url, label: 'Example' })),
     ];
-
 
     return (
         <View style={styles.container}>
@@ -337,169 +370,171 @@ export function StudioScreen() {
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                 >
-                    {/* Header */}
+                    {/* Header - Large Title + Credit Badge */}
                     <View style={styles.header}>
                         <View>
-                            <Text style={styles.title}>Studio</Text>
-                            <Text style={styles.subtitle}>Virtual Try-On</Text>
+                            <Text style={styles.largeTitle}>Studio</Text>
+                            <Text style={styles.subtitle}>AI Virtual Try-On</Text>
                         </View>
-                        <View style={styles.creditBadge}>
-                            <Text style={styles.creditValue}>{balance}</Text>
-                            <IconSymbol name="Sparkles" size={14} color={colors.brand.primary} />
-                        </View>
+                        <BlurView intensity={isDark ? 60 : 80} tint={isDark ? 'dark' : 'light'} style={styles.creditBadge}>
+                            <Text style={styles.creditText}>{balance}</Text>
+                            <IconSymbol name="Sparkles" size={14} color={colors.systemBlue} />
+                        </BlurView>
                     </View>
 
                     {loadingData ? (
-                        <View style={styles.loadingContainer}>
-                            <ActivityIndicator color={colors.brand.primary} />
-                            <Text style={styles.loadingText}>Loading your images...</Text>
+                        <View style={styles.skeletonSection}>
+                            <View style={styles.skeletonLabel} />
+                            <View style={styles.skeletonRow}>
+                                {[1, 2, 3, 4].map(i => (
+                                    <View key={i} style={styles.skeletonThumb} />
+                                ))}
+                            </View>
+                            <View style={[styles.skeletonLabel, { marginTop: 24 }]} />
+                            <View style={styles.skeletonRow}>
+                                {[1, 2, 3, 4].map(i => (
+                                    <View key={i} style={styles.skeletonThumb} />
+                                ))}
+                            </View>
                         </View>
                     ) : (
                         <>
-                            {/* Selected Images Preview (Side-by-Side when both selected) */}
+                            {/* Image Selection Section */}
                             {personImage && dressImage ? (
-                                <View style={styles.selectedPairContainer}>
-                                    <Text style={styles.selectedPairTitle}>Ready to Generate</Text>
-                                    <View style={styles.selectedPairRow}>
-                                        {/* Person Preview */}
-                                        <View style={styles.selectedPairCard}>
-                                            <Image source={{ uri: personImage }} style={styles.selectedPairImage} />
+                                // Side-by-side preview when both selected
+                                <View style={styles.previewSection}>
+                                    <Text style={styles.sectionLabel}>READY TO GENERATE</Text>
+                                    <View style={styles.previewRow}>
+                                        <View style={styles.previewCard}>
+                                            <Image source={personImage} style={styles.previewImage} contentFit="cover" transition={200} cachePolicy="memory-disk" />
                                             <TouchableOpacity
-                                                style={styles.pairClearButton}
+                                                style={styles.removeButton}
                                                 onPress={() => setPersonImage(null)}
+                                                accessibilityLabel="Remove person photo"
                                             >
-                                                <IconSymbol name="X" size={14} color="#fff" strokeWidth={2.5} />
+                                                <IconSymbol name="X" size={12} color="#FFF" strokeWidth={3} />
                                             </TouchableOpacity>
-                                            <View style={styles.pairLabel}>
-                                                <Text style={styles.pairLabelText}>You</Text>
+                                            <View style={styles.previewLabel}>
+                                                <Text style={styles.previewLabelText}>You</Text>
                                             </View>
                                         </View>
 
-                                        {/* Plus Icon */}
-                                        <View style={styles.plusIcon}>
-                                            <IconSymbol name="Plus" size={20} color={colors.text.tertiary} />
+                                        <View style={styles.plusContainer}>
+                                            <IconSymbol name="Plus" size={18} color={colors.labelTertiary} />
                                         </View>
 
-                                        {/* Garment Preview */}
-                                        <View style={styles.selectedPairCard}>
-                                            <Image source={{ uri: dressImage }} style={styles.selectedPairImage} />
+                                        <View style={styles.previewCard}>
+                                            <Image source={dressImage} style={styles.previewImage} contentFit="cover" transition={200} cachePolicy="memory-disk" />
                                             <TouchableOpacity
-                                                style={styles.pairClearButton}
+                                                style={styles.removeButton}
                                                 onPress={() => setDressImage(null)}
+                                                accessibilityLabel="Remove garment photo"
                                             >
-                                                <IconSymbol name="X" size={14} color="#fff" strokeWidth={2.5} />
+                                                <IconSymbol name="X" size={12} color="#FFF" strokeWidth={3} />
                                             </TouchableOpacity>
-                                            <View style={styles.pairLabel}>
-                                                <Text style={styles.pairLabelText}>Garment</Text>
+                                            <View style={styles.previewLabel}>
+                                                <Text style={styles.previewLabelText}>Garment</Text>
                                             </View>
                                         </View>
                                     </View>
                                 </View>
                             ) : (
                                 <>
-                                    {/* Person Input */}
+                                    {/* Person Selection */}
                                     <View style={styles.inputSection}>
-                                        <View style={styles.inputHeader}>
-                                            <Text style={styles.inputTitle}>You</Text>
-                                            <TouchableOpacity onPress={() => showImageOptions('person')}>
-                                                <Text style={styles.inputAction}>Upload</Text>
-                                            </TouchableOpacity>
-                                        </View>
+                                        <Text style={styles.inputTitle}>You</Text>
 
                                         {personImage ? (
                                             <View style={styles.selectedCard}>
-                                                <Image source={{ uri: personImage }} style={styles.selectedImage} />
+                                                <Image source={personImage} style={styles.selectedImage} contentFit="cover" transition={200} cachePolicy="memory-disk" />
                                                 <TouchableOpacity
-                                                    style={styles.clearButton}
+                                                    style={styles.removeButton}
                                                     onPress={() => setPersonImage(null)}
                                                 >
-                                                    <IconSymbol name="X" size={16} color="#fff" strokeWidth={2.5} />
+                                                    <IconSymbol name="X" size={14} color="#FFF" strokeWidth={2.5} />
                                                 </TouchableOpacity>
                                             </View>
                                         ) : (
-                                            <View>
-                                                {savedPersonPhotos.length > 0 && (
-                                                    <Text style={styles.sectionLabel}>Your Photos</Text>
+                                            <FlatList
+                                                data={personOptions}
+                                                keyExtractor={(item) => item.id}
+                                                renderItem={({ item }) => (
+                                                    <TouchableOpacity
+                                                        style={item.label === 'Add' ? styles.thumbCardAdd : styles.thumbCard}
+                                                        onPress={() => item.label === 'Add' ? showImageOptions('person') : setPersonImage(item.url)}
+                                                        activeOpacity={0.7}
+                                                    >
+                                                        {item.label === 'Add' ? (
+                                                            <IconSymbol name="Plus" size={28} color={colors.systemBlue} strokeWidth={2.5} />
+                                                        ) : (
+                                                            <>
+                                                                <Image source={item.url} style={styles.thumbImage} contentFit="cover" transition={150} cachePolicy="memory-disk" />
+                                                                {item.label === 'Saved' && (
+                                                                    <View style={styles.badge}>
+                                                                        <Text style={styles.badgeText}>Saved</Text>
+                                                                    </View>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </TouchableOpacity>
                                                 )}
-                                                <FlatList
-                                                    data={personOptions}
-                                                    keyExtractor={(item) => item.id}
-                                                    renderItem={({ item }) => (
-                                                        <TouchableOpacity
-                                                            style={styles.exampleThumb}
-                                                            onPress={() => setPersonImage(item.url)}
-                                                            activeOpacity={0.7}
-                                                        >
-                                                            <Image source={{ uri: item.url }} style={styles.exampleImage} />
-                                                            {item.label === 'Saved' && (
-                                                                <View style={styles.savedBadge}>
-                                                                    <Text style={styles.savedBadgeText}>Saved</Text>
-                                                                </View>
-                                                            )}
-                                                        </TouchableOpacity>
-                                                    )}
-                                                    horizontal
-                                                    showsHorizontalScrollIndicator={false}
-                                                    contentContainerStyle={styles.exampleList}
-                                                />
-                                            </View>
+                                                horizontal
+                                                showsHorizontalScrollIndicator={false}
+                                                contentContainerStyle={styles.thumbList}
+                                            />
                                         )}
                                     </View>
 
-                                    {/* Garment Input */}
+                                    {/* Garment Selection */}
                                     <View style={styles.inputSection}>
-                                        <View style={styles.inputHeader}>
-                                            <Text style={styles.inputTitle}>Garment</Text>
-                                            <TouchableOpacity onPress={() => showImageOptions('garment')}>
-                                                <Text style={styles.inputAction}>Upload</Text>
-                                            </TouchableOpacity>
-                                        </View>
+                                        <Text style={styles.inputTitle}>Garment</Text>
 
                                         {dressImage ? (
                                             <View style={styles.selectedCard}>
-                                                <Image source={{ uri: dressImage }} style={styles.selectedImage} />
+                                                <Image source={dressImage} style={styles.selectedImage} contentFit="cover" transition={200} cachePolicy="memory-disk" />
                                                 <TouchableOpacity
-                                                    style={styles.clearButton}
+                                                    style={styles.removeButton}
                                                     onPress={() => setDressImage(null)}
                                                 >
-                                                    <IconSymbol name="X" size={16} color="#fff" strokeWidth={2.5} />
+                                                    <IconSymbol name="X" size={14} color="#FFF" strokeWidth={2.5} />
                                                 </TouchableOpacity>
                                             </View>
                                         ) : (
-                                            <View>
-                                                {wardrobeWithUrls.length > 0 && (
-                                                    <Text style={styles.sectionLabel}>Your Wardrobe</Text>
+                                            <FlatList
+                                                data={garmentOptions}
+                                                keyExtractor={(item) => item.id}
+                                                renderItem={({ item }) => (
+                                                    <TouchableOpacity
+                                                        style={item.label === 'Add' ? styles.thumbCardAdd : styles.thumbCard}
+                                                        onPress={() => item.label === 'Add' ? showImageOptions('garment') : setDressImage(item.url)}
+                                                        activeOpacity={0.7}
+                                                    >
+                                                        {item.label === 'Add' ? (
+                                                            <IconSymbol name="Plus" size={28} color={colors.systemBlue} strokeWidth={2.5} />
+                                                        ) : (
+                                                            <>
+                                                                <Image source={item.url} style={styles.thumbImage} contentFit="cover" transition={150} cachePolicy="memory-disk" />
+                                                                {item.label === 'Wardrobe' && (
+                                                                    <View style={[styles.badge, styles.badgeWardrobe]}>
+                                                                        <Text style={styles.badgeText}>Wardrobe</Text>
+                                                                    </View>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </TouchableOpacity>
                                                 )}
-                                                <FlatList
-                                                    data={garmentOptions}
-                                                    keyExtractor={(item) => item.id}
-                                                    renderItem={({ item }) => (
-                                                        <TouchableOpacity
-                                                            style={styles.exampleThumb}
-                                                            onPress={() => setDressImage(item.url)}
-                                                            activeOpacity={0.7}
-                                                        >
-                                                            <Image source={{ uri: item.url }} style={styles.exampleImage} />
-                                                            {item.label === 'Wardrobe' && (
-                                                                <View style={styles.wardrobeBadge}>
-                                                                    <Text style={styles.wardrobeBadgeText}>Wardrobe</Text>
-                                                                </View>
-                                                            )}
-                                                        </TouchableOpacity>
-                                                    )}
-                                                    horizontal
-                                                    showsHorizontalScrollIndicator={false}
-                                                    contentContainerStyle={styles.exampleList}
-                                                />
-                                            </View>
+                                                horizontal
+                                                showsHorizontalScrollIndicator={false}
+                                                contentContainerStyle={styles.thumbList}
+                                            />
                                         )}
                                     </View>
                                 </>
                             )}
 
-                            {/* Quality */}
-                            <View style={styles.optionSection}>
-                                <Text style={styles.optionLabel}>Quality</Text>
+                            {/* Quality Selector - HIG Segmented Control */}
+                            <View style={styles.controlSection}>
+                                <Text style={styles.sectionLabel}>QUALITY</Text>
                                 <View style={styles.segmentedControl}>
                                     <TouchableOpacity
                                         style={[styles.segment, quality === 'standard' && styles.segmentActive]}
@@ -508,6 +543,7 @@ export function StudioScreen() {
                                             setQuality('standard');
                                         }}
                                         disabled={isGenerating}
+                                        accessibilityLabel="Standard quality - 1 credit"
                                     >
                                         <Text style={[styles.segmentText, quality === 'standard' && styles.segmentTextActive]}>
                                             Standard · 1
@@ -520,6 +556,7 @@ export function StudioScreen() {
                                             setQuality('studio');
                                         }}
                                         disabled={isGenerating}
+                                        accessibilityLabel="Studio quality - 2 credits"
                                     >
                                         <Text style={[styles.segmentText, quality === 'studio' && styles.segmentTextActive]}>
                                             Studio · 2
@@ -528,43 +565,42 @@ export function StudioScreen() {
                                 </View>
                             </View>
 
-                            {/* Model */}
-                            <View style={styles.optionSection}>
-                                <Text style={styles.optionLabel}>Model</Text>
-                                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                                    <View style={styles.chipRow}>
-                                        {[
-                                            { key: 'gemini2' as ModelType, label: 'Gemini 2' },
-                                            { key: 'geminipro' as ModelType, label: 'Gemini Pro' },
-                                            { key: 'fal' as ModelType, label: 'Fal AI' },
-                                        ].map((model) => (
-                                            <TouchableOpacity
-                                                key={model.key}
-                                                style={[styles.chip, modelType === model.key && styles.chipActive]}
-                                                onPress={() => {
-                                                    Haptics.selectionAsync();
-                                                    setModelType(model.key);
-                                                }}
-                                                disabled={isGenerating}
-                                            >
-                                                <Text style={[styles.chipText, modelType === model.key && styles.chipTextActive]}>
-                                                    {model.label}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </View>
-                                </ScrollView>
+                            {/* Model Selector - Chips */}
+                            <View style={styles.controlSection}>
+                                <Text style={styles.sectionLabel}>MODEL</Text>
+                                <View style={styles.chipRow}>
+                                    {[
+                                        { key: 'gemini2' as ModelType, label: 'Flash 2.0', cost: 1 },
+                                        { key: 'geminipro' as ModelType, label: 'Flash Pro', cost: 2 },
+                                        { key: 'fal' as ModelType, label: 'Studio AI', cost: 2 },
+                                    ].map((model) => (
+                                        <TouchableOpacity
+                                            key={model.key}
+                                            style={[styles.chip, modelType === model.key && styles.chipActive]}
+                                            onPress={() => {
+                                                Haptics.selectionAsync();
+                                                setModelType(model.key);
+                                            }}
+                                            disabled={isGenerating}
+                                            accessibilityLabel={`Select ${model.label} model`}
+                                        >
+                                            <Text style={[styles.chipText, modelType === model.key && styles.chipTextActive]}>
+                                                {model.label} · {model.cost}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
                             </View>
 
-                            {/* Fal Category */}
+                            {/* Fal Category (if Fal AI selected) */}
                             {modelType === 'fal' && (
-                                <View style={styles.optionSection}>
-                                    <Text style={styles.optionLabel}>Garment Type</Text>
+                                <View style={styles.controlSection}>
+                                    <Text style={styles.sectionLabel}>GARMENT TYPE</Text>
                                     <View style={styles.chipRow}>
                                         {[
-                                            { key: 'tops' as FalCategory, label: 'Top' },
-                                            { key: 'bottoms' as FalCategory, label: 'Bottom' },
-                                            { key: 'one-pieces' as FalCategory, label: 'Dress' },
+                                            { key: 'upper' as FalCategory, label: 'Top' },
+                                            { key: 'lower' as FalCategory, label: 'Bottom' },
+                                            { key: 'overall' as FalCategory, label: 'Dress' },
                                         ].map((cat) => (
                                             <TouchableOpacity
                                                 key={cat.key}
@@ -584,32 +620,29 @@ export function StudioScreen() {
                                 </View>
                             )}
 
-                            {/* Generate Button */}
+                            {/* Generate Button - Capsule Style */}
                             <TouchableOpacity
                                 onPress={handleGenerate}
                                 disabled={!canGenerate}
                                 activeOpacity={0.8}
-                                style={styles.generateWrapper}
+                                style={[
+                                    styles.generateButton,
+                                    { backgroundColor: canGenerate ? colors.systemBlue : colors.fillTertiary }
+                                ]}
+                                accessibilityLabel={`Generate image for ${creditCost} ${creditCost === 1 ? 'credit' : 'credits'}`}
                             >
-                                <LinearGradient
-                                    colors={canGenerate ? colors.gradient.primary : ['#3A3A3C', '#3A3A3C']}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 0 }}
-                                    style={styles.generateButton}
-                                >
-                                    {isGenerating ? (
-                                        <View style={styles.generatingRow}>
-                                            <ActivityIndicator color="#FFF" size="small" />
-                                            <Animated.Text style={[styles.generatingText, { opacity: fadeAnim }]}>
-                                                {LOADING_MESSAGES[messageIndex]}
-                                            </Animated.Text>
-                                        </View>
-                                    ) : (
-                                        <Text style={styles.generateText}>
-                                            Generate · {creditCost} {creditCost === 1 ? 'Credit' : 'Credits'}
-                                        </Text>
-                                    )}
-                                </LinearGradient>
+                                {isGenerating ? (
+                                    <View style={styles.generatingRow}>
+                                        <ActivityIndicator color="#FFF" size="small" />
+                                        <Animated.Text style={[styles.generateText, { opacity: fadeAnim }]}>
+                                            {LOADING_MESSAGES[messageIndex]}
+                                        </Animated.Text>
+                                    </View>
+                                ) : (
+                                    <Text style={styles.generateText}>
+                                        Generate · {creditCost} {creditCost === 1 ? 'Credit' : 'Credits'}
+                                    </Text>
+                                )}
                             </TouchableOpacity>
 
                             {/* Generating Preview */}
@@ -618,8 +651,11 @@ export function StudioScreen() {
                                     <Text style={styles.showcaseLabel}>Examples of what's possible</Text>
                                     <View style={styles.showcaseCard}>
                                         <Image
-                                            source={{ uri: SHOWCASE_RESULTS[showcaseIndex].url }}
+                                            source={SHOWCASE_RESULTS[showcaseIndex].url}
                                             style={styles.showcaseImage}
+                                            contentFit="cover"
+                                            transition={300}
+                                            cachePolicy="memory-disk"
                                         />
                                         <View style={styles.showcaseDots}>
                                             {SHOWCASE_RESULTS.map((_, idx) => (
@@ -633,31 +669,40 @@ export function StudioScreen() {
                                 </View>
                             )}
 
-                            {/* Result */}
+                            {/* Result Display */}
                             {resultUrl && state === 'succeeded' && (
                                 <View style={styles.resultSection}>
                                     <Text style={styles.resultTitle}>Your Result</Text>
                                     <View style={styles.resultCard}>
-                                        <Image source={{ uri: resultUrl }} style={styles.resultImage} />
+                                        <Image source={resultUrl} style={styles.resultImage} contentFit="cover" transition={300} cachePolicy="memory-disk" />
                                     </View>
                                     <View style={styles.resultActions}>
-                                        <TouchableOpacity style={styles.actionBtn} onPress={handleSaveResult}>
-                                            <IconSymbol name="Download" size={18} color={colors.text.primary} />
-                                            <Text style={styles.actionBtnText}>Save</Text>
+                                        <TouchableOpacity
+                                            style={styles.actionButton}
+                                            onPress={handleSaveResult}
+                                            accessibilityLabel="Save image to gallery"
+                                        >
+                                            <IconSymbol name="Download" size={18} color={colors.labelPrimary} />
+                                            <Text style={styles.actionButtonText}>Save</Text>
                                         </TouchableOpacity>
-                                        <TouchableOpacity style={[styles.actionBtn, styles.actionBtnPrimary]} onPress={handleShareResult}>
-                                            <IconSymbol name="Share" size={18} color="#000" />
-                                            <Text style={[styles.actionBtnText, styles.actionBtnTextPrimary]}>Share</Text>
+                                        <TouchableOpacity
+                                            style={[styles.actionButton, styles.actionButtonPrimary]}
+                                            onPress={handleShareResult}
+                                            accessibilityLabel="Share image"
+                                        >
+                                            <IconSymbol name="Share" size={18} color="#FFFFFF" />
+                                            <Text style={[styles.actionButtonText, styles.actionButtonTextPrimary]}>Share</Text>
                                         </TouchableOpacity>
                                     </View>
                                     <TouchableOpacity
-                                        style={styles.regenerateBtn}
+                                        style={styles.regenerateButton}
                                         onPress={handleGenerate}
                                         disabled={!canGenerate}
+                                        accessibilityLabel="Generate again"
                                     >
-                                        <IconSymbol name="Sparkles" size={18} color={colors.text.primary} />
-                                        <Text style={styles.regenerateBtnText}>
-                                            Regenerate · {creditCost} {creditCost === 1 ? 'Credit' : 'Credits'}
+                                        <IconSymbol name="Sparkles" size={18} color={colors.systemBlue} />
+                                        <Text style={styles.regenerateText}>
+                                            Generate Again · {creditCost} {creditCost === 1 ? 'Credit' : 'Credits'}
                                         </Text>
                                     </TouchableOpacity>
                                 </View>
@@ -665,102 +710,110 @@ export function StudioScreen() {
                         </>
                     )}
 
-                    {/* Bottom spacing */}
-                    <View style={{ height: 120 }} />
+                    {/* Bottom spacing for tab bar */}
+                    <View style={{ height: 100 }} />
                 </ScrollView>
             </SafeAreaView>
         </View>
     );
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+// Apple HIG Styles
+const createStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background.primary,
+        backgroundColor: colors.bgPrimary,
     },
     safeArea: {
         flex: 1,
     },
     scrollContent: {
-        paddingHorizontal: spacing.lg,
+        paddingHorizontal: 16, // --space-4
     },
+
+    // Header - Large Title (34px)
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        paddingTop: spacing.md,
-        marginBottom: spacing.xl,
+        paddingTop: 16, // --space-4
+        marginBottom: 24, // --space-6
     },
-    title: {
-        fontSize: 34,
+    largeTitle: {
+        fontFamily: '-apple-system',
+        fontSize: 34, // --text-large-title
+        lineHeight: 41,
+        letterSpacing: 0.4,
         fontWeight: '700',
-        color: colors.text.primary,
-        letterSpacing: -0.5,
+        color: colors.labelPrimary,
     },
     subtitle: {
-        fontSize: typography.footnote,
-        color: colors.text.muted,
+        fontFamily: '-apple-system',
+        fontSize: 13, // --text-footnote
+        lineHeight: 18,
+        letterSpacing: -0.08,
+        fontWeight: '400',
+        color: colors.labelSecondary,
         marginTop: 2,
     },
     creditBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.fill.tertiary,
-        paddingVertical: 8,
-        paddingHorizontal: 14,
-        borderRadius: 20,
+        backgroundColor: 'transparent',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 9999, // Capsule
+        borderWidth: 0.5,
+        borderColor: colors.separator,
         gap: 6,
+        overflow: 'hidden',
     },
-    creditValue: {
-        fontSize: 17,
+    creditText: {
+        fontFamily: '-apple-system',
+        fontSize: 17, // --text-headline
+        lineHeight: 22,
+        letterSpacing: -0.43,
         fontWeight: '600',
-        color: colors.text.primary,
+        color: colors.labelPrimary,
     },
+
+    // Loading
     loadingContainer: {
         alignItems: 'center',
-        paddingVertical: spacing.xxl,
-        gap: spacing.md,
+        paddingVertical: 48, // --space-12
+        gap: 12,
     },
     loadingText: {
-        fontSize: typography.subhead,
-        color: colors.text.secondary,
+        fontFamily: '-apple-system',
+        fontSize: 15, // --text-subhead
+        lineHeight: 20,
+        letterSpacing: -0.23,
+        color: colors.labelSecondary,
     },
-    inputSection: {
-        marginBottom: spacing.lg,
+
+    // Preview Section (when both images selected)
+    previewSection: {
+        marginBottom: 24,
     },
-    inputHeader: {
+    previewRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: spacing.sm,
+        justifyContent: 'center',
+        gap: 16,
     },
-    inputTitle: {
-        fontSize: typography.headline,
-        fontWeight: typography.semibold,
-        color: colors.text.primary,
-    },
-    inputAction: {
-        fontSize: typography.subhead,
-        color: colors.brand.primary,
-    },
-    sectionLabel: {
-        fontSize: typography.caption1,
-        color: colors.text.tertiary,
-        marginBottom: spacing.xs,
-    },
-    selectedCard: {
-        borderRadius: borderRadius.md,
-        overflow: 'hidden',
+    previewCard: {
+        width: (width - 32 - 48) / 2, // Account for padding and gap
         aspectRatio: 3 / 4,
-        maxHeight: 280,
-        position: 'relative',
+        borderRadius: 16, // --radius-lg
+        overflow: 'hidden',
+        backgroundColor: colors.bgTertiary,
     },
-    selectedImage: {
+    previewImage: {
         width: '100%',
         height: '100%',
-        resizeMode: 'cover',
+        // resizeMode handled by contentFit prop
     },
-    clearButton: {
+    removeButton: {
         position: 'absolute',
         top: 8,
         right: 8,
@@ -771,269 +824,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
         alignItems: 'center',
         justifyContent: 'center',
     },
-    clearButtonText: {
-        color: '#FFF',
-        fontSize: 14,
-        fontWeight: typography.bold,
-    },
-    exampleList: {
-        gap: spacing.sm,
-    },
-    exampleThumb: {
-        width: 80,
-        height: 100,
-        borderRadius: borderRadius.sm,
-        overflow: 'hidden',
-        backgroundColor: colors.background.tertiary,
-    },
-    exampleImage: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
-    },
-    savedBadge: {
-        position: 'absolute',
-        bottom: 4,
-        left: 4,
-        backgroundColor: colors.brand.primary,
-        paddingVertical: 2,
-        paddingHorizontal: 6,
-        borderRadius: 4,
-    },
-    savedBadgeText: {
-        fontSize: 9,
-        fontWeight: typography.semibold,
-        color: '#FFF',
-    },
-    wardrobeBadge: {
-        position: 'absolute',
-        bottom: 4,
-        left: 4,
-        backgroundColor: colors.brand.accent,
-        paddingVertical: 2,
-        paddingHorizontal: 6,
-        borderRadius: 4,
-    },
-    wardrobeBadgeText: {
-        fontSize: 9,
-        fontWeight: typography.semibold,
-        color: '#FFF',
-    },
-    optionSection: {
-        marginBottom: spacing.md,
-    },
-    optionLabel: {
-        fontSize: typography.footnote,
-        fontWeight: typography.medium,
-        color: colors.text.secondary,
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-        marginBottom: spacing.xs,
-    },
-    segmentedControl: {
-        flexDirection: 'row',
-        backgroundColor: colors.fill.tertiary,
-        borderRadius: borderRadius.xs,
-        padding: 2,
-    },
-    segment: {
-        flex: 1,
-        paddingVertical: 10,
-        alignItems: 'center',
-        borderRadius: borderRadius.xs - 2,
-    },
-    segmentActive: {
-        backgroundColor: colors.background.elevated,
-    },
-    segmentText: {
-        fontSize: typography.subhead,
-        fontWeight: typography.medium,
-        color: colors.text.secondary,
-    },
-    segmentTextActive: {
-        color: colors.text.primary,
-    },
-    chipRow: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-    },
-    chip: {
-        paddingVertical: 8,
-        paddingHorizontal: 14,
-        backgroundColor: colors.fill.secondary,
-        borderRadius: 20,
-    },
-    chipActive: {
-        backgroundColor: colors.brand.primary,
-    },
-    chipText: {
-        fontSize: typography.subhead,
-        fontWeight: typography.medium,
-        color: colors.text.secondary,
-    },
-    chipTextActive: {
-        color: '#FFFFFF',
-    },
-    generateWrapper: {
-        marginTop: spacing.lg,
-    },
-    generateButton: {
-        paddingVertical: 16,
-        borderRadius: borderRadius.md,
-        alignItems: 'center',
-    },
-    generateText: {
-        fontSize: typography.body,
-        fontWeight: typography.semibold,
-        color: '#FFFFFF',
-    },
-    generatingRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-    },
-    generatingText: {
-        fontSize: typography.subhead,
-        color: 'rgba(255,255,255,0.85)',
-    },
-    showcaseSection: {
-        marginTop: spacing.xl,
-    },
-    showcaseLabel: {
-        fontSize: typography.footnote,
-        color: colors.text.tertiary,
-        textAlign: 'center',
-        marginBottom: spacing.sm,
-    },
-    showcaseCard: {
-        borderRadius: borderRadius.lg,
-        overflow: 'hidden',
-        backgroundColor: colors.background.tertiary,
-    },
-    showcaseImage: {
-        width: '100%',
-        aspectRatio: 3 / 4,
-        resizeMode: 'cover',
-    },
-    showcaseDots: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: 6,
-        paddingVertical: spacing.sm,
-    },
-    dot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: colors.fill.primary,
-    },
-    dotActive: {
-        backgroundColor: colors.text.primary,
-    },
-    resultSection: {
-        marginTop: spacing.xl,
-    },
-    resultTitle: {
-        fontSize: typography.headline,
-        fontWeight: typography.semibold,
-        color: colors.text.primary,
-        marginBottom: spacing.sm,
-    },
-    resultCard: {
-        borderRadius: borderRadius.lg,
-        overflow: 'hidden',
-    },
-    resultImage: {
-        width: '100%',
-        aspectRatio: 3 / 4,
-        resizeMode: 'cover',
-    },
-    resultActions: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-        marginTop: spacing.md,
-    },
-    actionBtn: {
-        flex: 1,
-        flexDirection: 'row',
-        paddingVertical: 14,
-        backgroundColor: colors.fill.secondary,
-        borderRadius: borderRadius.sm,
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-    },
-    actionBtnPrimary: {
-        backgroundColor: colors.brand.primary,
-    },
-    actionBtnText: {
-        fontSize: typography.subhead,
-        fontWeight: typography.medium,
-        color: colors.text.primary,
-    },
-    actionBtnTextPrimary: {
-        color: '#FFFFFF',
-    },
-    regenerateBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        marginTop: spacing.sm,
-        paddingVertical: 16,
-        borderWidth: 1,
-        borderColor: colors.separator.primary,
-        borderRadius: borderRadius.sm,
-    },
-    regenerateBtnText: {
-        fontSize: typography.subhead,
-        fontWeight: typography.medium,
-        color: colors.text.primary,
-    },
-    // Side-by-side selected pair styles
-    selectedPairContainer: {
-        marginBottom: spacing.lg,
-    },
-    selectedPairTitle: {
-        fontSize: typography.footnote,
-        fontWeight: typography.medium,
-        color: colors.text.secondary,
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-        marginBottom: spacing.md,
-    },
-    selectedPairRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: spacing.md,
-    },
-    selectedPairCard: {
-        width: (width - spacing.lg * 2 - spacing.xl * 2) / 2,
-        aspectRatio: 3 / 4,
-        borderRadius: borderRadius.lg,
-        overflow: 'hidden',
-        backgroundColor: colors.background.card,
-        borderWidth: 1,
-        borderColor: colors.border.subtle,
-    },
-    selectedPairImage: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
-    },
-    pairClearButton: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        width: 26,
-        height: 26,
-        borderRadius: 13,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    pairLabel: {
+    previewLabel: {
         position: 'absolute',
         bottom: 0,
         left: 0,
@@ -1041,16 +832,312 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
         backgroundColor: 'rgba(0,0,0,0.5)',
         paddingVertical: 6,
     },
-    pairLabelText: {
-        fontSize: typography.footnote,
-        fontWeight: typography.medium,
-        color: '#fff',
+    previewLabelText: {
+        fontFamily: '-apple-system',
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#FFFFFF',
         textAlign: 'center',
     },
-    plusIcon: {
+    plusContainer: {
         width: 32,
         height: 32,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+
+    // Input Section
+    inputSection: {
+        marginBottom: 24,
+    },
+    inputTitle: {
+        fontFamily: '-apple-system',
+        fontSize: 17, // --text-headline
+        lineHeight: 22,
+        letterSpacing: -0.43,
+        fontWeight: '600',
+        color: colors.labelPrimary,
+        marginBottom: 12,
+    },
+    selectedCard: {
+        borderRadius: 12, // --radius-md
+        overflow: 'hidden',
+        aspectRatio: 3 / 4,
+        maxHeight: 280,
+        backgroundColor: colors.bgTertiary,
+    },
+    selectedImage: {
+        width: '100%',
+        height: '100%',
+        // resizeMode handled by contentFit prop
+    },
+    thumbList: {
+        gap: 8, // --space-2
+    },
+    thumbCard: {
+        width: 80,
+        height: 100,
+        borderRadius: 8, // --radius-sm
+        overflow: 'hidden',
+        backgroundColor: colors.bgTertiary,
+    },
+    thumbCardAdd: {
+        width: 80,
+        height: 100,
+        borderRadius: 8,
+        borderWidth: 2,
+        borderStyle: 'dashed',
+        borderColor: colors.systemBlue,
+        backgroundColor: colors.bgTertiary,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    thumbImage: {
+        width: '100%',
+        height: '100%',
+        // resizeMode handled by contentFit prop
+    },
+    badge: {
+        position: 'absolute',
+        bottom: 4,
+        left: 4,
+        backgroundColor: colors.systemBlue,
+        paddingVertical: 2,
+        paddingHorizontal: 6,
+        borderRadius: 4,
+    },
+    badgeWardrobe: {
+        backgroundColor: colors.systemGray,
+    },
+    badgeText: {
+        fontFamily: '-apple-system',
+        fontSize: 10,
+        fontWeight: '600',
+        color: '#FFFFFF',
+    },
+
+    // Control Section
+    controlSection: {
+        marginBottom: 16,
+    },
+    sectionLabel: {
+        fontFamily: '-apple-system',
+        fontSize: 13, // --text-footnote
+        lineHeight: 18,
+        letterSpacing: 0.5,
+        fontWeight: '400',
+        color: colors.labelSecondary,
+        textTransform: 'uppercase',
+        marginBottom: 8,
+    },
+
+    // Segmented Control (HIG Style)
+    segmentedControl: {
+        flexDirection: 'row',
+        backgroundColor: colors.fillTertiary,
+        borderRadius: 8, // --radius-sm
+        padding: 2,
+    },
+    segment: {
+        flex: 1,
+        paddingVertical: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 6,
+        minHeight: 44, // iOS touch target
+    },
+    segmentActive: {
+        backgroundColor: colors.bgPrimary,
+    },
+    segmentText: {
+        fontFamily: '-apple-system',
+        fontSize: 15, // --text-subhead
+        lineHeight: 20,
+        letterSpacing: -0.23,
+        fontWeight: '400',
+        color: colors.labelSecondary,
+    },
+    segmentTextActive: {
+        color: colors.labelPrimary,
+        fontWeight: '600',
+    },
+
+    // Chips
+    chipRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: 8,
+    },
+    chip: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        backgroundColor: colors.fillQuaternary,
+        borderRadius: 9999, // Capsule
+        minHeight: 44,
+        justifyContent: 'center',
+    },
+    chipActive: {
+        backgroundColor: colors.systemBlue,
+    },
+    chipText: {
+        fontFamily: '-apple-system',
+        fontSize: 15,
+        fontWeight: '400',
+        color: colors.labelPrimary,
+    },
+    chipTextActive: {
+        color: '#FFFFFF',
+        fontWeight: '600',
+    },
+
+    // Generate Button - Capsule Style
+    generateButton: {
+        marginTop: 8,
+        paddingVertical: 16,
+        borderRadius: 9999, // Capsule
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 56, // Prominent button
+    },
+    generateText: {
+        fontFamily: '-apple-system',
+        fontSize: 17, // --text-body
+        lineHeight: 22,
+        letterSpacing: -0.43,
+        fontWeight: '600',
+        color: '#FFFFFF',
+    },
+    generatingRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+
+    // Showcase (while generating)
+    showcaseSection: {
+        marginTop: 24,
+    },
+    showcaseLabel: {
+        fontFamily: '-apple-system',
+        fontSize: 13,
+        color: colors.labelTertiary,
+        textAlign: 'center',
+        marginBottom: 12,
+    },
+    showcaseCard: {
+        borderRadius: 16,
+        overflow: 'hidden',
+        backgroundColor: colors.bgTertiary,
+    },
+    showcaseImage: {
+        width: '100%',
+        aspectRatio: 3 / 4,
+        // resizeMode handled by contentFit prop
+    },
+    showcaseDots: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 6,
+        paddingVertical: 12,
+    },
+    dot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: colors.fillTertiary,
+    },
+    dotActive: {
+        backgroundColor: colors.labelPrimary,
+    },
+
+    // Result Section
+    resultSection: {
+        marginTop: 24,
+    },
+    resultTitle: {
+        fontFamily: '-apple-system',
+        fontSize: 17,
+        fontWeight: '600',
+        color: colors.labelPrimary,
+        marginBottom: 12,
+    },
+    resultCard: {
+        borderRadius: 16,
+        overflow: 'hidden',
+        backgroundColor: colors.bgTertiary,
+    },
+    resultImage: {
+        width: '100%',
+        aspectRatio: 3 / 4,
+        // resizeMode handled by contentFit prop
+    },
+    resultActions: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 16,
+    },
+    actionButton: {
+        flex: 1,
+        flexDirection: 'row',
+        paddingVertical: 12,
+        backgroundColor: colors.fillQuaternary,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        minHeight: 44,
+    },
+    actionButtonPrimary: {
+        backgroundColor: colors.systemBlue,
+    },
+    actionButtonText: {
+        fontFamily: '-apple-system',
+        fontSize: 15,
+        fontWeight: '600',
+        color: colors.labelPrimary,
+    },
+    actionButtonTextPrimary: {
+        color: '#FFFFFF',
+    },
+    regenerateButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        marginTop: 12,
+        paddingVertical: 14,
+        borderWidth: 1,
+        borderColor: colors.separator,
+        borderRadius: 12,
+        minHeight: 44,
+    },
+    regenerateText: {
+        fontFamily: '-apple-system',
+        fontSize: 15,
+        fontWeight: '400',
+        color: colors.systemBlue,
+    },
+
+    // Skeleton loaders
+    skeletonSection: {
+        gap: 12,
+    },
+    skeletonLabel: {
+        width: 60,
+        height: 14,
+        borderRadius: 4,
+        backgroundColor: colors.fillTertiary,
+    },
+    skeletonRow: {
+        flexDirection: 'row',
+        gap: 8,
+        marginTop: 8,
+    },
+    skeletonThumb: {
+        width: 80,
+        height: 100,
+        borderRadius: 8,
+        backgroundColor: colors.fillTertiary,
     },
 });

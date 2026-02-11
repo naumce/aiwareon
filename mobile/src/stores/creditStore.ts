@@ -20,14 +20,12 @@ export const useCreditStore = create<CreditState>((set) => ({
             const { data, error } = await supabase.rpc('get_credit_balance');
 
             if (error) {
-                console.error('Error fetching balance:', error);
                 set({ balance: 0, isLoading: false });
                 return;
             }
 
             set({ balance: data || 0, isLoading: false });
-        } catch (error) {
-            console.error('Error fetching balance:', error);
+        } catch {
             set({ balance: 0, isLoading: false });
         }
     },

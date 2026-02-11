@@ -75,7 +75,6 @@ export const useGenerationStore = create<GenerationStoreState>((set, get) => ({
                 state: 'succeeded',
             });
         } catch (error) {
-            console.error('Generation error:', error);
             set({
                 error: {
                     message: error instanceof Error ? error.message : 'Unknown error',

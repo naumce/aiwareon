@@ -100,7 +100,7 @@ export const darkColors = {
     },
 } as const;
 
-export type ThemeColors = typeof lightColors;
+export type ThemeColors = typeof lightColors | typeof darkColors;
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface ThemeContextValue {

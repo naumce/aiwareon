@@ -33,9 +33,7 @@ export const useWardrobeStore = create<WardrobeState>((set, get) => ({
                 .eq('is_example', false)
                 .order('created_at', { ascending: false });
 
-            if (userError) {
-                console.error('Error fetching wardrobe items:', userError);
-            }
+            if (userError) throw userError;
 
             // Fetch example items
             const { data: examples, error: exampleError } = await supabase
@@ -44,9 +42,7 @@ export const useWardrobeStore = create<WardrobeState>((set, get) => ({
                 .eq('is_example', true)
                 .order('created_at', { ascending: false });
 
-            if (exampleError) {
-                console.error('Error fetching example items:', exampleError);
-            }
+            if (exampleError) throw exampleError;
 
             // Helper to get signed URL for storage paths
             const getSignedUrl = async (item: any) => {
@@ -64,8 +60,7 @@ export const useWardrobeStore = create<WardrobeState>((set, get) => ({
                         .createSignedUrl(item.image_url, 3600);
 
                     return { ...item, image_url: data?.signedUrl || item.image_url };
-                } catch (e) {
-                    console.error('Error getting signed URL:', e);
+                } catch {
                     return item;
                 }
             };
@@ -83,8 +78,7 @@ export const useWardrobeStore = create<WardrobeState>((set, get) => ({
                 exampleItems: examplesWithUrls,
                 isLoading: false,
             });
-        } catch (error) {
-            console.error('Error fetching wardrobe:', error);
+        } catch {
             set({ isLoading: false });
         }
     },
@@ -97,18 +91,14 @@ export const useWardrobeStore = create<WardrobeState>((set, get) => ({
                 .select()
                 .single();
 
-            if (error) {
-                console.error('Error adding wardrobe item:', error);
-                return null;
-            }
+            if (error) return null;
 
             set((state) => ({
                 items: [data, ...state.items],
             }));
 
             return data;
-        } catch (error) {
-            console.error('Error adding wardrobe item:', error);
+        } catch {
             return null;
         }
     },
@@ -120,16 +110,13 @@ export const useWardrobeStore = create<WardrobeState>((set, get) => ({
                 .delete()
                 .eq('id', id);
 
-            if (error) {
-                console.error('Error removing wardrobe item:', error);
-                return;
-            }
+            if (error) return;
 
             set((state) => ({
                 items: state.items.filter((item) => item.id !== id),
             }));
-        } catch (error) {
-            console.error('Error removing wardrobe item:', error);
+        } catch {
+            // Delete failed silently
         }
     },
 
