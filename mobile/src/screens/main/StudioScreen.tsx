@@ -5,7 +5,6 @@ import {
     StyleSheet,
     TouchableOpacity,
     ScrollView,
-    Image,
     Dimensions,
     ActivityIndicator,
     Alert,
@@ -25,10 +24,11 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { supabase } from '../../services/supabaseClient';
 import { useGenerationStore, useCreditStore, useAuthStore, useWardrobeStore } from '../../stores';
-import { useTheme, spacing, borderRadius, typography } from '../../theme';
 import { PERSON_EXAMPLES, GARMENT_EXAMPLES, SHOWCASE_RESULTS } from '../../lib/exampleImages';
 import { IconSymbol, PremiumHeader, type IconName } from '../../components/ui';
 import type { Quality, ModelType, FalCategory, RootStackParamList } from '../../types';
+import { useTheme, spacing, borderRadius, typography } from '../../theme';
+import { Image } from 'expo-image';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -547,20 +547,17 @@ export function StudioScreen() {
     }, [fetchBalance, fetchWardrobe]);
 
     const fetchSavedPersonPhotos = useCallback(async () => {
-        if (!user?.id) return;
+        if (!user) return;
 
         try {
             const { data, error } = await supabase
                 .from('person_images')
                 .select('id, storage_path')
-                .eq('user_id', user.id)
+                .eq('user_id', user!.id)
                 .order('last_used_at', { ascending: false })
                 .limit(10);
 
-            if (error) {
-                console.error('Error fetching person images:', error);
-                return;
-            }
+            if (error) return;
 
             // Get signed URLs for each image
             const photosWithUrls = await Promise.all(
@@ -573,10 +570,24 @@ export function StudioScreen() {
             );
 
             setSavedPersonPhotos(photosWithUrls.filter(p => p.url));
-        } catch (err) {
-            console.error('Error loading person photos:', err);
+        } catch {
+            // Failed to load person photos
         }
-    }, [user?.id]);
+    }, [user]);
+
+    // Fetch user data on mount
+    useEffect(() => {
+        const loadData = async () => {
+            setLoadingData(true);
+            await Promise.all([
+                fetchBalance(),
+                fetchWardrobe(),
+                fetchSavedPersonPhotos(),
+            ]);
+            setLoadingData(false);
+        };
+        loadData();
+    }, [fetchBalance, fetchWardrobe, fetchSavedPersonPhotos]);
 
     // Get wardrobe items with signed URLs
     const [wardrobeWithUrls, setWardrobeWithUrls] = useState<Array<{ id: string; url: string; category: string }>>([]);
@@ -586,15 +597,12 @@ export function StudioScreen() {
             const allItems = [...wardrobeItems, ...exampleItems];
             const itemsWithUrls = await Promise.all(
                 allItems.slice(0, 10).map(async (item) => {
-                    // image_url can be a storage path or a full URL
                     if (item.image_url && !item.image_url.startsWith('http')) {
-                        // It's a storage path - get signed URL from wardrobe bucket
                         const { data } = await supabase.storage
                             .from('wardrobe')
                             .createSignedUrl(item.image_url, 3600);
                         return { id: item.id, url: data?.signedUrl || '', category: item.category };
                     }
-                    // It's already a full URL (example items)
                     return { id: item.id, url: item.image_url || '', category: item.category };
                 })
             );
@@ -703,8 +711,12 @@ export function StudioScreen() {
         );
     };
 
+    const getModelCost = (model: ModelType) => model === 'gemini2' ? 1 : 2;
+    const getQualityCost = (q: Quality) => q === 'studio' ? 2 : 1;
+    const getCreditCost = () => getQualityCost(quality) + getModelCost(modelType);
+
     const handleGenerate = async () => {
-        const creditCost = quality === 'studio' ? 2 : 1;
+        const creditCost = getCreditCost();
         if (balance < creditCost) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             Alert.alert('Insufficient Credits', `This requires ${creditCost} credit${creditCost > 1 ? 's' : ''}.`);
@@ -718,7 +730,6 @@ export function StudioScreen() {
         await fetchBalance();
     };
 
-    // Save generated result to device gallery
     const handleSaveResult = async () => {
         if (!resultUrl) return;
 
@@ -733,7 +744,6 @@ export function StudioScreen() {
 
             let localUri = resultUrl;
 
-            // If it's a data URI, save to temp file first
             if (resultUrl.startsWith('data:')) {
                 const base64Data = resultUrl.split(',')[1];
                 const filename = `aiwear_${Date.now()}.jpg`;
@@ -742,7 +752,6 @@ export function StudioScreen() {
                     encoding: FileSystem.EncodingType.Base64,
                 });
             } else if (resultUrl.startsWith('http')) {
-                // Download remote URL
                 const filename = `aiwear_${Date.now()}.jpg`;
                 localUri = FileSystem.cacheDirectory + filename;
                 await FileSystem.downloadAsync(resultUrl, localUri);
@@ -751,14 +760,12 @@ export function StudioScreen() {
             await MediaLibrary.saveToLibraryAsync(localUri);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             Alert.alert('Saved!', 'Image saved to your photo library.');
-        } catch (err) {
-            console.error('Error saving result:', err);
+        } catch {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             Alert.alert('Error', 'Failed to save image.');
         }
     };
 
-    // Share generated result
     const handleShareResult = async () => {
         if (!resultUrl) return;
 
@@ -767,7 +774,6 @@ export function StudioScreen() {
         try {
             let localUri = resultUrl;
 
-            // If it's a data URI, save to temp file first
             if (resultUrl.startsWith('data:')) {
                 const base64Data = resultUrl.split(',')[1];
                 const filename = `aiwear_${Date.now()}.jpg`;
@@ -786,8 +792,7 @@ export function StudioScreen() {
             } else {
                 Alert.alert('Sharing unavailable', 'Sharing is not available on this device.');
             }
-        } catch (err) {
-            console.error('Error sharing result:', err);
+        } catch {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             Alert.alert('Error', 'Failed to share image.');
         }
@@ -818,7 +823,6 @@ export function StudioScreen() {
         ...wardrobeWithUrls.map(w => ({ id: w.id, url: w.url, label: 'Wardrobe' })),
         ...GARMENT_EXAMPLES.map(e => ({ id: e.id, url: e.url, label: 'Example' })),
     ];
-
 
     return (
         <View style={styles.container}>
@@ -851,13 +855,23 @@ export function StudioScreen() {
                     />
 
                     {loadingData ? (
-                        <View style={styles.loadingContainer}>
-                            <ActivityIndicator color={colors.brand.primary} />
-                            <Text style={styles.loadingText}>Loading your images...</Text>
+                        <View style={styles.skeletonSection}>
+                            <View style={styles.skeletonLabel} />
+                            <View style={styles.skeletonRow}>
+                                {[1, 2, 3, 4].map(i => (
+                                    <View key={i} style={styles.skeletonThumb} />
+                                ))}
+                            </View>
+                            <View style={[styles.skeletonLabel, { marginTop: 24 }]} />
+                            <View style={styles.skeletonRow}>
+                                {[1, 2, 3, 4].map(i => (
+                                    <View key={i} style={styles.skeletonThumb} />
+                                ))}
+                            </View>
                         </View>
                     ) : (
                         <>
-                            {/* Selected Images Preview (Side-by-Side when both selected) */}
+                            {/* Image Selection Section */}
                             {personImage && dressImage ? (
                                 <View style={styles.selectedPairContainer}>
                                     <Text style={styles.selectedPairTitle}>Ready to Generate</Text>
@@ -868,8 +882,9 @@ export function StudioScreen() {
                                             <TouchableOpacity
                                                 style={styles.pairClearButton}
                                                 onPress={() => setPersonImage(null)}
+                                                accessibilityLabel="Remove person photo"
                                             >
-                                                <IconSymbol name="X" size={14} color="#fff" strokeWidth={2.5} />
+                                                <IconSymbol name="X" size={12} color="#FFF" strokeWidth={3} />
                                             </TouchableOpacity>
                                             <View style={styles.pairLabel}>
                                                 <Text style={styles.pairLabelText}>You</Text>
@@ -887,8 +902,9 @@ export function StudioScreen() {
                                             <TouchableOpacity
                                                 style={styles.pairClearButton}
                                                 onPress={() => setDressImage(null)}
+                                                accessibilityLabel="Remove garment photo"
                                             >
-                                                <IconSymbol name="X" size={14} color="#fff" strokeWidth={2.5} />
+                                                <IconSymbol name="X" size={12} color="#FFF" strokeWidth={3} />
                                             </TouchableOpacity>
                                             <View style={styles.pairLabel}>
                                                 <Text style={styles.pairLabelText}>Garment</Text>
@@ -898,7 +914,7 @@ export function StudioScreen() {
                                 </View>
                             ) : (
                                 <>
-                                    {/* Person Input */}
+                                    {/* Person Selection */}
                                     <View style={styles.inputSection}>
                                         <Text style={styles.inputTitle}>You</Text>
 
@@ -906,10 +922,10 @@ export function StudioScreen() {
                                             <View style={styles.selectedCard}>
                                                 <Image source={{ uri: personImage }} style={styles.selectedImage} />
                                                 <TouchableOpacity
-                                                    style={styles.clearButton}
+                                                    style={styles.removeButton}
                                                     onPress={() => setPersonImage(null)}
                                                 >
-                                                    <IconSymbol name="X" size={16} color="#fff" strokeWidth={2.5} />
+                                                    <IconSymbol name="X" size={14} color="#FFF" strokeWidth={2.5} />
                                                 </TouchableOpacity>
                                             </View>
                                         ) : (
@@ -945,7 +961,7 @@ export function StudioScreen() {
                                         )}
                                     </View>
 
-                                    {/* Garment Input */}
+                                    {/* Garment Selection */}
                                     <View style={styles.inputSection}>
                                         <Text style={styles.inputTitle}>Garment</Text>
 
@@ -953,10 +969,10 @@ export function StudioScreen() {
                                             <View style={styles.selectedCard}>
                                                 <Image source={{ uri: dressImage }} style={styles.selectedImage} />
                                                 <TouchableOpacity
-                                                    style={styles.clearButton}
+                                                    style={styles.removeButton}
                                                     onPress={() => setDressImage(null)}
                                                 >
-                                                    <IconSymbol name="X" size={16} color="#fff" strokeWidth={2.5} />
+                                                    <IconSymbol name="X" size={14} color="#FFF" strokeWidth={2.5} />
                                                 </TouchableOpacity>
                                             </View>
                                         ) : (
@@ -1037,9 +1053,9 @@ export function StudioScreen() {
                                     <Text style={styles.optionLabel}>Garment Type</Text>
                                     <View style={styles.chipRow}>
                                         {[
-                                            { key: 'tops' as FalCategory, label: 'Top' },
-                                            { key: 'bottoms' as FalCategory, label: 'Bottom' },
-                                            { key: 'one-pieces' as FalCategory, label: 'Dress' },
+                                            { key: 'upper' as FalCategory, label: 'Top' },
+                                            { key: 'lower' as FalCategory, label: 'Bottom' },
+                                            { key: 'overall' as FalCategory, label: 'Dress' },
                                         ].map((cat) => (
                                             <TouchableOpacity
                                                 key={cat.key}
@@ -1096,8 +1112,11 @@ export function StudioScreen() {
                                     <Text style={styles.showcaseLabel}>Examples of what's possible</Text>
                                     <View style={styles.showcaseCard}>
                                         <Image
-                                            source={{ uri: SHOWCASE_RESULTS[showcaseIndex].url }}
+                                            source={SHOWCASE_RESULTS[showcaseIndex].url}
                                             style={styles.showcaseImage}
+                                            contentFit="cover"
+                                            transition={300}
+                                            cachePolicy="memory-disk"
                                         />
                                         <View style={styles.showcaseDots}>
                                             {SHOWCASE_RESULTS.map((_, idx) => (
@@ -1113,8 +1132,8 @@ export function StudioScreen() {
                         </>
                     )}
 
-                    {/* Bottom spacing */}
-                    <View style={{ height: 120 }} />
+                    {/* Bottom spacing for tab bar */}
+                    <View style={{ height: 100 }} />
                 </ScrollView>
             </SafeAreaView>
         </View>
@@ -1167,7 +1186,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
         height: '100%',
         resizeMode: 'cover',
     },
-    clearButton: {
+    removeButton: {
         position: 'absolute',
         top: 8,
         right: 8,
@@ -1376,5 +1395,26 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
         height: 32,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    // Skeleton loaders
+    skeletonSection: {
+        gap: 12,
+    },
+    skeletonLabel: {
+        width: 60,
+        height: 14,
+        borderRadius: 4,
+        backgroundColor: colors.fill.tertiary,
+    },
+    skeletonRow: {
+        flexDirection: 'row',
+        gap: 8,
+        marginTop: 8,
+    },
+    skeletonThumb: {
+        width: 80,
+        height: 100,
+        borderRadius: 8,
+        backgroundColor: colors.fill.tertiary,
     },
 });

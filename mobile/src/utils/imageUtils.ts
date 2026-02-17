@@ -13,21 +13,16 @@ export async function ensureLocalUri(uri: string): Promise<string> {
 
     // If it's a remote URL, download to temp
     if (uri.startsWith('http://') || uri.startsWith('https://')) {
-        try {
-            const filename = `temp_${Date.now()}.jpg`;
-            const localUri = FileSystem.cacheDirectory + filename;
+        const filename = `temp_${Date.now()}.jpg`;
+        const localUri = FileSystem.cacheDirectory + filename;
 
-            const downloadResult = await FileSystem.downloadAsync(uri, localUri);
+        const downloadResult = await FileSystem.downloadAsync(uri, localUri);
 
-            if (downloadResult.status !== 200) {
-                throw new Error(`Failed to download image: ${downloadResult.status}`);
-            }
-
-            return downloadResult.uri;
-        } catch (error) {
-            console.error('Error downloading remote image:', error);
-            throw error;
+        if (downloadResult.status !== 200) {
+            throw new Error(`Failed to download image: ${downloadResult.status}`);
         }
+
+        return downloadResult.uri;
     }
 
     return uri;
@@ -37,18 +32,13 @@ export async function ensureLocalUri(uri: string): Promise<string> {
  * Convert local file URI to base64
  */
 export async function uriToBase64(uri: string): Promise<string> {
-    try {
-        // Ensure we have a local file
-        const localUri = await ensureLocalUri(uri);
+    // Ensure we have a local file
+    const localUri = await ensureLocalUri(uri);
 
-        const base64 = await FileSystem.readAsStringAsync(localUri, {
-            encoding: FileSystem.EncodingType.Base64,
-        });
-        return base64;
-    } catch (error) {
-        console.error('Error converting URI to base64:', error);
-        throw error;
-    }
+    const base64 = await FileSystem.readAsStringAsync(localUri, {
+        encoding: FileSystem.EncodingType.Base64,
+    });
+    return base64;
 }
 
 /**
@@ -58,39 +48,29 @@ export async function resizeImage(
     uri: string,
     maxDimension: number = 1024
 ): Promise<string> {
-    try {
-        // Ensure we have a local file
-        const localUri = await ensureLocalUri(uri);
+    // Ensure we have a local file
+    const localUri = await ensureLocalUri(uri);
 
-        const result = await ImageManipulator.manipulateAsync(
-            localUri,
-            [{ resize: { width: maxDimension } }],
-            { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
-        );
-        return result.uri;
-    } catch (error) {
-        console.error('Error resizing image:', error);
-        throw error;
-    }
+    const result = await ImageManipulator.manipulateAsync(
+        localUri,
+        [{ resize: { width: maxDimension } }],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+    );
+    return result.uri;
 }
 
 /**
  * Compress image for wardrobe (smaller size)
  */
 export async function compressForWardrobe(uri: string): Promise<string> {
-    try {
-        const localUri = await ensureLocalUri(uri);
+    const localUri = await ensureLocalUri(uri);
 
-        const result = await ImageManipulator.manipulateAsync(
-            localUri,
-            [{ resize: { width: 512 } }],
-            { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
-        );
-        return result.uri;
-    } catch (error) {
-        console.error('Error compressing image:', error);
-        throw error;
-    }
+    const result = await ImageManipulator.manipulateAsync(
+        localUri,
+        [{ resize: { width: 512 } }],
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+    );
+    return result.uri;
 }
 
 /**

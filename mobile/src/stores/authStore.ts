@@ -61,8 +61,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     set({ user: null, isAnonymous: false });
                 }
             });
-        } catch (error) {
-            console.error('Auth initialization error:', error);
+        } catch {
             set({ isLoading: false });
         }
     },

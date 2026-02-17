@@ -30,14 +30,12 @@ export const useOutfitStore = create<OutfitState>((set, get) => ({
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('Error fetching outfits:', error);
                 set({ outfits: [], isLoading: false });
                 return;
             }
 
             set({ outfits: data || [], isLoading: false });
-        } catch (error) {
-            console.error('Error fetching outfits:', error);
+        } catch {
             set({ isLoading: false });
         }
     },
@@ -50,18 +48,14 @@ export const useOutfitStore = create<OutfitState>((set, get) => ({
                 .select()
                 .single();
 
-            if (error) {
-                console.error('Error adding outfit:', error);
-                return null;
-            }
+            if (error) return null;
 
             set((state) => ({
                 outfits: [data, ...state.outfits],
             }));
 
             return data;
-        } catch (error) {
-            console.error('Error adding outfit:', error);
+        } catch {
             return null;
         }
     },
@@ -73,16 +67,13 @@ export const useOutfitStore = create<OutfitState>((set, get) => ({
                 .delete()
                 .eq('id', id);
 
-            if (error) {
-                console.error('Error removing outfit:', error);
-                return;
-            }
+            if (error) return;
 
             set((state) => ({
                 outfits: state.outfits.filter((o) => o.id !== id),
             }));
-        } catch (error) {
-            console.error('Error removing outfit:', error);
+        } catch {
+            // Delete failed silently
         }
     },
 

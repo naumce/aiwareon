@@ -88,7 +88,7 @@ export type Quality = 'standard' | 'studio';
 
 export type ModelType = 'fal' | 'gemini2' | 'geminipro';
 
-export type FalCategory = 'tops' | 'bottoms' | 'one-pieces';
+export type FalCategory = 'upper' | 'lower' | 'overall' | 'inner' | 'outer';
 
 export interface GenerationError {
     message: string;

@@ -37,8 +37,6 @@ export async function virtualTryOn(
         : 'gemini-2.5-flash-image';
     const maxDim = modelType === 'geminipro' ? 2048 : 1024;
 
-    console.log('🤖 Using Gemini model:', targetModel);
-
     // Resize images first
     const resizedPerson = await resizeImage(personImageUri, maxDim);
     const resizedGarment = await resizeImage(garmentImageUri, maxDim);
@@ -126,8 +124,6 @@ OUTPUT: High-quality editorial photo, studio lighting, photorealistic skin textu
 
             throw new Error('No image in response');
         } catch (error: any) {
-            console.error(`Gemini attempt ${attempt + 1} failed:`, error);
-
             if (attempt < retries && (error.message?.includes('500') || error.status === 500)) {
                 await delay(2000 * (attempt + 1));
                 continue;
@@ -170,8 +166,7 @@ If NOT a clear garment image, return: {"error": "INVALID_GARMENT"}`,
 
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
         return text || '{"category": "one-pieces", "description": "clothing item"}';
-    } catch (error) {
-        console.error('Error describing garment:', error);
+    } catch {
         return '{"category": "one-pieces", "description": "clothing item"}';
     }
 }
@@ -228,8 +223,7 @@ No other text, just the JSON.`,
         }
 
         throw new Error('No valid JSON in response');
-    } catch (error) {
-        console.error('Error categorizing garment:', error);
+    } catch {
         return {
             name: 'Fashion Item',
             category: 'tops',

@@ -202,6 +202,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     tabLabel: {
+        fontFamily: '-apple-system',
         fontSize: 10,
         fontWeight: '600',
         marginTop: 2,

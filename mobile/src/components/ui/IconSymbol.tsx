@@ -87,7 +87,6 @@ export function IconSymbol({
     const Icon = iconMap[name];
 
     if (!Icon) {
-        console.warn(`IconSymbol: Icon "${name}" not found.`);
         return null;
     }
 

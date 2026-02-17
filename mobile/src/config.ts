@@ -6,13 +6,30 @@
 //   EXPO_PUBLIC_GEMINI_API_KEY=your-key-here
 //   EXPO_PUBLIC_FAL_API_KEY=your-key-here
 
-// Supabase
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://mrjrsrnttvflefvnjyol.supabase.co';
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yanJzcm50dHZmbGVmdm5qeW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0OTM5OTQsImV4cCI6MjA4MjA2OTk5NH0.1IIO31JYYoi3MPtSGgnwVBrYcwyq40mgZQEUIWquR_k';
+// Supabase - REQUIRED (no fallbacks for security)
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-// AI Service API Keys from environment
+// AI Service API Keys - OPTIONAL
 const FAL_API_KEY = process.env.EXPO_PUBLIC_FAL_API_KEY || '';
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
+
+// Error Tracking - OPTIONAL
+const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN || '';
+
+// Validate required environment variables at module load
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    const missingVars = [];
+    if (!SUPABASE_URL) missingVars.push('EXPO_PUBLIC_SUPABASE_URL');
+    if (!SUPABASE_ANON_KEY) missingVars.push('EXPO_PUBLIC_SUPABASE_ANON_KEY');
+
+    throw new Error(
+        '❌ Missing required environment variables!\n\n' +
+        `Missing: ${missingVars.join(', ')}\n\n` +
+        'Please ensure your .env file contains all required variables.\n' +
+        'See .env.example for reference.'
+    );
+}
 
 export const config = {
     // Supabase
@@ -29,6 +46,11 @@ export const config = {
     // Google Gemini - Image generation
     gemini: {
         apiKey: GEMINI_API_KEY,
+    },
+
+    // Sentry - Error tracking
+    sentry: {
+        dsn: SENTRY_DSN,
     },
 
     // Feature flags (auto-enable when keys are present)
