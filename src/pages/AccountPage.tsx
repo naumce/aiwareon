@@ -18,22 +18,22 @@ export function AccountPage() {
             {/* Header */}
             <div className="px-8 py-6 shrink-0">
                 <h2 className="text-2xl font-bold tracking-tight uppercase italic">Account</h2>
-                <p className="text-xs text-zinc-500 font-bold uppercase tracking-[0.2em] mt-1">Settings & Profile</p>
+                <p className="text-xs text-[#AAA] font-bold uppercase tracking-[0.2em] mt-1">Settings & Profile</p>
             </div>
 
             <div className="flex-1 p-8 pt-0 overflow-y-auto">
                 <div className="max-w-lg mx-auto space-y-6">
 
                     {/* Profile Card */}
-                    <div className="glass rounded-2xl p-6 border border-white/5">
-                        <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Profile</h3>
+                    <div className="glass rounded-2xl p-6 border border-black/[0.04]">
+                        <h3 className="text-[10px] font-bold text-[#AAA] uppercase tracking-widest mb-4">Profile</h3>
                         <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 rounded-full bg-indigo-500 flex items-center justify-center text-2xl font-bold">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#C9A0FF] to-[#FF8FAB] flex items-center justify-center text-2xl font-bold">
                                 {user?.email?.[0]?.toUpperCase() || 'U'}
                             </div>
                             <div>
                                 <p className="font-bold text-lg">{user?.email}</p>
-                                <p className="text-xs text-zinc-500 uppercase tracking-widest">
+                                <p className="text-xs text-[#AAA] uppercase tracking-widest">
                                     Free Plan
                                 </p>
                             </div>
@@ -41,12 +41,12 @@ export function AccountPage() {
                     </div>
 
                     {/* Credits Card */}
-                    <div className="glass rounded-2xl p-6 border border-white/5">
-                        <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Credits</h3>
+                    <div className="glass rounded-2xl p-6 border border-black/[0.04]">
+                        <h3 className="text-[10px] font-bold text-[#AAA] uppercase tracking-widest mb-4">Credits</h3>
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-4xl font-bold text-indigo-400">{balance}</p>
-                                <p className="text-xs text-zinc-500 mt-1">Available credits</p>
+                                <p className="text-4xl font-bold text-[#C9A0FF]">{balance}</p>
+                                <p className="text-xs text-[#AAA] mt-1">Available credits</p>
                             </div>
                             <Link
                                 to="/pricing"
@@ -59,12 +59,12 @@ export function AccountPage() {
 
                     {/* Install App Card */}
                     {canInstall && !isInstalled && (
-                        <div className="glass rounded-2xl p-6 border border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 to-transparent">
-                            <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Install App</h3>
+                        <div className="glass rounded-2xl p-6 border border-[#C9A0FF]/20 bg-gradient-to-br from-[#C9A0FF]/5 to-transparent">
+                            <h3 className="text-[10px] font-bold text-[#AAA] uppercase tracking-widest mb-4">Install App</h3>
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="font-bold text-lg mb-1">Add to Home Screen</p>
-                                    <p className="text-xs text-zinc-400">Faster access & offline mode</p>
+                                    <p className="text-xs text-[#888]">Faster access & offline mode</p>
                                 </div>
                                 <button
                                     onClick={handleInstall}
@@ -80,24 +80,24 @@ export function AccountPage() {
                     )}
 
                     {/* Quick Links */}
-                    <div className="glass rounded-2xl p-6 border border-white/5">
-                        <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Quick Links</h3>
+                    <div className="glass rounded-2xl p-6 border border-black/[0.04]">
+                        <h3 className="text-[10px] font-bold text-[#AAA] uppercase tracking-widest mb-4">Quick Links</h3>
                         <div className="space-y-3">
                             <Link
                                 to="/studio"
-                                className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                                className="flex items-center justify-between p-4 rounded-xl bg-black/[0.03] hover:bg-black/[0.06] transition-colors"
                             >
                                 <span className="font-medium">Create New Look</span>
-                                <svg className="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-[#AAA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </Link>
                             <Link
                                 to="/studio/history"
-                                className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                                className="flex items-center justify-between p-4 rounded-xl bg-black/[0.03] hover:bg-black/[0.06] transition-colors"
                             >
                                 <span className="font-medium">View Gallery</span>
-                                <svg className="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-[#AAA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </Link>
@@ -107,7 +107,7 @@ export function AccountPage() {
                     {/* Sign Out */}
                     <button
                         onClick={() => signOut()}
-                        className="w-full py-4 rounded-2xl border border-red-500/20 text-red-400 font-bold text-[10px] uppercase tracking-widest hover:bg-red-500/10 transition-colors"
+                        className="w-full py-4 rounded-2xl border border-red-400/20 text-red-400 font-bold text-[10px] uppercase tracking-widest hover:bg-red-500/10 transition-colors"
                     >
                         Sign Out
                     </button>

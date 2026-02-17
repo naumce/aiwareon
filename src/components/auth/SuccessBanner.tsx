@@ -43,11 +43,16 @@ export function SuccessBanner({
                 className="space-y-3"
             >
                 {/* Main Success Banner */}
-                <div className="glass rounded-2xl p-6 border-white/10 shadow-2xl shadow-violet-500/20 relative">
+                <div className="rounded-3xl p-6 relative"
+                    style={{
+                        background: 'white',
+                        border: '1px solid rgba(0, 0, 0, 0.05)',
+                        boxShadow: '0 12px 32px rgba(0, 0, 0, 0.08)',
+                    }}>
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors"
+                            className="absolute top-4 right-4 text-[#AAA] hover:text-[#1A1A2E] transition-colors"
                             aria-label="Close"
                         >
                             <X className="w-4 h-4" />
@@ -56,16 +61,17 @@ export function SuccessBanner({
 
                     <div className="flex items-center gap-4">
                         {/* Checkmark Icon */}
-                        <div className="w-14 h-14 rounded-full gradient-primary flex items-center justify-center flex-shrink-0">
+                        <div className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0"
+                            style={{ background: 'linear-gradient(135deg, #C9A0FF, #FF8FAB)' }}>
                             <CheckCircle className="w-7 h-7 text-white" />
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-bold uppercase tracking-tight text-white">
+                            <h3 className="text-lg font-bold tracking-tight text-[#1A1A2E]">
                                 {title}
                             </h3>
-                            <p className="text-sm text-zinc-400 mt-1">
+                            <p className="text-sm text-[#888] mt-1">
                                 {message}
                             </p>
                         </div>
@@ -76,7 +82,7 @@ export function SuccessBanner({
                                 {ctaLink ? (
                                     <Link
                                         to={ctaLink}
-                                        className="text-[10px] font-bold text-violet-400 hover:text-violet-300 uppercase tracking-widest transition-colors whitespace-nowrap"
+                                        className="text-sm font-semibold text-[#FF8FAB] hover:text-[#C9A0FF] transition-colors whitespace-nowrap"
                                         onClick={onContinue}
                                     >
                                         {ctaText} →
@@ -84,7 +90,7 @@ export function SuccessBanner({
                                 ) : (
                                     <button
                                         onClick={onContinue}
-                                        className="text-[10px] font-bold text-violet-400 hover:text-violet-300 uppercase tracking-widest transition-colors whitespace-nowrap"
+                                        className="text-sm font-semibold text-[#FF8FAB] hover:text-[#C9A0FF] transition-colors whitespace-nowrap"
                                     >
                                         {ctaText} →
                                     </button>
@@ -100,10 +106,14 @@ export function SuccessBanner({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-800/30 border border-white/5"
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl"
+                        style={{
+                            background: 'rgba(255, 255, 255, 0.8)',
+                            border: '1px solid rgba(0, 0, 0, 0.05)',
+                        }}
                     >
-                        <Info className="w-4 h-4 text-zinc-500 flex-shrink-0" />
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                        <Info className="w-4 h-4 text-[#AAA] flex-shrink-0" />
+                        <p className="text-xs text-[#888]">
                             We've sent a verification email to verify your account
                         </p>
                     </motion.div>

@@ -1,17 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @layer base {
   :root {
-    /* Veogen Color System */
-    --color-primary: 99 102 241;
-    /* indigo-500 #6366f1 */
-    --color-secondary: 139 92 246;
-    /* violet-500 #8b5cf6 */
-    --color-accent: 165 180 252;
-    /* light indigo #a5b4fc */
+    /* DRAPE Color System — Light Mode */
+    --color-primary-rgb: 201 160 255;
+    /* lavender #C9A0FF */
+    --color-secondary-rgb: 255 143 171;
+    /* rose #FF8FAB */
+    --color-accent-rgb: 125 211 192;
+    /* mint #7DD3C0 */
+    --color-gold-rgb: 250 211 144;
+    /* gold #FAD390 */
 
-    /* Font */
+    --color-primary: #C9A0FF;
+    --color-secondary: #FF8FAB;
+    --color-accent: #7DD3C0;
+    --color-gold: #FAD390;
+
+    --bg-main: #F7F5F2;
+    --bg-surface: #FFFFFF;
+    --bg-dark: #0F0F13;
+    --surface-dark: #1A1A22;
+    --text-primary: #1A1A2E;
+    --text-secondary: #71717a;
+    --text-muted: #999;
+
+    --grad-main: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    --grad-mesh: conic-gradient(from 180deg at 50% 50%, #C9A0FF 0deg, #FF8FAB 120deg, #7DD3C0 240deg, #C9A0FF 360deg);
+
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
+    --shadow-glow: 0 0 20px rgba(201, 160, 255, 0.4);
+    --shadow-rose-glow: 0 10px 30px rgba(255, 143, 171, 0.4);
+
+    --glass-light: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(0, 0, 0, 0.05);
+
+    /* Fonts */
+    --font-display: 'Outfit', sans-serif;
     --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
     /* Spacing */
@@ -24,12 +52,13 @@
     --space-12: 3rem;
     --space-16: 4rem;
 
-    /* Border Radius */
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --radius-xl: 16px;
-    --radius-2xl: 20px;
+    /* Border Radius — DRAPE uses larger radii */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-2xl: 32px;
+    --radius-pill: 100px;
     --radius-full: 9999px;
   }
 
@@ -37,18 +66,21 @@
   *::before,
   *::after {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
   }
 
   html {
     @apply m-0 p-0;
     width: 100%;
     height: 100%;
-    background: #0a0a0a;
+    background: var(--bg-main);
   }
 
   body {
-    @apply text-zinc-100 antialiased font-sans m-0 p-0;
-    background: #0a0a0a;
+    @apply antialiased m-0 p-0;
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    background: var(--bg-main);
     width: 100%;
     min-height: 100vh;
     min-height: 100dvh;
@@ -60,47 +92,53 @@
     min-height: 100vh;
     min-height: 100dvh;
   }
+
+  /* Headings use Outfit */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
 }
 
 /* ========================================
-   VEOGEN GLASS COMPONENT
+   GLASS COMPONENTS
    ======================================== */
 @utility glass {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--glass-light);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
 }
 
 @utility glass-hover {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.85);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-md);
   }
 }
 
 /* ========================================
-   VEOGEN GRADIENTS
+   GRADIENTS
    ======================================== */
 @utility gradient-primary {
-  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-secondary)));
+  background: var(--grad-main);
 }
 
 @utility text-gradient {
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  background-image: linear-gradient(135deg, #fff, rgb(var(--color-accent)));
+  background-image: var(--grad-main);
 }
 
 @utility gradient-glow {
-  box-shadow: 0 10px 40px rgba(99, 102, 241, 0.25);
+  box-shadow: var(--shadow-rose-glow);
 }
 
 /* ========================================
-   VEOGEN ANIMATIONS
+   ANIMATIONS
    ======================================== */
 @keyframes fadeInUp {
   from {
@@ -141,14 +179,70 @@
 }
 
 @keyframes pulse-glow {
-
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 20px rgba(201, 160, 255, 0.3);
   }
 
   50% {
-    box-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 40px rgba(201, 160, 255, 0.5);
+  }
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+
+  20% {
+    left: 200%;
+  }
+
+  100% {
+    left: 200%;
+  }
+}
+
+@keyframes meshSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes meshFloat {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(2%, -2%) scale(1.02);
+  }
+
+  66% {
+    transform: translate(-1%, 1%) scale(0.98);
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
   }
 }
 
@@ -170,9 +264,9 @@
 
 @utility animate-shimmer {
   background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0.03) 25%,
-      rgba(255, 255, 255, 0.08) 50%,
-      rgba(255, 255, 255, 0.03) 75%);
+      rgba(201, 160, 255, 0.05) 25%,
+      rgba(201, 160, 255, 0.12) 50%,
+      rgba(201, 160, 255, 0.05) 75%);
   background-size: 400% 100%;
   animation: skeleton-loading 1.5s ease-in-out infinite;
 }
@@ -182,25 +276,30 @@
 }
 
 /* ========================================
-   VEOGEN BUTTON STYLES
+   BUTTON STYLES
    ======================================== */
 @utility btn-primary {
-  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-secondary)));
+  background: var(--grad-main);
   color: white;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-lg);
+  font-family: var(--font-display);
+  font-weight: 700;
+  padding: 0.875rem 1.75rem;
+  border-radius: var(--radius-pill);
   border: none;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
   transition: all 0.3s ease;
+  box-shadow: var(--shadow-rose-glow);
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 12px 35px rgba(255, 143, 171, 0.5);
   }
 
   &:active {
-    transform: translateY(0);
+    transform: scale(0.96);
+    box-shadow: 0 4px 12px rgba(255, 143, 171, 0.3);
   }
 
   &:disabled {
@@ -212,24 +311,25 @@
 }
 
 @utility btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
-  color: white;
-  font-weight: 500;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 600;
   padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border);
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
   }
 }
 
 @utility btn-ghost {
   background: transparent;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   font-weight: 500;
   padding: 0.5rem 1rem;
   border: none;
@@ -237,93 +337,207 @@
   transition: color 0.2s ease;
 
   &:hover {
-    color: white;
+    color: var(--text-primary);
   }
 }
 
 /* ========================================
-   VEOGEN INPUT STYLES
+   INPUT STYLES
    ======================================== */
-@utility input-veogen {
+@utility input-drape {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  height: 56px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid transparent;
   border-radius: var(--radius-lg);
-  padding: 0.875rem 1rem;
-  color: white;
+  padding: 0 20px 0 50px;
+  font-family: var(--font-sans);
   font-size: 1rem;
-  transition: all 0.2s ease;
+  color: var(--text-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s;
 
   &::placeholder {
-    color: rgba(255, 255, 255, 0.3);
+    color: #AAA;
+  }
+
+  &:focus {
+    background: white;
+    border-color: var(--color-secondary);
+    outline: none;
+    box-shadow: 0 8px 24px rgba(255, 143, 171, 0.2);
+  }
+}
+
+/* Keep old name for compatibility during migration */
+@utility input-veogen {
+  width: 100%;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+
+  &::placeholder {
+    color: #AAA;
   }
 
   &:focus {
     outline: none;
-    border-color: rgba(99, 102, 241, 0.5);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: var(--color-secondary);
+    box-shadow: 0 8px 24px rgba(255, 143, 171, 0.2);
   }
 }
 
 /* ========================================
-   VEOGEN CARD STYLES
+   CARD STYLES
    ======================================== */
 @utility card-veogen {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-surface);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
   padding: 1.5rem;
-  transition: border-color 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
   }
 }
 
 /* ========================================
-   VEOGEN UPLOAD DROPZONE
+   UPLOAD DROPZONE
    ======================================== */
 @utility dropzone-veogen {
-  border: 2px dashed rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-lg);
+  border: 2px dashed rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-xl);
   padding: 2rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.5);
 
   &:hover {
-    border-color: rgba(99, 102, 241, 0.5);
-    background: rgba(99, 102, 241, 0.05);
+    border-color: var(--color-primary);
+    background: rgba(201, 160, 255, 0.05);
   }
 }
 
 /* ========================================
-   VEOGEN TIP BADGE
+   TIP BADGE
    ======================================== */
 @utility tip-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  background: rgba(201, 160, 255, 0.12);
+  border: 1px solid rgba(201, 160, 255, 0.3);
   border-radius: var(--radius-lg);
   padding: 0.75rem 1.25rem;
   font-size: 0.875rem;
-  color: rgb(var(--color-accent));
+  color: #8B6FC0;
 }
 
 /* ========================================
-   VEOGEN INSPIRATION QUOTE
+   INSPIRATION QUOTE
    ======================================== */
 @utility inspiration-quote {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   font-style: italic;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(201, 160, 255, 0.06);
   border-radius: var(--radius-md);
-  border-left: 3px solid rgba(99, 102, 241, 0.5);
+  border-left: 3px solid var(--color-primary);
+}
+
+/* ========================================
+   SHIMMER SWEEP (Buttons)
+   ======================================== */
+.shimmer-sweep {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shine 3s infinite;
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+
+/* ========================================
+   MESH BACKGROUNDS
+   ======================================== */
+.mesh-bg {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 143, 171, 0.25), transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(201, 160, 255, 0.25), transparent 40%);
+  animation: meshFloat 15s infinite ease-in-out;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mesh-bg-home {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 20% 40%, rgba(201, 160, 255, 0.12), transparent 40%),
+    radial-gradient(circle at 80% 60%, rgba(125, 211, 192, 0.12), transparent 40%);
+  animation: meshFloat 25s infinite ease-in-out reverse;
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ========================================
+   SCROLL REVEAL
+   ======================================== */
+.scroll-hidden {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.scroll-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========================================
+   STAGGERED ENTRY
+   ======================================== */
+.animate-entry > *:nth-child(1) {
+  animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-entry > *:nth-child(2) {
+  animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-entry > *:nth-child(3) {
+  animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
+  opacity: 0;
+}
+
+.animate-entry > *:nth-child(4) {
+  animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.4s forwards;
+  opacity: 0;
 }
 
 /* ========================================
@@ -342,5 +556,5 @@
    SELECTION STYLING
    ======================================== */
 ::selection {
-  background: rgba(99, 102, 241, 0.3);
+  background: rgba(201, 160, 255, 0.3);
 }

@@ -54,29 +54,36 @@ export function ResetPasswordPage() {
     };
 
     return (
-        <div className="h-[100dvh] w-full flex items-center justify-center px-4 relative overflow-y-auto overflow-x-hidden bg-zinc-950">
-            {/* Background Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg h-full max-h-lg bg-violet-500/10 blur-[120px] rounded-full -z-10" />
+        <div className="h-[100dvh] w-full flex items-center justify-center px-4 relative overflow-y-auto overflow-x-hidden"
+            style={{ background: '#F7F5F2' }}>
+
+            {/* Animated Mesh Background */}
+            <div className="mesh-bg" />
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="glass p-12 rounded-[2.5rem] max-w-md w-full border-white/5 relative"
+                className="rounded-3xl p-8 md:p-10 max-w-md w-full relative z-10"
+                style={{
+                    background: 'rgba(255, 255, 255, 0.85)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(0, 0, 0, 0.05)',
+                    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.08)',
+                }}
             >
                 {flowState === 'reset' && (
-                    <Link to="/login" className="absolute top-8 left-8 text-zinc-600 hover:text-white transition-colors">
+                    <Link to="/login" className="absolute top-6 left-6 text-[#AAA] hover:text-[#1A1A2E] transition-colors">
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
                 )}
 
-                <div className="text-center mb-10">
-                    <div className="text-2xl font-bold tracking-tighter mb-2">
-                        <span className="text-white">AI</span>
-                        <span className="text-zinc-500">WEAR</span>
-                    </div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">
-                        {flowState === 'reset' ? 'New Secure Code' : 'Password Updated'}
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-extrabold mb-2 text-gradient">
+                        AIWEAR
+                    </h1>
+                    <p className="text-sm text-[#888]">
+                        {flowState === 'reset' ? 'Create New Password' : 'Password Updated'}
                     </p>
                 </div>
 
@@ -86,7 +93,11 @@ export function ResetPasswordPage() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="mb-6 p-4 rounded-2xl bg-red-500/5 border border-red-500/10 text-red-400 text-[10px] font-bold uppercase tracking-widest text-center"
+                            className="mb-6 p-4 rounded-2xl text-sm text-red-500 text-center"
+                            style={{
+                                background: 'rgba(239, 68, 68, 0.08)',
+                                border: '1px solid rgba(239, 68, 68, 0.15)'
+                            }}
                         >
                             {error}
                         </motion.div>
@@ -102,11 +113,11 @@ export function ResetPasswordPage() {
                             exit={{ opacity: 0, x: 20 }}
                             transition={{ duration: 0.3 }}
                             onSubmit={handleSubmit}
-                            className="space-y-6"
+                            className="space-y-5"
                         >
                             <div className="space-y-4">
                                 <PasswordInput
-                                    label="New Secure Code"
+                                    label="New Password"
                                     value={password}
                                     onChange={setPassword}
                                     showStrengthMeter={true}
@@ -114,7 +125,7 @@ export function ResetPasswordPage() {
                                 />
 
                                 <PasswordInput
-                                    label="Confirm Secure Code"
+                                    label="Confirm Password"
                                     value={confirmPassword}
                                     onChange={setConfirmPassword}
                                     error={confirmPassword && password !== confirmPassword ? 'Passwords do not match' : undefined}
@@ -128,7 +139,7 @@ export function ResetPasswordPage() {
                                 disabled={loading || !password || !confirmPassword}
                                 className="w-full"
                             >
-                                Reset Secure Code
+                                Reset Password
                             </LoadingButton>
                         </motion.form>
                     ) : (
@@ -140,7 +151,7 @@ export function ResetPasswordPage() {
                             className="space-y-6"
                         >
                             <SuccessBanner
-                                title="Secure Code Updated"
+                                title="Password Updated"
                                 message="Your password has been successfully reset."
                                 ctaText="Sign In"
                                 ctaLink="/login"

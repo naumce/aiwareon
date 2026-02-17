@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vite build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx expo start:*)",
+      "WebFetch(domain:ai.google.dev)"
+    ]
+  }
+}

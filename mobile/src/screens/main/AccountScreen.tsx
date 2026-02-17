@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -7,6 +7,8 @@ import {
     Alert,
     Linking,
     Switch,
+    Animated,
+    TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,7 +17,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
 import { useAuthStore, useCreditStore } from '../../stores';
 import { useTheme, spacing, borderRadius, typography } from '../../theme';
-import { IconSymbol, ScalePressable, Button } from '../../components/ui';
+import { IconSymbol, ScalePressable, PremiumHeader } from '../../components/ui';
 import type { RootStackParamList } from '../../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -60,12 +62,16 @@ export function AccountScreen() {
                     showsVerticalScrollIndicator={false}
                 >
                     {/* Header */}
-                    <Text style={styles.title}>Account</Text>
+                    <PremiumHeader
+                        title="Settings"
+                        showGreeting={false}
+                        style={{ paddingBottom: spacing.xl, paddingHorizontal: 0 }}
+                    />
 
                     {/* Profile Section */}
                     <View style={styles.profileSection}>
                         <LinearGradient
-                            colors={['#8E54E9', '#4776E6']}
+                            colors={colors.gradient.primary}
                             style={styles.avatarGradient}
                         >
                             <View style={[styles.avatar, { backgroundColor: colors.background.primary }]}>
@@ -78,23 +84,74 @@ export function AccountScreen() {
                     </View>
 
                     {/* Credits Card */}
-                    <View style={styles.creditsCard}>
-                        <View style={styles.creditsHeader}>
-                            <Text style={styles.creditsLabel}>Available Credits</Text>
-                            <Text style={styles.creditsValue}>{balance}</Text>
+                    <TouchableOpacity
+                        activeOpacity={0.85}
+                        onPress={handleBuyCredits}
+                        style={{ marginBottom: spacing.xl }}
+                    >
+                        <View style={{ borderRadius: 20, overflow: 'hidden' }}>
+                            <LinearGradient
+                                colors={colors.gradient.primary}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={{
+                                    paddingVertical: spacing.lg,
+                                    paddingHorizontal: spacing.lg,
+                                }}
+                            >
+                                <View style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                }}>
+                                    <View>
+                                        <Text style={{
+                                            fontSize: 12,
+                                            fontWeight: '600',
+                                            color: 'rgba(255,255,255,0.6)',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: 0.8,
+                                        }}>
+                                            Credits
+                                        </Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
+                                            <Text style={{
+                                                fontSize: 36,
+                                                fontWeight: '700',
+                                                color: '#FFFFFF',
+                                                letterSpacing: -1,
+                                            }}>
+                                                {balance}
+                                            </Text>
+                                            <Text style={{
+                                                fontSize: 14,
+                                                fontWeight: '500',
+                                                color: 'rgba(255,255,255,0.6)',
+                                            }}>
+                                                available
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    <View style={{
+                                        backgroundColor: 'rgba(255,255,255,0.2)',
+                                        paddingVertical: 10,
+                                        paddingHorizontal: 18,
+                                        borderRadius: 14,
+                                        borderWidth: 1,
+                                        borderColor: 'rgba(255,255,255,0.3)',
+                                    }}>
+                                        <Text style={{
+                                            fontSize: 14,
+                                            fontWeight: '600',
+                                            color: '#FFFFFF',
+                                        }}>
+                                            Buy More
+                                        </Text>
+                                    </View>
+                                </View>
+                            </LinearGradient>
                         </View>
-                        <View style={styles.creditsCosts}>
-                            <Text style={styles.costText}>Standard: 1 credit</Text>
-                            <Text style={styles.costDivider}>·</Text>
-                            <Text style={styles.costText}>Studio: 2 credits</Text>
-                        </View>
-                        <Button
-                            title="Buy Credits"
-                            onPress={handleBuyCredits}
-                            buttonStyle="filled"
-                            size="medium"
-                        />
-                    </View>
+                    </TouchableOpacity>
 
                     {/* Appearance Section */}
                     <View style={styles.listSection}>
@@ -198,14 +255,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     scrollContent: {
         paddingHorizontal: spacing.lg,
     },
-    title: {
-        fontSize: 34,
-        fontWeight: '700',
-        color: colors.text.primary,
-        letterSpacing: -0.5,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.xl,
-    },
     profileSection: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -238,41 +287,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     profileEmail: {
         fontSize: typography.body,
         color: colors.text.primary,
-    },
-    creditsCard: {
-        backgroundColor: colors.background.tertiary,
-        borderRadius: borderRadius.lg,
-        padding: spacing.lg,
-        marginBottom: spacing.xl,
-    },
-    creditsHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'baseline',
-        marginBottom: spacing.sm,
-    },
-    creditsLabel: {
-        fontSize: typography.subhead,
-        color: colors.text.secondary,
-    },
-    creditsValue: {
-        fontSize: typography.title1,
-        fontWeight: '700',
-        color: colors.brand.primary,
-    },
-    creditsCosts: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: spacing.md,
-    },
-    costText: {
-        fontSize: typography.footnote,
-        color: colors.text.tertiary,
-    },
-    costDivider: {
-        fontSize: typography.footnote,
-        color: colors.text.tertiary,
-        marginHorizontal: spacing.sm,
     },
     listSection: {
         marginBottom: spacing.lg,

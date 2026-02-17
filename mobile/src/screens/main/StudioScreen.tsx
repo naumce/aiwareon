@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
     View,
     Text,
@@ -10,23 +10,477 @@ import {
     ActivityIndicator,
     Alert,
     Animated,
+    Easing,
     FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { supabase } from '../../services/supabaseClient';
 import { useGenerationStore, useCreditStore, useAuthStore, useWardrobeStore } from '../../stores';
 import { useTheme, spacing, borderRadius, typography } from '../../theme';
 import { PERSON_EXAMPLES, GARMENT_EXAMPLES, SHOWCASE_RESULTS } from '../../lib/exampleImages';
-import { IconSymbol } from '../../components/ui';
-import type { Quality, ModelType, FalCategory } from '../../types';
+import { IconSymbol, PremiumHeader, type IconName } from '../../components/ui';
+import type { Quality, ModelType, FalCategory, RootStackParamList } from '../../types';
 
-const { width } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+/** Animated "+" add-photo card with gradient border and pulse */
+function AddPhotoCard({ onPress, colors }: { onPress: () => void; colors: ReturnType<typeof useTheme>['colors'] }) {
+    const pulse = useRef(new Animated.Value(0)).current;
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulse, { toValue: 1, duration: 2000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+                Animated.timing(pulse, { toValue: 0, duration: 2000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+            ]),
+        ).start();
+    }, [pulse]);
+
+    const glowOpacity = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.4, 0.9] });
+    const iconScale = pulse.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1.12, 1] });
+
+    return (
+        <TouchableOpacity
+            activeOpacity={0.8}
+            onPressIn={() => Animated.spring(scaleAnim, { toValue: 0.9, tension: 300, friction: 15, useNativeDriver: true }).start()}
+            onPressOut={() => Animated.spring(scaleAnim, { toValue: 1, tension: 200, friction: 12, useNativeDriver: true }).start()}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onPress(); }}
+        >
+            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                <LinearGradient
+                    colors={colors.gradient.primary as [string, string]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{
+                        width: 82,
+                        height: 102,
+                        borderRadius: borderRadius.sm + 1,
+                        padding: 1.5,
+                    }}
+                >
+                    <Animated.View style={{
+                        ...StyleSheet.absoluteFillObject,
+                        borderRadius: borderRadius.sm + 1,
+                        opacity: glowOpacity,
+                        shadowColor: colors.brand.primary,
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.6,
+                        shadowRadius: 12,
+                        elevation: 6,
+                    }} />
+                    <View style={{
+                        flex: 1,
+                        borderRadius: borderRadius.sm,
+                        backgroundColor: colors.background.primary,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                        <Animated.View style={{ transform: [{ scale: iconScale }] }}>
+                            <LinearGradient
+                                colors={colors.gradient.primary as [string, string]}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={{
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: 18,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <IconSymbol name="Plus" size={20} color="#fff" strokeWidth={2.5} />
+                            </LinearGradient>
+                        </Animated.View>
+                    </View>
+                </LinearGradient>
+            </Animated.View>
+        </TouchableOpacity>
+    );
+}
+
+/** Premium quality toggle with animated sliding gradient indicator */
+function QualitySelector({
+    quality,
+    setQuality,
+    disabled,
+    colors,
+    isDark,
+}: {
+    quality: Quality;
+    setQuality: (q: Quality) => void;
+    disabled: boolean;
+    colors: ReturnType<typeof useTheme>['colors'];
+    isDark: boolean;
+}) {
+    const slideX = useRef(new Animated.Value(quality === 'standard' ? 0 : 1)).current;
+    const pressScale = useRef(new Animated.Value(1)).current;
+    const [containerWidth, setContainerWidth] = useState(0);
+
+    useEffect(() => {
+        Animated.spring(slideX, {
+            toValue: quality === 'standard' ? 0 : 1,
+            tension: 280,
+            friction: 22,
+            useNativeDriver: true,
+        }).start();
+    }, [quality, slideX]);
+
+    const handleSelect = (q: Quality) => {
+        if (disabled || q === quality) return;
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        Animated.sequence([
+            Animated.timing(pressScale, { toValue: 0.97, duration: 80, useNativeDriver: true }),
+            Animated.spring(pressScale, { toValue: 1, tension: 300, friction: 15, useNativeDriver: true }),
+        ]).start();
+        setQuality(q);
+    };
+
+    const pillWidth = containerWidth > 0 ? (containerWidth - 8) / 2 : 0;
+
+    return (
+        <View style={{ marginBottom: spacing.md }}>
+            <Animated.View style={{ transform: [{ scale: pressScale }] }}>
+                <View
+                    onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+                    style={{
+                        flexDirection: 'row',
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                        borderRadius: 16,
+                        padding: 4,
+                    }}
+                >
+                    {/* Sliding gradient pill */}
+                    {pillWidth > 0 && (
+                        <Animated.View
+                            pointerEvents="none"
+                            style={{
+                                position: 'absolute',
+                                top: 4,
+                                bottom: 4,
+                                left: 4,
+                                width: pillWidth,
+                                zIndex: 0,
+                                transform: [{
+                                    translateX: slideX.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, pillWidth],
+                                    }),
+                                }],
+                            }}
+                        >
+                            <LinearGradient
+                                colors={quality === 'studio'
+                                    ? [colors.brand.secondary + '20', colors.brand.primary + '12']
+                                    : [colors.brand.primary + '18', colors.brand.secondary + '0C']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={{
+                                    flex: 1,
+                                    borderRadius: 12,
+                                    borderWidth: 1,
+                                    borderColor: quality === 'studio'
+                                        ? colors.brand.secondary + '35'
+                                        : colors.brand.primary + '30',
+                                }}
+                            />
+                        </Animated.View>
+                    )}
+
+                    {/* Standard */}
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => handleSelect('standard')}
+                        disabled={disabled}
+                        style={{ flex: 1, zIndex: 2 }}
+                    >
+                        <Animated.View style={{
+                            paddingVertical: 14,
+                            alignItems: 'center',
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            gap: 8,
+                            opacity: slideX.interpolate({ inputRange: [0, 1], outputRange: [1, 0.45] }),
+                        }}>
+                            <IconSymbol
+                                name="Zap"
+                                size={15}
+                                color={quality === 'standard' ? colors.brand.primary : colors.text.tertiary}
+                                strokeWidth={quality === 'standard' ? 2.5 : 1.5}
+                            />
+                            <Text style={{
+                                fontSize: 14,
+                                fontWeight: '600',
+                                color: quality === 'standard' ? colors.text.primary : colors.text.tertiary,
+                            }}>
+                                Standard
+                            </Text>
+                            <View style={{
+                                backgroundColor: quality === 'standard'
+                                    ? (isDark ? 'rgba(201,160,255,0.18)' : 'rgba(201,160,255,0.14)')
+                                    : 'transparent',
+                                paddingHorizontal: 7,
+                                paddingVertical: 2,
+                                borderRadius: 8,
+                            }}>
+                                <Text style={{
+                                    fontSize: 11,
+                                    fontWeight: '700',
+                                    color: quality === 'standard' ? colors.brand.primary : colors.text.tertiary,
+                                }}>
+                                    1 cr
+                                </Text>
+                            </View>
+                        </Animated.View>
+                    </TouchableOpacity>
+
+                    {/* Studio */}
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => handleSelect('studio')}
+                        disabled={disabled}
+                        style={{ flex: 1, zIndex: 2 }}
+                    >
+                        <Animated.View style={{
+                            paddingVertical: 14,
+                            alignItems: 'center',
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            gap: 8,
+                            opacity: slideX.interpolate({ inputRange: [0, 1], outputRange: [0.45, 1] }),
+                        }}>
+                            <IconSymbol
+                                name="Sparkles"
+                                size={15}
+                                color={quality === 'studio' ? colors.brand.secondary : colors.text.tertiary}
+                                strokeWidth={quality === 'studio' ? 2.5 : 1.5}
+                            />
+                            <Text style={{
+                                fontSize: 14,
+                                fontWeight: '600',
+                                color: quality === 'studio' ? colors.text.primary : colors.text.tertiary,
+                            }}>
+                                Studio
+                            </Text>
+                            <View style={{
+                                backgroundColor: quality === 'studio'
+                                    ? (isDark ? 'rgba(255,143,171,0.18)' : 'rgba(255,143,171,0.14)')
+                                    : 'transparent',
+                                paddingHorizontal: 7,
+                                paddingVertical: 2,
+                                borderRadius: 8,
+                            }}>
+                                <Text style={{
+                                    fontSize: 11,
+                                    fontWeight: '700',
+                                    color: quality === 'studio' ? colors.brand.secondary : colors.text.tertiary,
+                                }}>
+                                    2 cr
+                                </Text>
+                            </View>
+                        </Animated.View>
+                    </TouchableOpacity>
+                </View>
+            </Animated.View>
+        </View>
+    );
+}
+
+/** Frosted glass action button for overlaying on images */
+function GlassButton({
+    icon,
+    label,
+    onPress,
+    colors,
+    isPrimary = false,
+}: {
+    icon: IconName;
+    label: string;
+    onPress: () => void;
+    colors: ReturnType<typeof useTheme>['colors'];
+    isPrimary?: boolean;
+}) {
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+
+    const content = isPrimary ? (
+        <LinearGradient
+            colors={colors.gradient.primary as [string, string]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                paddingVertical: 14,
+                borderRadius: 14,
+            }}
+        >
+            <IconSymbol name={icon} size={17} color="#FFFFFF" strokeWidth={2} />
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#FFFFFF' }}>{label}</Text>
+        </LinearGradient>
+    ) : (
+        <BlurView
+            intensity={60}
+            tint="dark"
+            style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                paddingVertical: 14,
+                borderRadius: 14,
+                overflow: 'hidden',
+                borderWidth: 1,
+                borderColor: 'rgba(255,255,255,0.15)',
+            }}
+        >
+            <IconSymbol name={icon} size={17} color="#FFFFFF" strokeWidth={1.8} />
+            <Text style={{ fontSize: 14, fontWeight: '500', color: '#FFFFFF' }}>{label}</Text>
+        </BlurView>
+    );
+
+    return (
+        <TouchableOpacity
+            activeOpacity={0.8}
+            onPressIn={() => Animated.spring(scaleAnim, { toValue: 0.92, tension: 300, friction: 15, useNativeDriver: true }).start()}
+            onPressOut={() => Animated.spring(scaleAnim, { toValue: 1, tension: 200, friction: 12, useNativeDriver: true }).start()}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onPress(); }}
+            style={{ flex: 1 }}
+        >
+            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                {content}
+            </Animated.View>
+        </TouchableOpacity>
+    );
+}
+
+/** Immersive full-screen result hero with overlaid action buttons */
+function ResultHeroSection({
+    resultUrl,
+    onSave,
+    onShare,
+    onRetake,
+    onFavorite,
+    colors,
+    isDark,
+}: {
+    resultUrl: string;
+    onSave: () => void;
+    onShare: () => void;
+    onRetake: () => void;
+    onFavorite: () => void;
+    colors: ReturnType<typeof useTheme>['colors'];
+    isDark: boolean;
+}) {
+    const [isFavorited, setIsFavorited] = useState(false);
+    const scaleAnim = useRef(new Animated.Value(0.92)).current;
+    const opacityAnim = useRef(new Animated.Value(0)).current;
+    const btnSlide = useRef(new Animated.Value(30)).current;
+    const btnOpacity = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.parallel([
+            Animated.spring(scaleAnim, { toValue: 1, tension: 80, friction: 12, useNativeDriver: true }),
+            Animated.timing(opacityAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
+        ]).start();
+
+        setTimeout(() => {
+            Animated.parallel([
+                Animated.spring(btnSlide, { toValue: 0, tension: 100, friction: 14, useNativeDriver: true }),
+                Animated.timing(btnOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+            ]).start();
+        }, 250);
+    }, [scaleAnim, opacityAnim, btnSlide, btnOpacity]);
+
+    const handleFavoritePress = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        setIsFavorited(prev => !prev);
+        onFavorite();
+    };
+
+    const imageHeight = SCREEN_HEIGHT * 0.72;
+
+    return (
+        <Animated.View style={{
+            opacity: opacityAnim,
+            transform: [{ scale: scaleAnim }],
+            marginBottom: spacing.lg,
+        }}>
+            <View style={{
+                borderRadius: 24,
+                overflow: 'hidden',
+                height: imageHeight,
+            }}>
+                <Image
+                    source={{ uri: resultUrl }}
+                    style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
+                />
+
+                {/* Bottom gradient for button legibility */}
+                <LinearGradient
+                    colors={['transparent', 'rgba(0,0,0,0.6)']}
+                    style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: 180,
+                    }}
+                />
+
+                {/* Heart — top right */}
+                <TouchableOpacity
+                    onPress={handleFavoritePress}
+                    activeOpacity={0.7}
+                    style={{
+                        position: 'absolute',
+                        top: 16,
+                        right: 16,
+                        width: 44,
+                        height: 44,
+                        borderRadius: 22,
+                        backgroundColor: 'rgba(0,0,0,0.3)',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <IconSymbol
+                        name="Heart"
+                        size={22}
+                        color={isFavorited ? '#FF8FAB' : '#FFFFFF'}
+                        strokeWidth={isFavorited ? 2.5 : 1.5}
+                    />
+                </TouchableOpacity>
+
+                {/* Action buttons — bottom */}
+                <Animated.View style={{
+                    position: 'absolute',
+                    bottom: 20,
+                    left: 16,
+                    right: 16,
+                    flexDirection: 'row',
+                    gap: 10,
+                    opacity: btnOpacity,
+                    transform: [{ translateY: btnSlide }],
+                }}>
+                    <GlassButton icon="RotateCcw" label="Retake" onPress={onRetake} colors={colors} />
+                    <GlassButton icon="Download" label="Save" onPress={onSave} colors={colors} />
+                    <GlassButton icon="Share" label="Share" onPress={onShare} colors={colors} isPrimary />
+                </Animated.View>
+            </View>
+        </Animated.View>
+    );
+}
 
 // Person image from DB
 interface PersonImage {
@@ -44,6 +498,7 @@ const LOADING_MESSAGES = [
 ];
 
 export function StudioScreen() {
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const { user } = useAuthStore();
     const {
         state,
@@ -60,17 +515,21 @@ export function StudioScreen() {
     const { items: wardrobeItems, exampleItems, fetchItems: fetchWardrobe } = useWardrobeStore();
 
     const [quality, setQuality] = useState<Quality>('standard');
-    const [modelType, setModelType] = useState<ModelType>('gemini2');
-    const [falCategory, setFalCategory] = useState<FalCategory>('tops');
+    // HARDCODED: Using geminipro for feature development. Model selection UI commented out below.
+    const modelType: ModelType = 'geminipro';
+    // const [modelType, setModelType] = useState<ModelType>('gemini2');
+    // const [falCategory, setFalCategory] = useState<FalCategory>('tops');
     const [messageIndex, setMessageIndex] = useState(0);
     const [showcaseIndex, setShowcaseIndex] = useState(0);
     const fadeAnim = useState(new Animated.Value(1))[0];
+    const scrollViewRef = useRef<ScrollView>(null);
+    const showcaseLayoutY = useRef(0);
 
     // User's saved person photos from DB
     const [savedPersonPhotos, setSavedPersonPhotos] = useState<PersonImage[]>([]);
     const [loadingData, setLoadingData] = useState(true);
 
-    const { colors } = useTheme();
+    const { colors, isDark } = useTheme();
     const styles = createStyles(colors);
 
     // Fetch user data on mount
@@ -174,6 +633,25 @@ export function StudioScreen() {
         }
     }, [error]);
 
+    // Auto-scroll to showcase when generating
+    useEffect(() => {
+        if (state === 'generating' && scrollViewRef.current) {
+            const timer = setTimeout(() => {
+                scrollViewRef.current?.scrollTo({ y: showcaseLayoutY.current, animated: true });
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [state]);
+
+    // Auto-scroll to top when result arrives
+    useEffect(() => {
+        if (state === 'succeeded' && resultUrl) {
+            setTimeout(() => {
+                scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+            }, 100);
+        }
+    }, [state, resultUrl]);
+
     const pickImage = async (target: 'person' | 'garment') => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
@@ -234,7 +712,8 @@ export function StudioScreen() {
         }
 
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        await generate(quality, modelType, modelType === 'fal' ? falCategory : undefined);
+        // HARDCODED: geminipro model, no fal category needed
+        await generate(quality, modelType);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         await fetchBalance();
     };
@@ -314,6 +793,17 @@ export function StudioScreen() {
         }
     };
 
+    const handleRetake = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        useGenerationStore.setState({ state: 'idle', resultUrl: null, error: null });
+        scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    }, []);
+
+    const handleFavorite = useCallback(() => {
+        // TODO: persist favorite to backend
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }, []);
+
     const canGenerate = personImage && dressImage && state !== 'generating' && balance > 0;
     const isGenerating = state === 'generating';
     const creditCost = quality === 'studio' ? 2 : 1;
@@ -334,20 +824,31 @@ export function StudioScreen() {
         <View style={styles.container}>
             <SafeAreaView style={styles.safeArea} edges={['top']}>
                 <ScrollView
+                    ref={scrollViewRef}
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                 >
+                    {/* Result Hero — shown at top when generation succeeds */}
+                    {resultUrl && state === 'succeeded' && (
+                        <ResultHeroSection
+                            resultUrl={resultUrl}
+                            onSave={handleSaveResult}
+                            onShare={handleShareResult}
+                            onRetake={handleRetake}
+                            onFavorite={handleFavorite}
+                            colors={colors}
+                            isDark={isDark}
+                        />
+                    )}
+
                     {/* Header */}
-                    <View style={styles.header}>
-                        <View>
-                            <Text style={styles.title}>Studio</Text>
-                            <Text style={styles.subtitle}>Virtual Try-On</Text>
-                        </View>
-                        <View style={styles.creditBadge}>
-                            <Text style={styles.creditValue}>{balance}</Text>
-                            <IconSymbol name="Sparkles" size={14} color={colors.brand.primary} />
-                        </View>
-                    </View>
+                    <PremiumHeader
+                        title="What will you wear?"
+                        rightIcon="Sparkles"
+                        rightLabel={String(balance)}
+                        onRightPress={() => navigation.navigate('BuyCredits')}
+                        style={{ paddingHorizontal: 0 }}
+                    />
 
                     {loadingData ? (
                         <View style={styles.loadingContainer}>
@@ -399,12 +900,7 @@ export function StudioScreen() {
                                 <>
                                     {/* Person Input */}
                                     <View style={styles.inputSection}>
-                                        <View style={styles.inputHeader}>
-                                            <Text style={styles.inputTitle}>You</Text>
-                                            <TouchableOpacity onPress={() => showImageOptions('person')}>
-                                                <Text style={styles.inputAction}>Upload</Text>
-                                            </TouchableOpacity>
-                                        </View>
+                                        <Text style={styles.inputTitle}>You</Text>
 
                                         {personImage ? (
                                             <View style={styles.selectedCard}>
@@ -424,6 +920,9 @@ export function StudioScreen() {
                                                 <FlatList
                                                     data={personOptions}
                                                     keyExtractor={(item) => item.id}
+                                                    ListHeaderComponent={
+                                                        <AddPhotoCard onPress={() => showImageOptions('person')} colors={colors} />
+                                                    }
                                                     renderItem={({ item }) => (
                                                         <TouchableOpacity
                                                             style={styles.exampleThumb}
@@ -448,12 +947,7 @@ export function StudioScreen() {
 
                                     {/* Garment Input */}
                                     <View style={styles.inputSection}>
-                                        <View style={styles.inputHeader}>
-                                            <Text style={styles.inputTitle}>Garment</Text>
-                                            <TouchableOpacity onPress={() => showImageOptions('garment')}>
-                                                <Text style={styles.inputAction}>Upload</Text>
-                                            </TouchableOpacity>
-                                        </View>
+                                        <Text style={styles.inputTitle}>Garment</Text>
 
                                         {dressImage ? (
                                             <View style={styles.selectedCard}>
@@ -473,6 +967,9 @@ export function StudioScreen() {
                                                 <FlatList
                                                     data={garmentOptions}
                                                     keyExtractor={(item) => item.id}
+                                                    ListHeaderComponent={
+                                                        <AddPhotoCard onPress={() => showImageOptions('garment')} colors={colors} />
+                                                    }
                                                     renderItem={({ item }) => (
                                                         <TouchableOpacity
                                                             style={styles.exampleThumb}
@@ -498,38 +995,16 @@ export function StudioScreen() {
                             )}
 
                             {/* Quality */}
-                            <View style={styles.optionSection}>
-                                <Text style={styles.optionLabel}>Quality</Text>
-                                <View style={styles.segmentedControl}>
-                                    <TouchableOpacity
-                                        style={[styles.segment, quality === 'standard' && styles.segmentActive]}
-                                        onPress={() => {
-                                            Haptics.selectionAsync();
-                                            setQuality('standard');
-                                        }}
-                                        disabled={isGenerating}
-                                    >
-                                        <Text style={[styles.segmentText, quality === 'standard' && styles.segmentTextActive]}>
-                                            Standard · 1
-                                        </Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={[styles.segment, quality === 'studio' && styles.segmentActive]}
-                                        onPress={() => {
-                                            Haptics.selectionAsync();
-                                            setQuality('studio');
-                                        }}
-                                        disabled={isGenerating}
-                                    >
-                                        <Text style={[styles.segmentText, quality === 'studio' && styles.segmentTextActive]}>
-                                            Studio · 2
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
+                            <QualitySelector
+                                quality={quality}
+                                setQuality={setQuality}
+                                disabled={isGenerating}
+                                colors={colors}
+                                isDark={isDark}
+                            />
 
-                            {/* Model */}
-                            <View style={styles.optionSection}>
+                            {/* COMMENTED OUT: Model selection chips - hardcoded to geminipro for feature development */}
+                            {/* <View style={styles.optionSection}>
                                 <Text style={styles.optionLabel}>Model</Text>
                                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                                     <View style={styles.chipRow}>
@@ -554,10 +1029,10 @@ export function StudioScreen() {
                                         ))}
                                     </View>
                                 </ScrollView>
-                            </View>
+                            </View> */}
 
-                            {/* Fal Category */}
-                            {modelType === 'fal' && (
+                            {/* COMMENTED OUT: Fal category selector - hardcoded model doesn't use fal */}
+                            {/* {modelType === 'fal' && (
                                 <View style={styles.optionSection}>
                                     <Text style={styles.optionLabel}>Garment Type</Text>
                                     <View style={styles.chipRow}>
@@ -582,7 +1057,7 @@ export function StudioScreen() {
                                         ))}
                                     </View>
                                 </View>
-                            )}
+                            )} */}
 
                             {/* Generate Button */}
                             <TouchableOpacity
@@ -592,7 +1067,7 @@ export function StudioScreen() {
                                 style={styles.generateWrapper}
                             >
                                 <LinearGradient
-                                    colors={canGenerate ? colors.gradient.primary : ['#3A3A3C', '#3A3A3C']}
+                                    colors={canGenerate ? colors.gradient.primary : ['#D4D4D8', '#D4D4D8']}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 0 }}
                                     style={styles.generateButton}
@@ -614,7 +1089,10 @@ export function StudioScreen() {
 
                             {/* Generating Preview */}
                             {isGenerating && (
-                                <View style={styles.showcaseSection}>
+                                <View
+                                    style={styles.showcaseSection}
+                                    onLayout={(e) => { showcaseLayoutY.current = e.nativeEvent.layout.y; }}
+                                >
                                     <Text style={styles.showcaseLabel}>Examples of what's possible</Text>
                                     <View style={styles.showcaseCard}>
                                         <Image
@@ -630,36 +1108,6 @@ export function StudioScreen() {
                                             ))}
                                         </View>
                                     </View>
-                                </View>
-                            )}
-
-                            {/* Result */}
-                            {resultUrl && state === 'succeeded' && (
-                                <View style={styles.resultSection}>
-                                    <Text style={styles.resultTitle}>Your Result</Text>
-                                    <View style={styles.resultCard}>
-                                        <Image source={{ uri: resultUrl }} style={styles.resultImage} />
-                                    </View>
-                                    <View style={styles.resultActions}>
-                                        <TouchableOpacity style={styles.actionBtn} onPress={handleSaveResult}>
-                                            <IconSymbol name="Download" size={18} color={colors.text.primary} />
-                                            <Text style={styles.actionBtnText}>Save</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={[styles.actionBtn, styles.actionBtnPrimary]} onPress={handleShareResult}>
-                                            <IconSymbol name="Share" size={18} color="#000" />
-                                            <Text style={[styles.actionBtnText, styles.actionBtnTextPrimary]}>Share</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                    <TouchableOpacity
-                                        style={styles.regenerateBtn}
-                                        onPress={handleGenerate}
-                                        disabled={!canGenerate}
-                                    >
-                                        <IconSymbol name="Sparkles" size={18} color={colors.text.primary} />
-                                        <Text style={styles.regenerateBtnText}>
-                                            Regenerate · {creditCost} {creditCost === 1 ? 'Credit' : 'Credits'}
-                                        </Text>
-                                    </TouchableOpacity>
                                 </View>
                             )}
                         </>
@@ -684,38 +1132,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     scrollContent: {
         paddingHorizontal: spacing.lg,
     },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        paddingTop: spacing.md,
-        marginBottom: spacing.xl,
-    },
-    title: {
-        fontSize: 34,
-        fontWeight: '700',
-        color: colors.text.primary,
-        letterSpacing: -0.5,
-    },
-    subtitle: {
-        fontSize: typography.footnote,
-        color: colors.text.muted,
-        marginTop: 2,
-    },
-    creditBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.fill.tertiary,
-        paddingVertical: 8,
-        paddingHorizontal: 14,
-        borderRadius: 20,
-        gap: 6,
-    },
-    creditValue: {
-        fontSize: 17,
-        fontWeight: '600',
-        color: colors.text.primary,
-    },
     loadingContainer: {
         alignItems: 'center',
         paddingVertical: spacing.xxl,
@@ -728,20 +1144,11 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     inputSection: {
         marginBottom: spacing.lg,
     },
-    inputHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: spacing.sm,
-    },
     inputTitle: {
         fontSize: typography.headline,
         fontWeight: typography.semibold,
         color: colors.text.primary,
-    },
-    inputAction: {
-        fontSize: typography.subhead,
-        color: colors.brand.primary,
+        marginBottom: spacing.sm,
     },
     sectionLabel: {
         fontSize: typography.caption1,
@@ -830,29 +1237,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
         letterSpacing: 0.5,
         marginBottom: spacing.xs,
     },
-    segmentedControl: {
-        flexDirection: 'row',
-        backgroundColor: colors.fill.tertiary,
-        borderRadius: borderRadius.xs,
-        padding: 2,
-    },
-    segment: {
-        flex: 1,
-        paddingVertical: 10,
-        alignItems: 'center',
-        borderRadius: borderRadius.xs - 2,
-    },
-    segmentActive: {
-        backgroundColor: colors.background.elevated,
-    },
-    segmentText: {
-        fontSize: typography.subhead,
-        fontWeight: typography.medium,
-        color: colors.text.secondary,
-    },
-    segmentTextActive: {
-        color: colors.text.primary,
-    },
     chipRow: {
         flexDirection: 'row',
         gap: spacing.sm,
@@ -930,66 +1314,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     dotActive: {
         backgroundColor: colors.text.primary,
     },
-    resultSection: {
-        marginTop: spacing.xl,
-    },
-    resultTitle: {
-        fontSize: typography.headline,
-        fontWeight: typography.semibold,
-        color: colors.text.primary,
-        marginBottom: spacing.sm,
-    },
-    resultCard: {
-        borderRadius: borderRadius.lg,
-        overflow: 'hidden',
-    },
-    resultImage: {
-        width: '100%',
-        aspectRatio: 3 / 4,
-        resizeMode: 'cover',
-    },
-    resultActions: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-        marginTop: spacing.md,
-    },
-    actionBtn: {
-        flex: 1,
-        flexDirection: 'row',
-        paddingVertical: 14,
-        backgroundColor: colors.fill.secondary,
-        borderRadius: borderRadius.sm,
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-    },
-    actionBtnPrimary: {
-        backgroundColor: colors.brand.primary,
-    },
-    actionBtnText: {
-        fontSize: typography.subhead,
-        fontWeight: typography.medium,
-        color: colors.text.primary,
-    },
-    actionBtnTextPrimary: {
-        color: '#FFFFFF',
-    },
-    regenerateBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        marginTop: spacing.sm,
-        paddingVertical: 16,
-        borderWidth: 1,
-        borderColor: colors.separator.primary,
-        borderRadius: borderRadius.sm,
-    },
-    regenerateBtnText: {
-        fontSize: typography.subhead,
-        fontWeight: typography.medium,
-        color: colors.text.primary,
-    },
     // Side-by-side selected pair styles
     selectedPairContainer: {
         marginBottom: spacing.lg,
@@ -1009,7 +1333,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
         gap: spacing.md,
     },
     selectedPairCard: {
-        width: (width - spacing.lg * 2 - spacing.xl * 2) / 2,
+        width: (SCREEN_WIDTH - spacing.lg * 2 - spacing.xl * 2) / 2,
         aspectRatio: 3 / 4,
         borderRadius: borderRadius.lg,
         overflow: 'hidden',

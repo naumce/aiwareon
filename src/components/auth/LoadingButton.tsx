@@ -23,12 +23,12 @@ export function LoadingButton({
     type = 'button',
     onClick,
 }: LoadingButtonProps) {
-    const baseStyles = 'relative font-bold text-xs uppercase tracking-[0.3em] transition-all disabled:opacity-50 flex items-center justify-center gap-3';
+    const baseStyles = 'relative font-semibold text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden';
 
     const variants = {
-        primary: 'gradient-primary rounded-2xl px-8 py-5 text-white hover:opacity-90 shadow-2xl shadow-violet-500/20',
-        secondary: 'bg-zinc-800 rounded-2xl px-8 py-5 text-white hover:bg-zinc-700',
-        glass: 'bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl px-8 py-4 text-white',
+        primary: 'rounded-2xl px-8 py-4 text-white',
+        secondary: 'bg-white rounded-2xl px-8 py-4 text-[#1A1A2E] border border-[rgba(0,0,0,0.05)] shadow-sm hover:shadow-md',
+        glass: 'bg-white/60 hover:bg-white/80 border border-[rgba(0,0,0,0.08)] rounded-2xl px-8 py-4 text-[#1A1A2E] shadow-sm backdrop-blur-xl',
     };
 
     return (
@@ -39,7 +39,16 @@ export function LoadingButton({
             type={type}
             onClick={onClick}
             className={`${baseStyles} ${variants[variant]} ${className}`}
+            style={variant === 'primary' ? {
+                background: 'linear-gradient(135deg, #C9A0FF, #FF8FAB)',
+                boxShadow: disabled ? 'none' : '0 10px 30px rgba(255, 143, 171, 0.4)',
+            } : undefined}
         >
+            {/* Shimmer sweep for primary */}
+            {variant === 'primary' && !loading && !disabled && (
+                <span className="shimmer-sweep" />
+            )}
+
             {loading ? (
                 <>
                     <Loader2 className="w-4 h-4 animate-spin" />

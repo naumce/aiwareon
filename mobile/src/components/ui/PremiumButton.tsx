@@ -11,7 +11,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { IconSymbol, type IconName } from './IconSymbol';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import { useTheme, spacing, borderRadius, typography } from '../../theme';
 
 interface PremiumButtonProps {
     title: string;
@@ -41,6 +41,9 @@ export function PremiumButton({
     textStyle,
     haptic = true,
 }: PremiumButtonProps) {
+    const { colors } = useTheme();
+    const styles = createStyles(colors);
+
     const handlePress = useCallback(() => {
         if (haptic) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -96,7 +99,7 @@ export function PremiumButton({
                 style={style}
             >
                 <LinearGradient
-                    colors={isDisabled ? ['#3A3A3C', '#3A3A3C'] : colors.gradient.primary}
+                    colors={isDisabled ? ['#D4D4D8', '#D4D4D8'] : colors.gradient.primary}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={[styles.button, styles.buttonPrimary]}
@@ -125,7 +128,7 @@ export function PremiumButton({
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
     button: {
         paddingVertical: 14,
         paddingHorizontal: spacing.lg,

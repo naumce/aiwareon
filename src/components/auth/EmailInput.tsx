@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Check, AlertCircle } from 'lucide-react';
+import { Check, AlertCircle, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { validateEmail } from '../../utils/emailValidation';
 
@@ -19,7 +19,7 @@ export function EmailInput({
     onChange,
     onValidationChange,
     error,
-    placeholder = 'EX: COUTURE@AIWEAR.COLLECTIVE',
+    placeholder = 'Email',
     className = '',
 }: EmailInputProps) {
     const [isFocused, setIsFocused] = useState(false);
@@ -54,11 +54,17 @@ export function EmailInput({
 
     return (
         <div className={`space-y-2 ${className}`}>
-            <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest px-2">
+            <label className="text-xs font-medium text-[#888] px-1 block">
                 {label}
             </label>
 
             <div className="relative">
+                {/* Input icon */}
+                <div className={`absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-300 ${isFocused ? 'text-[#FF8FAB]' : 'text-[#AAA]'
+                    }`}>
+                    <Mail className="w-5 h-5" />
+                </div>
+
                 <input
                     type="email"
                     value={value}
@@ -67,13 +73,22 @@ export function EmailInput({
                     onBlur={handleBlur}
                     placeholder={placeholder}
                     required
-                    className={`w-full px-5 py-4 rounded-2xl bg-zinc-900/50 
-            text-white placeholder-zinc-700 focus:outline-none transition-all duration-300 text-sm
-            ${error ? 'border-red-500/50 border' :
-                            showError ? 'border-red-500/50 border' :
-                                showSuccess ? 'border-emerald-500/50 border' :
-                                    isFocused ? 'border-violet-500/50 border' : 'border border-white/5'}
-          `}
+                    className="w-full h-14 rounded-2xl text-sm transition-all duration-300 pl-12 pr-12 focus:outline-none"
+                    style={{
+                        background: isFocused ? 'white' : 'rgba(255, 255, 255, 0.6)',
+                        border: error || showError
+                            ? '2px solid rgba(239, 68, 68, 0.5)'
+                            : showSuccess
+                                ? '2px solid rgba(16, 185, 129, 0.5)'
+                                : isFocused
+                                    ? '2px solid #FF8FAB'
+                                    : '2px solid transparent',
+                        color: '#1A1A2E',
+                        boxShadow: isFocused
+                            ? '0 8px 24px rgba(255, 143, 171, 0.2)'
+                            : '0 4px 16px rgba(0, 0, 0, 0.05)',
+                        backdropFilter: 'blur(10px)',
+                    }}
                 />
 
                 {/* Validation Icon */}
@@ -85,7 +100,7 @@ export function EmailInput({
                             exit={{ opacity: 0, scale: 0.8 }}
                             className="absolute right-4 top-1/2 -translate-y-1/2"
                         >
-                            <Check className="w-5 h-5 text-emerald-400" />
+                            <Check className="w-5 h-5 text-emerald-500" />
                         </motion.div>
                     )}
                     {showError && (
@@ -108,7 +123,7 @@ export function EmailInput({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest px-2 flex items-center gap-1"
+                        className="text-xs text-emerald-500 px-1 flex items-center gap-1"
                     >
                         <Check className="w-3 h-3" /> Valid email
                     </motion.p>
@@ -119,7 +134,7 @@ export function EmailInput({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="text-[9px] font-bold text-red-400 uppercase tracking-widest px-2 flex items-center gap-1"
+                        className="text-xs text-red-400 px-1 flex items-center gap-1"
                     >
                         <AlertCircle className="w-3 h-3" /> Please enter a valid email address
                     </motion.p>
@@ -130,7 +145,7 @@ export function EmailInput({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="text-[9px] font-bold text-red-400 uppercase tracking-widest px-2 flex items-center gap-1"
+                        className="text-xs text-red-400 px-1 flex items-center gap-1"
                     >
                         <AlertCircle className="w-3 h-3" /> {error}
                     </motion.p>

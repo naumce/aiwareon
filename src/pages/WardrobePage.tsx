@@ -148,9 +148,9 @@ export function WardrobePage() {
                             exit={{ opacity: 0, height: 0 }}
                             className="mb-6 overflow-hidden"
                         >
-                            <div className="glass rounded-3xl p-4 border border-violet-500/30 flex items-center justify-center gap-3">
+                            <div className="glass rounded-3xl p-4 border border-[#C9A0FF]/30 flex items-center justify-center gap-3">
                                 <div className="w-5 h-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
-                                <span className="text-sm text-zinc-400">
+                                <span className="text-sm text-[#888]">
                                     {isCompressing ? 'Optimizing image...' : 'AI detecting category...'}
                                 </span>
                             </div>
@@ -167,17 +167,17 @@ export function WardrobePage() {
                             exit={{ opacity: 0, height: 0 }}
                             className="mb-6 overflow-hidden"
                         >
-                            <div className="glass rounded-3xl p-4 border border-violet-500/30">
+                            <div className="glass rounded-3xl p-4 border border-[#C9A0FF]/30">
                                 <div className="flex gap-4">
                                     {/* Preview */}
-                                    <div className="w-20 h-28 rounded-xl overflow-hidden shrink-0 ring-2 ring-violet-500">
+                                    <div className="w-20 h-28 rounded-xl overflow-hidden shrink-0 ring-2 ring-[#C9A0FF]">
                                         <img src={pendingImage} alt="New item" className="w-full h-full object-cover" />
                                     </div>
 
                                     {/* AI Result + Category Picker */}
                                     <div className="flex-1">
                                         {/* AI Detected */}
-                                        <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-1">
+                                        <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">
                                             ✨ AI Detected: {aiResult.suggestedName}
                                         </p>
 
@@ -189,8 +189,8 @@ export function WardrobePage() {
                                                     onClick={() => setSelectedCat(cat.id as WardrobeCategory)}
                                                     className={`px-2 py-1 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1
                                                         ${selectedCat === cat.id
-                                                            ? 'bg-violet-500 text-white ring-2 ring-violet-400'
-                                                            : 'bg-white/10 text-zinc-400 hover:bg-white/20'}`}
+                                                            ? 'bg-[#C9A0FF] text-[#1A1A2E] ring-2 ring-[#C9A0FF]'
+                                                            : 'bg-black/[0.04] text-[#888] hover:bg-black/[0.08]'}`}
                                                 >
                                                     <span>{cat.emoji}</span>
                                                     <span className="hidden sm:inline">{cat.label}</span>
@@ -203,13 +203,13 @@ export function WardrobePage() {
                                             <button
                                                 onClick={handleConfirmAdd}
                                                 disabled={isAdding || !selectedCat}
-                                                className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-violet-500 to-pink-500 text-white hover:scale-[1.02] transition-transform disabled:opacity-50"
+                                                className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#C9A0FF] to-[#FF8FAB] text-[#1A1A2E] hover:scale-[1.02] transition-transform disabled:opacity-50"
                                             >
                                                 {isAdding ? 'Saving...' : '✓ Add to Wardrobe'}
                                             </button>
                                             <button
                                                 onClick={handleCancelUpload}
-                                                className="px-3 py-2 text-xs text-zinc-500 hover:text-white uppercase tracking-wider"
+                                                className="px-3 py-2 text-xs text-[#AAA] hover:text-[#1A1A2E] uppercase tracking-wider"
                                             >
                                                 ✕ Cancel
                                             </button>
@@ -227,7 +227,7 @@ export function WardrobePage() {
                         {/* UPLOAD BUTTON */}
                         <button
                             onClick={handleUploadClick}
-                            className="px-4 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-violet-500 to-pink-500 text-white shadow-lg shadow-violet-500/25 flex items-center gap-2 hover:scale-105 transition-transform"
+                            className="px-4 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[#C9A0FF] to-[#FF8FAB] text-[#1A1A2E] shadow-lg shadow-[#C9A0FF]/25 flex items-center gap-2 hover:scale-105 transition-transform"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -238,7 +238,7 @@ export function WardrobePage() {
                         {/* CAMERA BUTTON */}
                         <button
                             onClick={handleCameraClick}
-                            className="px-4 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-pink-500 to-orange-500 text-white shadow-lg shadow-pink-500/25 flex items-center gap-2 hover:scale-105 transition-transform"
+                            className="px-4 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[#FF8FAB] to-[#FAD390] text-[#1A1A2E] shadow-lg shadow-[#FF8FAB]/25 flex items-center gap-2 hover:scale-105 transition-transform"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -254,8 +254,8 @@ export function WardrobePage() {
                                 onClick={() => setCategory(cat.id)}
                                 className={`px-4 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-2 whitespace-nowrap
                                     ${selectedCategory === cat.id
-                                        ? 'bg-white/20 text-white ring-1 ring-white/30'
-                                        : 'glass text-zinc-400 hover:text-white hover:bg-white/10'}`}
+                                        ? 'bg-black/[0.06] text-[#1A1A2E] ring-1 ring-[#AAA]/30'
+                                        : 'glass text-[#888] hover:text-[#1A1A2E] hover:bg-black/[0.06]'}`}
                             >
                                 <span>{cat.icon}</span>
                                 <span>{cat.label}</span>
@@ -283,7 +283,7 @@ export function WardrobePage() {
                 {/* My Items Section */}
                 {userItems.length > 0 && (
                     <div className="mb-10">
-                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 px-1">
+                        <h2 className="text-[10px] font-bold text-[#AAA] uppercase tracking-widest mb-4 px-1">
                             My Pieces ({userItems.length})
                         </h2>
                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
@@ -294,7 +294,7 @@ export function WardrobePage() {
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
-                                    className="group relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 bg-zinc-900/50 hover:border-violet-500/50 transition-all duration-300"
+                                    className="group relative aspect-[3/4] rounded-2xl overflow-hidden border border-black/[0.06] bg-gray-50 hover:border-[#FF8FAB]/50 transition-all duration-300"
                                 >
                                     <img
                                         src={getDisplayUrl(item.image_url, 'thumbnail')}
@@ -306,7 +306,7 @@ export function WardrobePage() {
                                     {/* Category Badge - Always visible */}
                                     <div className="absolute bottom-1.5 left-1.5 right-1.5">
                                         <div className="px-2 py-1 rounded-lg bg-black/60 backdrop-blur-sm">
-                                            <span className="text-[9px] font-bold text-white uppercase tracking-wider">{item.category}</span>
+                                            <span className="text-[9px] font-bold text-[#1A1A2E] uppercase tracking-wider">{item.category}</span>
                                         </div>
                                     </div>
 
@@ -315,7 +315,7 @@ export function WardrobePage() {
                                         onClick={() => handleDeleteItem(item.id)}
                                         className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-red-500/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200"
                                     >
-                                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-3.5 h-3.5 text-[#1A1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                         </svg>
                                     </button>
@@ -328,8 +328,8 @@ export function WardrobePage() {
                 {/* Example Items Section */}
                 <div className="mb-10">
                     <div className="flex items-center gap-3 mb-4">
-                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-1">Inspiration</h2>
-                        <div className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent" />
+                        <h2 className="text-[10px] font-bold text-[#AAA] uppercase tracking-widest px-1">Inspiration</h2>
+                        <div className="flex-1 h-px bg-gradient-to-r from-black/[0.06] to-transparent" />
                     </div>
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
                         {exampleItems.map((item, index) => (
@@ -338,7 +338,7 @@ export function WardrobePage() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.03 }}
-                                className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/5 bg-zinc-900/30 opacity-70 hover:opacity-100 transition-opacity"
+                                className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-black/[0.04] bg-gray-50 opacity-70 hover:opacity-100 transition-opacity"
                             >
                                 <img
                                     src={item.image_url}
@@ -347,7 +347,7 @@ export function WardrobePage() {
                                 />
                                 <div className="absolute bottom-1.5 left-1.5 right-1.5">
                                     <div className="px-2 py-1 rounded-lg bg-black/60 backdrop-blur-sm">
-                                        <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">{item.category}</span>
+                                        <span className="text-[9px] font-bold text-[#888] uppercase tracking-wider">{item.category}</span>
                                     </div>
                                 </div>
                             </motion.div>
@@ -358,14 +358,14 @@ export function WardrobePage() {
                 {/* Empty State */}
                 {userItems.length === 0 && !isLoading && !pendingImage && (
                     <div className="text-center py-8">
-                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-violet-500/20 to-pink-500/20 flex items-center justify-center">
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#C9A0FF]/15 to-[#FF8FAB]/15 flex items-center justify-center">
                             <span className="text-3xl">👗</span>
                         </div>
-                        <h3 className="text-base font-bold text-white mb-1">Start your wardrobe</h3>
-                        <p className="text-sm text-zinc-500 mb-4">Upload or snap your first piece</p>
+                        <h3 className="text-base font-bold text-[#1A1A2E] mb-1">Start your wardrobe</h3>
+                        <p className="text-sm text-[#AAA] mb-4">Upload or snap your first piece</p>
                         <button
                             onClick={handleUploadClick}
-                            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-violet-500 to-pink-500 text-white font-bold text-sm uppercase tracking-wider shadow-lg shadow-violet-500/25"
+                            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#C9A0FF] to-[#FF8FAB] text-[#1A1A2E] font-bold text-sm uppercase tracking-wider shadow-lg shadow-[#C9A0FF]/25"
                         >
                             + Add First Piece
                         </button>

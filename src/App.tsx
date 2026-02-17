@@ -24,8 +24,8 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8  border-2 border-violet-500 border-t-transparent" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F5F2' }}>
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#C9A0FF] border-t-transparent" />
       </div>
     );
   }
@@ -41,10 +41,10 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/pricing" element={
-            <div className="min-h-screen flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F5F2' }}>
               <div className="text-center">
-                <h1 className="text-3xl font-bold">Pricing</h1>
-                <p className="text-zinc-400 mt-2">Coming soon...</p>
+                <h1 className="text-3xl font-bold text-[#1A1A2E]">Pricing</h1>
+                <p className="text-[#888] mt-2">Coming soon...</p>
               </div>
             </div>
           } />

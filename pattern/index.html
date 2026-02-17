@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DRAPE — Virtual Try-On</title>
+    <meta name="description" content="See it on you before you wear it. AI-powered virtual clothing try-on.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ==============================
+       SCREEN 1: SPLASH
+       ============================== -->
+    <div id="screen-splash" class="screen active">
+        <div class="splash-mesh"></div>
+        <div class="splash-content">
+            <div class="splash-logo-wrap">
+                <div class="splash-logo-glow"></div>
+                <h1 class="splash-logo">DRAPE</h1>
+            </div>
+            <p class="splash-tagline" id="splash-tagline"></p>
+            <div class="splash-tagline-cursor" id="splash-cursor">|</div>
+            <button class="splash-cta" id="splash-cta" onclick="goToAuth()">
+                <span>Try It On</span>
+                <div class="shimmer-sweep"></div>
+            </button>
+        </div>
+        <div class="splash-dots">
+            <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+    </div>
+
+    <!-- ==============================
+       SCREEN 1.5: AUTH
+       ============================== -->
+    <div id="screen-auth" class="screen">
+        <div class="auth-mesh"></div>
+        <div class="auth-content">
+            <button class="auth-skip-btn" onclick="goToHome()">Skip for now</button>
+            <div class="auth-header">
+                <h1 class="auth-title">Welcome Back</h1>
+                <p class="auth-subtitle">Sign in to continue your style journey</p>
+            </div>
+
+            <div class="auth-form-container">
+                <!-- Login Form -->
+                <form id="form-login" class="auth-form active" onsubmit="return handleLogin(event)">
+                    <div class="input-group">
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                        </div>
+                        <input type="email" placeholder="Email" required autocomplete="email">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <input type="password" placeholder="Password" required autocomplete="current-password">
+                        <button type="button" class="password-toggle">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="auth-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox"> <span>Remember me</span>
+                        </label>
+                        <a href="#" class="forgot-link" onclick="switchAuthMode('forgot')">Forgot Password?</a>
+                    </div>
+                    <button type="submit" class="auth-btn-primary">
+                        <span>Log In</span>
+                        <div class="shimmer-sweep"></div>
+                    </button>
+                </form>
+
+                <!-- Signup Form -->
+                <form id="form-signup" class="auth-form" onsubmit="return handleSignup(event)">
+                    <div class="input-group">
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <input type="text" placeholder="Full Name" required autocomplete="name">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                        </div>
+                        <input type="email" placeholder="Email" required autocomplete="email">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <input type="password" placeholder="Password" required autocomplete="new-password">
+                    </div>
+                    <div class="auth-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" required> <span>I agree to Terms & Privacy</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="auth-btn-primary">
+                        <span>Sign Up</span>
+                        <div class="shimmer-sweep"></div>
+                    </button>
+                </form>
+
+                <!-- Forgot Password Form -->
+                <form id="form-forgot" class="auth-form" onsubmit="return handleForgot(event)">
+                    <p class="auth-text-sm">Enter your email and we'll send you a link to reset your password.</p>
+                    <div class="input-group">
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                        </div>
+                        <input type="email" placeholder="Email" required autocomplete="email">
+                    </div>
+                    <button type="submit" class="auth-btn-primary">
+                        <span>Send Link</span>
+                        <div class="shimmer-sweep"></div>
+                    </button>
+                    <button type="button" class="auth-btn-text" onclick="switchAuthMode('login')">
+                        Back to Login
+                    </button>
+                </form>
+            </div>
+
+            <div class="auth-divider">
+                <span>Or continue with</span>
+            </div>
+
+            <div class="social-buttons">
+                <button class="social-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.146 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .533 5.347.533 12S5.867 24 12.48 24c3.44 0 6.333-1.133 8.547-3.2 2.293-2.187 2.973-5.24 2.973-7.747 0-.76-.053-1.467-.173-2.133H12.48z">
+                        </path>
+                    </svg>
+                </button>
+                <button class="social-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.07.45-2.2.53-3.19-.34C4.19 17.53 1.8 12.63 4.22 8.3c1.23-2.12 3.42-3.4 5.76-3.46 1.28-.03 2.52.88 3.3.88.75 0 2.16-1.1 3.63-.94 1.24.13 2.17.61 2.85 1.56-2.52 1.53-2.1 4.79.46 5.86-.53 1.55-1.25 3.09-2.05 4.16h-.06l-.06.02zM12.03 4.9c-.19-1.92 1.48-3.9 3.4-4.22.25 2.18-2 4.41-3.4 4.22z">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <p class="auth-switch-text" id="auth-switch-text">
+                Don't have an account? <strong onclick="switchAuthMode('signup')">Sign Up</strong>
+            </p>
+        </div>
+    </div>
+    <div id="screen-home" class="screen">
+        <div class="home-mesh"></div>
+        <!-- Status Bar -->
+        <div class="status-bar light">
+            <span class="status-time">9:41</span>
+            <div class="status-icons">
+                <svg width="16" height="12" viewBox="0 0 16 12">
+                    <rect x="0" y="3" width="3" height="9" rx="1" fill="currentColor" />
+                    <rect x="4.5" y="2" width="3" height="10" rx="1" fill="currentColor" />
+                    <rect x="9" y="0" width="3" height="12" rx="1" fill="currentColor" />
+                    <rect x="13" y="1" width="3" height="11" rx="1" fill="currentColor" opacity=".35" />
+                </svg>
+                <div class="battery-icon">
+                    <div class="battery-body">
+                        <div class="battery-fill"></div>
+                    </div>
+                    <div class="battery-tip"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="home-scroll" id="home-scroll">
+            <!-- Header -->
+            <header class="home-header">
+                <div>
+                    <p class="home-greeting">Good Evening ✨</p>
+                    <h2 class="home-title">What will you wear?</h2>
+                </div>
+                <div class="header-actions">
+                    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark Mode">
+                        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </svg>
+                        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                    </button>
+                    <div class="home-avatar">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face"
+                            alt="User" />
+                    </div>
+                </div>
+            </header>
+
+            <!-- Upload Cards -->
+            <div class="upload-section">
+                <!-- Person Card -->
+                <div class="upload-card" id="person-card" onclick="handleUpload('person')">
+                    <div class="upload-card-inner" id="person-card-inner">
+                        <div class="upload-placeholder">
+                            <div class="upload-icon-float">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                            </div>
+                            <span class="upload-label">Your Photo</span>
+                            <span class="upload-sublabel">Upload or take a photo</span>
+                        </div>
+                    </div>
+                    <div class="upload-card-preview hidden" id="person-preview">
+                        <img src="" alt="Person" id="person-preview-img" />
+                        <button class="change-btn" onclick="event.stopPropagation(); resetUpload('person')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path
+                                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                <circle cx="12" cy="13" r="4" />
+                            </svg>
+                            Change
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Garment Card -->
+                <div class="upload-card" id="garment-card" onclick="handleUpload('garment')">
+                    <div class="upload-card-inner" id="garment-card-inner">
+                        <div class="upload-placeholder">
+                            <div class="upload-icon-float">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 2L2 6v2l4 2V2z" />
+                                    <path d="M18 2l4 4v2l-4 2V2z" />
+                                    <path d="M6 2h12v20H6z" />
+                                    <path d="M9 2a3 3 0 0 0 6 0" />
+                                </svg>
+                            </div>
+                            <span class="upload-label">Garment</span>
+                            <span class="upload-sublabel">Pick or upload clothing</span>
+                        </div>
+                    </div>
+                    <div class="upload-card-preview hidden" id="garment-preview">
+                        <img src="" alt="Garment" id="garment-preview-img" />
+                        <button class="change-btn" onclick="event.stopPropagation(); resetUpload('garment')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <polyline points="17 1 21 5 17 9" />
+                                <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                            </svg>
+                            Change
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Try It On CTA -->
+            <div class="cta-container">
+                <button class="try-on-cta" id="try-on-btn" onclick="startTryOn()">
+                    <span class="cta-sparkle">✨</span>
+                    <span>Try It On</span>
+                    <div class="shimmer-sweep"></div>
+                </button>
+            </div>
+
+            <!-- Night Out Picks -->
+            <section class="picks-section">
+                <div class="section-header">
+                    <h3 class="section-title">Night Out Picks <span class="title-emoji">🌙</span></h3>
+                    <button class="see-all-btn">See All</button>
+                </div>
+                <div class="picks-scroll">
+                    <div class="pick-card" onclick="selectGarment(this)"
+                        data-img="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&h=400&fit=crop">
+                        <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&h=400&fit=crop"
+                            alt="Black Dress" loading="lazy" />
+                        <div class="pick-info">
+                            <span class="pick-name">Satin Dress</span>
+                            <span class="pick-tag">Elegant</span>
+                        </div>
+                    </div>
+                    <div class="pick-card" onclick="selectGarment(this)"
+                        data-img="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=300&h=400&fit=crop">
+                        <img src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=300&h=400&fit=crop"
+                            alt="Blazer" loading="lazy" />
+                        <div class="pick-info">
+                            <span class="pick-name">Velvet Blazer</span>
+                            <span class="pick-tag">Bold</span>
+                        </div>
+                    </div>
+                    <div class="pick-card" onclick="selectGarment(this)"
+                        data-img="https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=300&h=400&fit=crop">
+                        <img src="https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=300&h=400&fit=crop"
+                            alt="Top" loading="lazy" />
+                        <div class="pick-info">
+                            <span class="pick-name">Silk Top</span>
+                            <span class="pick-tag">Chic</span>
+                        </div>
+                    </div>
+                    <div class="pick-card" onclick="selectGarment(this)"
+                        data-img="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=300&h=400&fit=crop">
+                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=300&h=400&fit=crop"
+                            alt="Heels" loading="lazy" />
+                        <div class="pick-info">
+                            <span class="pick-name">Strappy Heels</span>
+                            <span class="pick-tag">Glam</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Try-Ons -->
+            <section class="recent-section">
+                <div class="section-header">
+                    <h3 class="section-title">Recent Try-Ons</h3>
+                    <button class="see-all-btn">History</button>
+                </div>
+                <div class="recent-scroll">
+                    <div class="recent-card">
+                        <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=200&h=260&fit=crop&crop=top"
+                            alt="Recent 1" loading="lazy" />
+                        <div class="recent-badge">2h ago</div>
+                    </div>
+                    <div class="recent-card">
+                        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200&h=260&fit=crop&crop=top"
+                            alt="Recent 2" loading="lazy" />
+                        <div class="recent-badge">Yesterday</div>
+                    </div>
+                    <div class="recent-card">
+                        <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=200&h=260&fit=crop&crop=top"
+                            alt="Recent 3" loading="lazy" />
+                        <div class="recent-badge">3 days</div>
+                    </div>
+                </div>
+            </section>
+
+            <div style="height:110px"></div>
+        </div>
+
+        <!-- Bottom Nav -->
+        <nav class="bottom-nav" id="bottom-nav">
+            <div class="nav-indicator" id="nav-indicator"></div>
+            <button class="nav-tab active" data-screen="home" onclick="switchTab(this)">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z" />
+                </svg>
+                <span>Home</span>
+            </button>
+            <button class="nav-tab" data-screen="wardrobe" onclick="switchTab(this); goToWardrobe()">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <line x1="12" y1="3" x2="12" y2="21" />
+                    <path d="M3 9h9" />
+                    <path d="M12 9h9" />
+                </svg>
+                <span>Wardrobe</span>
+            </button>
+            <button class="nav-tab" data-screen="create" onclick="switchTab(this)">
+                <div class="nav-create-orb">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                </div>
+            </button>
+            <button class="nav-tab" data-screen="saved" onclick="switchTab(this)">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+                </svg>
+                <span>Saved</span>
+            </button>
+            <button class="nav-tab" data-screen="profile" onclick="switchTab(this)">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="7" r="4" />
+                    <path d="M5.5 21a6.5 6.5 0 0113 0" />
+                </svg>
+                <span>Profile</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ==============================
+       SCREEN 3: WARDROBE
+       ============================== -->
+    <div id="screen-wardrobe" class="screen">
+        <div class="status-bar light">
+            <span class="status-time">9:41</span>
+            <div class="status-icons">
+                <svg width="16" height="12" viewBox="0 0 16 12">
+                    <rect x="0" y="3" width="3" height="9" rx="1" fill="currentColor" />
+                    <rect x="4.5" y="2" width="3" height="10" rx="1" fill="currentColor" />
+                    <rect x="9" y="0" width="3" height="12" rx="1" fill="currentColor" />
+                    <rect x="13" y="1" width="3" height="11" rx="1" fill="currentColor" opacity=".35" />
+                </svg>
+                <div class="battery-icon">
+                    <div class="battery-body">
+                        <div class="battery-fill"></div>
+                    </div>
+                    <div class="battery-tip"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ward-scroll">
+            <!-- Wardrobe Header -->
+            <div class="ward-header">
+                <button class="ward-back" onclick="goToHome()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                </button>
+                <h2 class="ward-title">Wardrobe</h2>
+                <button class="ward-search">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="cat-tabs" id="cat-tabs">
+                <button class="cat-tab active" data-cat="all">All</button>
+                <button class="cat-tab" data-cat="tops">Tops</button>
+                <button class="cat-tab" data-cat="dresses">Dresses</button>
+                <button class="cat-tab" data-cat="pants">Pants</button>
+                <button class="cat-tab" data-cat="outerwear">Outerwear</button>
+                <button class="cat-tab" data-cat="shoes">Shoes</button>
+            </div>
+
+            <!-- Collection Banner -->
+            <div class="collection-banner" id="collection-banner">
+                <div class="collection-bg">
+                    <img src="https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&h=300&fit=crop"
+                        alt="Night Out" loading="lazy" />
+                </div>
+                <div class="collection-overlay">
+                    <span class="collection-tag">🌙 Curated</span>
+                    <h3 class="collection-title">Night Out</h3>
+                    <p class="collection-sub">8 pieces for the perfect evening</p>
+                </div>
+            </div>
+
+            <!-- Masonry Grid -->
+            <div class="ward-grid">
+                <div class="ward-item" onclick="selectGarmentFromWardrobe(this)"
+                    data-img="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&h=400&fit=crop">
+                    <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&h=400&fit=crop"
+                        alt="Dress" loading="lazy" />
+                    <div class="ward-item-info">
+                        <span>Satin Mini Dress</span>
+                        <span class="ward-item-cat">Dresses</span>
+                    </div>
+                    <div class="ward-ai-badge">AI</div>
+                </div>
+                <div class="ward-item tall" onclick="selectGarmentFromWardrobe(this)"
+                    data-img="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=300&h=500&fit=crop">
+                    <img src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=300&h=500&fit=crop"
+                        alt="Blazer" loading="lazy" />
+                    <div class="ward-item-info">
+                        <span>Oversized Blazer</span>
+                        <span class="ward-item-cat">Outerwear</span>
+                    </div>
+                    <div class="ward-ai-badge">AI</div>
+                </div>
+                <div class="ward-item" onclick="selectGarmentFromWardrobe(this)"
+                    data-img="https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=300&h=400&fit=crop">
+                    <img src="https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=300&h=400&fit=crop" alt="Top"
+                        loading="lazy" />
+                    <div class="ward-item-info">
+                        <span>Silk Camisole</span>
+                        <span class="ward-item-cat">Tops</span>
+                    </div>
+                    <div class="ward-ai-badge">AI</div>
+                </div>
+                <div class="ward-item tall" onclick="selectGarmentFromWardrobe(this)"
+                    data-img="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=300&h=500&fit=crop">
+                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=300&h=500&fit=crop"
+                        alt="Heels" loading="lazy" />
+                    <div class="ward-item-info">
+                        <span>Strappy Heels</span>
+                        <span class="ward-item-cat">Shoes</span>
+                    </div>
+                    <div class="ward-ai-badge">AI</div>
+                </div>
+                <div class="ward-item" onclick="selectGarmentFromWardrobe(this)"
+                    data-img="https://images.unsplash.com/photo-1583846783214-2985f5012612?w=300&h=400&fit=crop">
+                    <img src="https://images.unsplash.com/photo-1583846783214-2985f5012612?w=300&h=400&fit=crop"
+                        alt="Pants" loading="lazy" />
+                    <div class="ward-item-info">
+                        <span>Tailored Trousers</span>
+                        <span class="ward-item-cat">Pants</span>
+                    </div>
+                    <div class="ward-ai-badge">AI</div>
+                </div>
+                <div class="ward-item" onclick="selectGarmentFromWardrobe(this)"
+                    data-img="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&h=400&fit=crop">
+                    <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&h=400&fit=crop"
+                        alt="Jacket" loading="lazy" />
+                    <div class="ward-item-info">
+                        <span>Leather Jacket</span>
+                        <span class="ward-item-cat">Outerwear</span>
+                    </div>
+                    <div class="ward-ai-badge">AI</div>
+                </div>
+            </div>
+
+            <div style="height:40px"></div>
+        </div>
+    </div>
+
+    <!-- ==============================
+       SCREEN 4: TRY-ON RESULT
+       ============================== -->
+    <div id="screen-result" class="screen">
+        <div class="status-bar dark">
+            <span class="status-time">9:41</span>
+            <div class="status-icons" style="color:white">
+                <svg width="16" height="12" viewBox="0 0 16 12">
+                    <rect x="0" y="3" width="3" height="9" rx="1" fill="white" />
+                    <rect x="4.5" y="2" width="3" height="10" rx="1" fill="white" />
+                    <rect x="9" y="0" width="3" height="12" rx="1" fill="white" />
+                    <rect x="13" y="1" width="3" height="11" rx="1" fill="white" opacity=".35" />
+                </svg>
+                <div class="battery-icon">
+                    <div class="battery-body">
+                        <div class="battery-fill" style="background:white"></div>
+                    </div>
+                    <div class="battery-tip" style="background:white"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Overlay -->
+        <div class="processing-overlay" id="processing-overlay">
+            <div class="scan-ring"></div>
+            <div class="processing-text">
+                <div class="processing-spinner"></div>
+                <span>AI is dressing you up...</span>
+            </div>
+        </div>
+
+        <!-- Before/After Split -->
+        <div class="split-container" id="split-container">
+            <div class="split-before" id="split-before">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=900&fit=crop&crop=face"
+                    alt="Before" />
+                <span class="split-label split-label-before">Before</span>
+            </div>
+            <div class="split-after" id="split-after">
+                <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&h=900&fit=crop&crop=top"
+                    alt="After" />
+                <span class="split-label split-label-after">After</span>
+            </div>
+            <div class="split-handle" id="split-handle">
+                <div class="split-handle-line"></div>
+                <div class="split-handle-knob">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                        <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+                        style="transform:scaleX(-1)">
+                        <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Particle Canvas -->
+        <canvas id="particle-canvas"></canvas>
+
+        <!-- Top Bar -->
+        <div class="result-top-bar" id="result-top-bar">
+            <button class="glass-circle-btn" onclick="goToHome()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+            </button>
+            <button class="glass-circle-btn accent" onclick="goToHome()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Result Bottom Panel -->
+        <div class="result-panel" id="result-panel">
+            <div class="result-actions">
+                <button class="result-btn primary" onclick="goToHome()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                        <polyline points="17 21 17 13 7 13 7 21" />
+                    </svg>
+                    Save Look
+                </button>
+                <button class="result-btn secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="18" cy="5" r="3" />
+                        <circle cx="6" cy="12" r="3" />
+                        <circle cx="18" cy="19" r="3" />
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                    </svg>
+                    Share
+                </button>
+            </div>
+            <button class="try-another-btn" onclick="goToHome()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="1 4 1 10 7 10" />
+                    <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+                </svg>
+                Try Another
+            </button>
+            <div class="home-indicator"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

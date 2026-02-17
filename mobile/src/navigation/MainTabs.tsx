@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
 
 // Screens
 import { StudioScreen } from '../screens/main/StudioScreen';
@@ -11,7 +12,7 @@ import { GalleryScreen } from '../screens/main/GalleryScreen';
 import { AccountScreen } from '../screens/main/AccountScreen';
 
 import type { MainTabsParamList } from '../types';
-import { useTheme, spacing } from '../theme';
+import { useTheme } from '../theme';
 import { IconSymbol, type IconName } from '../components/ui';
 
 const Tab = createBottomTabNavigator<MainTabsParamList>();
@@ -36,27 +37,82 @@ function TabBarButton({
     onPress: () => void;
     colors: ReturnType<typeof useTheme>['colors'];
 }) {
+    const scale = useRef(new Animated.Value(1)).current;
+    const liftY = useRef(new Animated.Value(focused ? -4 : 0)).current;
+    const labelOpacity = useRef(new Animated.Value(focused ? 1 : 0)).current;
+    const labelSlide = useRef(new Animated.Value(focused ? 0 : 5)).current;
+
+    useEffect(() => {
+        Animated.parallel([
+            Animated.spring(liftY, {
+                toValue: focused ? -4 : 0,
+                tension: 300,
+                friction: 20,
+                useNativeDriver: true,
+            }),
+            Animated.timing(labelOpacity, {
+                toValue: focused ? 1 : 0,
+                duration: 200,
+                useNativeDriver: true,
+            }),
+            Animated.spring(labelSlide, {
+                toValue: focused ? 0 : 5,
+                tension: 300,
+                friction: 20,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    }, [focused, liftY, labelOpacity, labelSlide]);
+
+    const handlePressIn = () => {
+        Animated.spring(scale, {
+            toValue: 0.85,
+            tension: 300,
+            friction: 15,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scale, {
+            toValue: 1,
+            tension: 200,
+            friction: 12,
+            useNativeDriver: true,
+        }).start();
+    };
+
     return (
         <Pressable
-            onPress={onPress}
-            style={({ pressed }) => [
-                styles.tabButton,
-                pressed && styles.tabButtonPressed,
-            ]}
+            onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onPress();
+            }}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            style={styles.tabButton}
         >
-            <IconSymbol
-                name={icon}
-                size={24}
-                color={focused ? colors.brand.primary : colors.text.tertiary}
-                strokeWidth={focused ? 2 : 1.5}
-            />
-            <Text style={[
-                styles.tabLabel,
-                { color: focused ? colors.brand.primary : colors.text.tertiary },
-                focused && styles.tabLabelActive,
-            ]}>
-                {label}
-            </Text>
+            <Animated.View style={{
+                transform: [{ scale }, { translateY: liftY }],
+                alignItems: 'center',
+            }}>
+                <IconSymbol
+                    name={icon}
+                    size={22}
+                    color={focused ? colors.brand.secondary : colors.text.tertiary}
+                    strokeWidth={focused ? 2 : 1.5}
+                />
+                <Animated.Text style={[
+                    styles.tabLabel,
+                    {
+                        color: focused ? colors.brand.secondary : colors.text.tertiary,
+                        opacity: labelOpacity,
+                        transform: [{ translateY: labelSlide }],
+                    },
+                ]}>
+                    {label}
+                </Animated.Text>
+            </Animated.View>
         </Pressable>
     );
 }
@@ -64,7 +120,6 @@ function TabBarButton({
 export function MainTabs() {
     const insets = useSafeAreaInsets();
     const { colors, isDark } = useTheme();
-    const bottomPadding = Math.max(insets.bottom, 8);
 
     return (
         <Tab.Navigator
@@ -74,17 +129,26 @@ export function MainTabs() {
             }}
             tabBar={({ state, navigation }) => (
                 <View style={[
-                    styles.customTabBar,
+                    styles.floatingBar,
                     {
-                        paddingBottom: bottomPadding,
-                        backgroundColor: isDark ? 'rgba(28, 28, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                        bottom: Math.max(insets.bottom, 16),
                     }
                 ]}>
                     <BlurView
-                        intensity={isDark ? 60 : 80}
+                        intensity={isDark ? 50 : 70}
                         tint={isDark ? 'dark' : 'light'}
-                        style={StyleSheet.absoluteFill}
+                        style={[StyleSheet.absoluteFill, styles.blurFill]}
                     />
+                    {/* Solid background overlay for consistency */}
+                    <View style={[
+                        StyleSheet.absoluteFill,
+                        styles.blurFill,
+                        {
+                            backgroundColor: isDark
+                                ? 'rgba(26, 26, 46, 0.85)'
+                                : 'rgba(255, 255, 255, 0.88)',
+                        },
+                    ]} />
                     <View style={styles.tabButtonsRow}>
                         {tabConfig.map((tab, index) => (
                             <TabBarButton
@@ -109,34 +173,37 @@ export function MainTabs() {
 }
 
 const styles = StyleSheet.create({
-    customTabBar: {
+    floatingBar: {
         position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        borderTopWidth: StyleSheet.hairlineWidth,
-        borderTopColor: 'rgba(128, 128, 128, 0.3)',
+        left: 20,
+        right: 20,
+        height: 64,
+        borderRadius: 32,
+        overflow: 'hidden',
+        // Shadow
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.12,
+        shadowRadius: 24,
+        elevation: 12,
+    },
+    blurFill: {
+        borderRadius: 32,
     },
     tabButtonsRow: {
+        flex: 1,
         flexDirection: 'row',
-        paddingTop: 8,
+        alignItems: 'center',
     },
     tabButton: {
         flex: 1,
-        minHeight: 44, // HIG: minimum touch target
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 4,
-    },
-    tabButtonPressed: {
-        opacity: 0.7,
+        height: '100%',
     },
     tabLabel: {
         fontSize: 10,
-        fontWeight: '500',
-        marginTop: 2,
-    },
-    tabLabelActive: {
         fontWeight: '600',
+        marginTop: 2,
     },
 });

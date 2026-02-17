@@ -19,7 +19,7 @@ import * as Haptics from 'expo-haptics';
 import { supabase } from '../../services/supabaseClient';
 import { useAuthStore } from '../../stores';
 import { useTheme, spacing, borderRadius, typography } from '../../theme';
-import { IconSymbol } from '../../components/ui';
+import { IconSymbol, PremiumHeader } from '../../components/ui';
 
 const { width } = Dimensions.get('window');
 const COLUMNS = 2;
@@ -213,13 +213,10 @@ export function GalleryScreen() {
     return (
         <View style={styles.container}>
             <SafeAreaView style={styles.safeArea} edges={['top']}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <View>
-                        <Text style={styles.title}>Gallery</Text>
-                        <Text style={styles.subtitle}>{items.length} results</Text>
-                    </View>
-                </View>
+                <PremiumHeader
+                    title="Your Creations"
+                    greeting={`${items.length} results`}
+                />
 
                 {loading ? (
                     <View style={styles.loadingContainer}>
@@ -304,22 +301,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     },
     safeArea: {
         flex: 1,
-    },
-    header: {
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.lg,
-    },
-    title: {
-        fontSize: 34,
-        fontWeight: '700',
-        color: colors.text.primary,
-        letterSpacing: -0.5,
-    },
-    subtitle: {
-        fontSize: typography.footnote,
-        color: colors.text.muted,
-        marginTop: 2,
     },
     listContent: {
         paddingHorizontal: spacing.lg,

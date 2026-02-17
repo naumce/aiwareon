@@ -27,6 +27,8 @@ import {
     EyeOff,
     HelpCircle,
     Moon,
+    RotateCcw,
+    Zap,
 } from 'lucide-react-native';
 import { colors } from '../../theme';
 
@@ -59,6 +61,8 @@ const iconMap = {
     EyeOff,
     HelpCircle,
     Moon,
+    RotateCcw,
+    Zap,
 } as const;
 
 export type IconName = keyof typeof iconMap;

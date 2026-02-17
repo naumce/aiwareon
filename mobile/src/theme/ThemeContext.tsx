@@ -2,105 +2,105 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// iOS System Colors - Light Mode
+// DRAPE Design System - Light Mode
 export const lightColors = {
     background: {
-        primary: '#FFFFFF',
-        secondary: '#F2F2F7',    // System Gray 6
+        primary: '#F7F5F2',      // Warm white
+        secondary: '#FFFFFF',
         tertiary: '#FFFFFF',
         elevated: '#FFFFFF',
-        card: '#FFFFFF',
+        card: 'rgba(255, 255, 255, 0.85)',
     },
     text: {
-        primary: '#000000',
-        secondary: 'rgba(60, 60, 67, 0.6)',
-        tertiary: 'rgba(60, 60, 67, 0.3)',
-        muted: 'rgba(60, 60, 67, 0.4)',
-        disabled: 'rgba(60, 60, 67, 0.18)',
+        primary: '#1A1A2E',
+        secondary: 'rgba(26, 26, 46, 0.55)',
+        tertiary: 'rgba(26, 26, 46, 0.3)',
+        muted: 'rgba(26, 26, 46, 0.4)',
+        disabled: 'rgba(26, 26, 46, 0.18)',
     },
     brand: {
-        primary: '#007AFF',    // iOS blue (light mode)
-        secondary: '#5856D6',  // iOS indigo
-        accent: '#AF52DE',     // iOS purple
-        tint: 'rgba(0, 122, 255, 0.1)',
+        primary: '#C9A0FF',    // Lavender
+        secondary: '#FF8FAB',  // Rose
+        accent: '#7DD3C0',     // Mint
+        tint: 'rgba(201, 160, 255, 0.1)',
     },
     gradient: {
-        primary: ['#5856D6', '#007AFF'] as [string, string],
-        accent: ['#AF52DE', '#FF2D55'] as [string, string],
-        subtle: ['rgba(0,0,0,0.03)', 'rgba(0,0,0,0.01)'] as [string, string],
+        primary: ['#C9A0FF', '#FF8FAB'] as [string, string],
+        accent: ['#FF8FAB', '#FAD390'] as [string, string],
+        subtle: ['rgba(201, 160, 255, 0.06)', 'rgba(255, 143, 171, 0.03)'] as [string, string],
     },
     state: {
-        success: '#34C759',  // iOS green light
-        error: '#FF3B30',    // iOS red light
-        warning: '#FF9500',  // iOS orange light
-        info: '#007AFF',
+        success: '#34C759',
+        error: '#FF3B30',
+        warning: '#FF9500',
+        info: '#C9A0FF',
     },
     separator: {
-        opaque: '#C6C6C8',
-        translucent: 'rgba(60, 60, 67, 0.29)',
+        opaque: 'rgba(0, 0, 0, 0.08)',
+        translucent: 'rgba(0, 0, 0, 0.05)',
     },
     fill: {
-        primary: 'rgba(120, 120, 128, 0.2)',
-        secondary: 'rgba(120, 120, 128, 0.16)',
-        tertiary: 'rgba(118, 118, 128, 0.12)',
+        primary: 'rgba(0, 0, 0, 0.06)',
+        secondary: 'rgba(0, 0, 0, 0.04)',
+        tertiary: 'rgba(0, 0, 0, 0.03)',
     },
     border: {
-        subtle: 'rgba(60, 60, 67, 0.18)',
-        default: 'rgba(60, 60, 67, 0.29)',
-        active: 'rgba(0, 122, 255, 0.5)',
+        subtle: 'rgba(0, 0, 0, 0.06)',
+        default: 'rgba(0, 0, 0, 0.1)',
+        active: 'rgba(201, 160, 255, 0.5)',
     },
 } as const;
 
-// iOS System Colors - Dark Mode
+// DRAPE Design System - Dark Mode
 export const darkColors = {
     background: {
-        primary: '#000000',      // Pure black for OLED
-        secondary: '#1C1C1E',    // System gray 6
-        tertiary: '#2C2C2E',     // System gray 5
-        elevated: '#3A3A3C',     // System gray 4
-        card: 'rgba(44, 44, 46, 0.8)',
+        primary: '#1A1A2E',      // Deep navy
+        secondary: '#252540',
+        tertiary: '#2E2E4A',
+        elevated: '#383855',
+        card: 'rgba(46, 46, 74, 0.8)',
     },
     text: {
-        primary: '#FFFFFF',
-        secondary: 'rgba(235, 235, 245, 0.6)',
-        tertiary: 'rgba(235, 235, 245, 0.3)',
-        muted: 'rgba(235, 235, 245, 0.4)',
-        disabled: 'rgba(235, 235, 245, 0.18)',
+        primary: '#F7F5F2',
+        secondary: 'rgba(247, 245, 242, 0.6)',
+        tertiary: 'rgba(247, 245, 242, 0.3)',
+        muted: 'rgba(247, 245, 242, 0.4)',
+        disabled: 'rgba(247, 245, 242, 0.18)',
     },
     brand: {
-        primary: '#0A84FF',    // iOS blue dark
-        secondary: '#5E5CE6',  // iOS indigo
-        accent: '#BF5AF2',     // iOS purple
-        tint: 'rgba(10, 132, 255, 0.1)',
+        primary: '#C9A0FF',    // Lavender
+        secondary: '#FF8FAB',  // Rose
+        accent: '#7DD3C0',     // Mint
+        tint: 'rgba(201, 160, 255, 0.15)',
     },
     gradient: {
-        primary: ['#5E5CE6', '#0A84FF'] as [string, string],
-        accent: ['#BF5AF2', '#FF2D55'] as [string, string],
-        subtle: ['rgba(255,255,255,0.05)', 'rgba(255,255,255,0.02)'] as [string, string],
+        primary: ['#C9A0FF', '#FF8FAB'] as [string, string],
+        accent: ['#FF8FAB', '#FAD390'] as [string, string],
+        subtle: ['rgba(201, 160, 255, 0.1)', 'rgba(255, 143, 171, 0.05)'] as [string, string],
     },
     state: {
-        success: '#30D158',  // iOS green dark
-        error: '#FF453A',    // iOS red dark
-        warning: '#FF9F0A',  // iOS orange dark
-        info: '#0A84FF',
+        success: '#30D158',
+        error: '#FF453A',
+        warning: '#FF9F0A',
+        info: '#C9A0FF',
     },
     separator: {
-        opaque: '#38383A',
-        translucent: 'rgba(84, 84, 88, 0.65)',
+        opaque: 'rgba(255, 255, 255, 0.08)',
+        translucent: 'rgba(255, 255, 255, 0.05)',
     },
     fill: {
-        primary: 'rgba(120, 120, 128, 0.2)',
-        secondary: 'rgba(120, 120, 128, 0.16)',
-        tertiary: 'rgba(118, 118, 128, 0.12)',
+        primary: 'rgba(255, 255, 255, 0.1)',
+        secondary: 'rgba(255, 255, 255, 0.07)',
+        tertiary: 'rgba(255, 255, 255, 0.05)',
     },
     border: {
-        subtle: 'rgba(84, 84, 88, 0.4)',
-        default: 'rgba(84, 84, 88, 0.65)',
-        active: 'rgba(10, 132, 255, 0.5)',
+        subtle: 'rgba(255, 255, 255, 0.08)',
+        default: 'rgba(255, 255, 255, 0.12)',
+        active: 'rgba(201, 160, 255, 0.5)',
     },
 } as const;
 
-export type ThemeColors = typeof lightColors;
+export type ThemeColors = typeof lightColors | typeof darkColors;
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface ThemeContextValue {
@@ -162,5 +162,5 @@ export function useTheme(): ThemeContextValue {
     return context;
 }
 
-// For static imports (backward compatibility) - defaults to dark
-export { darkColors as colors };
+// For static imports (backward compatibility) - defaults to light (DRAPE)
+export { lightColors as colors };

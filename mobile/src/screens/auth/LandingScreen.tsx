@@ -13,7 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import { useTheme, spacing, borderRadius, typography } from '../../theme';
 import { ScalePressable } from '../../components/ui';
 
 const { width } = Dimensions.get('window');
@@ -29,6 +29,8 @@ const FEATURES = [
 
 export function LandingScreen() {
     const navigation = useNavigation<NavigationProp>();
+    const { colors } = useTheme();
+    const styles = createStyles(colors);
 
     return (
         <View style={styles.container}>
@@ -93,7 +95,7 @@ export function LandingScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background.primary,

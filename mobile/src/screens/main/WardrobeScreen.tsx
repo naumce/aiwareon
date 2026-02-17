@@ -20,7 +20,7 @@ import { useWardrobeStore, useAuthStore } from '../../stores';
 import { geminiService } from '../../services';
 import { compressForWardrobe } from '../../utils/imageUtils';
 import { useTheme, spacing, borderRadius, typography } from '../../theme';
-import { IconSymbol, ScalePressable } from '../../components/ui';
+import { IconSymbol, ScalePressable, PremiumHeader } from '../../components/ui';
 import type { WardrobeCategory } from '../../types';
 
 const { width } = Dimensions.get('window');
@@ -194,37 +194,22 @@ export function WardrobeScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <View>
-                    <Text style={styles.title}>Wardrobe</Text>
-                    <Text style={styles.subtitle}>{items.length} items</Text>
-                </View>
-                {/* Add Button - Minimal */}
-                <ScalePressable
-                    style={styles.addBtn}
-                    onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        Alert.alert(
-                            'Add Item',
-                            'Choose how to add a garment',
-                            [
-                                { text: 'Cancel', style: 'cancel' },
-                                { text: 'Take Photo', onPress: takePhoto },
-                                { text: 'Choose from Library', onPress: pickImage },
-                            ]
-                        );
-                    }}
-                    disabled={isCategorizing}
-                    hapticType="light"
-                >
-                    {isCategorizing ? (
-                        <ActivityIndicator size="small" color={colors.brand.primary} />
-                    ) : (
-                        <IconSymbol name="Plus" size={22} color={colors.text.primary} strokeWidth={2} />
-                    )}
-                </ScalePressable>
-            </View>
+            <PremiumHeader
+                title="Your Wardrobe"
+                greeting={`${items.length} items`}
+                rightIcon="Plus"
+                onRightPress={() => {
+                    Alert.alert(
+                        'Add Item',
+                        'Choose how to add a garment',
+                        [
+                            { text: 'Cancel', style: 'cancel' },
+                            { text: 'Take Photo', onPress: takePhoto },
+                            { text: 'Choose from Library', onPress: pickImage },
+                        ]
+                    );
+                }}
+            />
 
             {/* Category Filter - iOS Segmented Style */}
             <View style={styles.filterContainer}>
@@ -366,33 +351,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     container: {
         flex: 1,
         backgroundColor: colors.background.primary,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.lg,
-    },
-    title: {
-        fontSize: 34,
-        fontWeight: '700',
-        color: colors.text.primary,
-        letterSpacing: -0.5,
-    },
-    subtitle: {
-        fontSize: typography.footnote,
-        color: colors.text.muted,
-        marginTop: 2,
-    },
-    addBtn: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: colors.fill.tertiary,
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     // Filter Pills
     filterContainer: {

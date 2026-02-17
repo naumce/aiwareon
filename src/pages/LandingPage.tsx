@@ -82,22 +82,22 @@ export function LandingPage() {
     }, [selectedSet, selectedDress]);
 
     return (
-        <div className="min-h-screen w-full bg-[#0a0a0a]">
+        <div className="min-h-screen w-full" style={{ background: '#F7F5F2' }}>
             {/* Navigation */}
             <nav className="relative z-10 px-4 md:px-8 py-6 flex justify-between items-center max-w-7xl mx-auto w-full">
-                <Link to="/" className="text-xl font-bold tracking-tight">
-                    <span className="text-white">AIWEAR</span>
+                <Link to="/" className="text-xl font-bold tracking-tight text-[#1A1A2E]">
+                    <span className="font-extrabold">AIWEAR</span>
                 </Link>
                 <div className="flex items-center gap-6">
-                    <Link to="/pricing" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                    <Link to="/pricing" className="text-sm font-medium text-[#AAA] hover:text-[#1A1A2E] transition-colors">
                         Pricing
                     </Link>
                     <Link
                         to={user ? "/studio" : "/login"}
-                        className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all hover:scale-105"
+                        className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-white transition-all hover:scale-105"
                         style={{
-                            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                            boxShadow: '0 4px 20px rgba(99, 102, 241, 0.3)'
+                            background: 'linear-gradient(135deg, #C9A0FF, #FF8FAB)',
+                            boxShadow: '0 4px 20px rgba(255, 143, 171, 0.3)'
                         }}
                     >
                         {user ? "Open Studio" : "Get Started"}
@@ -115,38 +115,39 @@ export function LandingPage() {
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
                         <span className="text-gradient">AI Virtual Try-On</span>
                         <br />
-                        <span className="text-zinc-400 font-light">For Everyone</span>
+                        <span className="text-[#AAA] font-light">For Everyone</span>
                     </h1>
 
-                    <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-8">
+                    <p className="text-lg md:text-xl text-[#888] max-w-2xl mx-auto leading-relaxed mb-8">
                         See yourself in any outfit before you buy. Powered by cutting-edge AI for photorealistic results.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link
                             to={user ? "/studio" : "/login"}
-                            className="px-8 py-4 rounded-xl text-base font-semibold transition-all hover:scale-105 hover:shadow-lg"
+                            className="px-8 py-4 rounded-2xl text-base font-semibold text-white transition-all hover:scale-105 hover:shadow-lg"
                             style={{
-                                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                boxShadow: '0 8px 30px rgba(99, 102, 241, 0.3)'
+                                background: 'linear-gradient(135deg, #C9A0FF, #FF8FAB)',
+                                boxShadow: '0 8px 30px rgba(255, 143, 171, 0.3)'
                             }}
                         >
                             Start Creating
                         </Link>
                         <Link
                             to="/pricing"
-                            className="px-8 py-4 rounded-xl text-base font-semibold transition-all hover:bg-white/10"
+                            className="px-8 py-4 rounded-2xl text-base font-semibold text-[#1A1A2E] transition-all hover:shadow-md"
                             style={{
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.15)'
+                                background: 'white',
+                                border: '1px solid rgba(0, 0, 0, 0.08)',
+                                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
                             }}
                         >
                             View Pricing
                         </Link>
                     </div>
 
-                    <p className="text-sm text-zinc-500 mt-4">
-                        Pay as you go • No subscription required
+                    <p className="text-sm text-[#AAA] mt-4">
+                        Pay as you go &middot; No subscription required
                     </p>
                 </motion.div>
             </section>
@@ -159,7 +160,7 @@ export function LandingPage() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
                 >
-                    <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+                    <h2 className="text-2xl md:text-3xl font-bold text-center text-[#1A1A2E] mb-12">
                         Features That Set Us Apart
                     </h2>
 
@@ -171,18 +172,19 @@ export function LandingPage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.6, delay: i * 0.1 }}
-                                className="p-6 rounded-2xl transition-all hover:border-indigo-500/30"
+                                className="p-6 rounded-3xl transition-all hover:shadow-lg"
                                 style={{
-                                    background: 'rgba(255, 255, 255, 0.03)',
-                                    border: '1px solid rgba(255, 255, 255, 0.08)'
+                                    background: 'white',
+                                    border: '1px solid rgba(0, 0, 0, 0.05)',
+                                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)'
                                 }}
                             >
-                                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-indigo-400 mb-4"
-                                    style={{ background: 'rgba(99, 102, 241, 0.15)' }}>
+                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-[#C9A0FF] mb-4"
+                                    style={{ background: 'rgba(201, 160, 255, 0.12)' }}>
                                     {feature.icon}
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                                <p className="text-sm text-zinc-400">{feature.description}</p>
+                                <h3 className="text-lg font-semibold text-[#1A1A2E] mb-2">{feature.title}</h3>
+                                <p className="text-sm text-[#888]">{feature.description}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -199,8 +201,8 @@ export function LandingPage() {
                         transition={{ duration: 0.6 }}
                         className="text-center mb-12"
                     >
-                        <h2 className="text-2xl md:text-3xl font-bold mb-4">See What You Can Create</h2>
-                        <p className="text-zinc-400">Try the interactive demo below</p>
+                        <h2 className="text-2xl md:text-3xl font-bold text-[#1A1A2E] mb-4">See What You Can Create</h2>
+                        <p className="text-[#888]">Try the interactive demo below</p>
                     </motion.div>
 
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -214,7 +216,7 @@ export function LandingPage() {
                         >
                             {/* Model Selection */}
                             <div>
-                                <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">
+                                <h3 className="text-xs font-semibold text-[#AAA] uppercase tracking-wider mb-4">
                                     01. Select Model
                                 </h3>
                                 <div className="flex gap-3">
@@ -225,17 +227,17 @@ export function LandingPage() {
                                                 setSelectedSet(set);
                                                 setSelectedDress(set.dresses[0]);
                                             }}
-                                            className={`px-6 py-3 rounded-xl text-sm font-medium transition-all ${selectedSet.id === set.id
-                                                    ? 'text-indigo-300'
-                                                    : 'text-zinc-500 hover:text-white'
+                                            className={`px-6 py-3 rounded-2xl text-sm font-medium transition-all ${selectedSet.id === set.id
+                                                    ? 'text-[#C9A0FF]'
+                                                    : 'text-[#AAA] hover:text-[#1A1A2E]'
                                                 }`}
                                             style={{
                                                 background: selectedSet.id === set.id
-                                                    ? 'rgba(99, 102, 241, 0.2)'
-                                                    : 'rgba(255, 255, 255, 0.05)',
+                                                    ? 'rgba(201, 160, 255, 0.12)'
+                                                    : 'white',
                                                 border: selectedSet.id === set.id
-                                                    ? '1px solid rgba(99, 102, 241, 0.5)'
-                                                    : '1px solid rgba(255, 255, 255, 0.1)'
+                                                    ? '1px solid rgba(201, 160, 255, 0.4)'
+                                                    : '1px solid rgba(0, 0, 0, 0.06)'
                                             }}
                                         >
                                             Model {set.id}
@@ -246,7 +248,7 @@ export function LandingPage() {
 
                             {/* Garment Selection */}
                             <div>
-                                <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">
+                                <h3 className="text-xs font-semibold text-[#AAA] uppercase tracking-wider mb-4">
                                     02. Select Garment
                                 </h3>
                                 <div className="flex gap-3">
@@ -254,12 +256,12 @@ export function LandingPage() {
                                         <button
                                             key={dress.id}
                                             onClick={() => setSelectedDress(dress)}
-                                            className={`w-20 h-24 rounded-xl overflow-hidden transition-all ${selectedDress.id === dress.id
-                                                    ? 'ring-2 ring-indigo-500'
-                                                    : 'hover:ring-2 hover:ring-white/30'
+                                            className={`w-20 h-24 rounded-2xl overflow-hidden transition-all ${selectedDress.id === dress.id
+                                                    ? 'ring-2 ring-[#FF8FAB] shadow-lg'
+                                                    : 'hover:ring-2 hover:ring-[#C9A0FF]/40'
                                                 }`}
                                             style={{
-                                                border: '1px solid rgba(255, 255, 255, 0.1)'
+                                                border: '1px solid rgba(0, 0, 0, 0.06)'
                                             }}
                                         >
                                             <img src={dress.thumb} alt={dress.name} className="w-full h-full object-cover" />
@@ -272,20 +274,21 @@ export function LandingPage() {
                             <div className="flex gap-4">
                                 <button
                                     onClick={() => setIsRevealed(!isRevealed)}
-                                    className="flex-1 py-4 rounded-xl text-sm font-semibold transition-all"
+                                    className="flex-1 py-4 rounded-2xl text-sm font-semibold text-[#1A1A2E] transition-all"
                                     style={{
-                                        background: 'rgba(255, 255, 255, 0.05)',
-                                        border: '1px solid rgba(255, 255, 255, 0.15)'
+                                        background: 'white',
+                                        border: '1px solid rgba(0, 0, 0, 0.08)',
+                                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
                                     }}
                                 >
                                     {isRevealed ? 'Show Original' : 'Generate Preview'}
                                 </button>
                                 <Link
                                     to={user ? "/studio" : "/login"}
-                                    className="flex-1 py-4 rounded-xl text-sm font-semibold text-center transition-all hover:scale-[1.02]"
+                                    className="flex-1 py-4 rounded-2xl text-sm font-semibold text-white text-center transition-all hover:scale-[1.02]"
                                     style={{
-                                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                        boxShadow: '0 8px 30px rgba(99, 102, 241, 0.25)'
+                                        background: 'linear-gradient(135deg, #C9A0FF, #FF8FAB)',
+                                        boxShadow: '0 8px 30px rgba(255, 143, 171, 0.25)'
                                     }}
                                 >
                                     Try With Your Photo
@@ -301,8 +304,9 @@ export function LandingPage() {
                             transition={{ duration: 0.6 }}
                             className="relative aspect-[3/4] rounded-3xl overflow-hidden"
                             style={{
-                                background: 'rgba(255, 255, 255, 0.03)',
-                                border: '1px solid rgba(255, 255, 255, 0.08)'
+                                background: 'white',
+                                border: '1px solid rgba(0, 0, 0, 0.06)',
+                                boxShadow: '0 12px 40px rgba(0, 0, 0, 0.08)'
                             }}
                         >
                             <AnimatePresence mode="wait">
@@ -320,10 +324,10 @@ export function LandingPage() {
                                             alt="Model"
                                             className="absolute inset-0 w-full h-full object-contain p-4"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-8">
+                                        <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-transparent flex items-end p-8">
                                             <div>
-                                                <p className="text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-1">Original</p>
-                                                <h4 className="text-xl font-bold">Reference Photo</h4>
+                                                <p className="text-[#C9A0FF] text-xs font-semibold uppercase tracking-wider mb-1">Original</p>
+                                                <h4 className="text-xl font-bold text-[#1A1A2E]">Reference Photo</h4>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -341,10 +345,10 @@ export function LandingPage() {
                                             alt="Result"
                                             className="absolute inset-0 w-full h-full object-contain p-4"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-8">
+                                        <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-transparent flex items-end p-8">
                                             <div>
-                                                <p className="text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-1">AI Generated</p>
-                                                <h4 className="text-xl font-bold">{selectedSet.name} — {selectedDress.name}</h4>
+                                                <p className="text-[#FF8FAB] text-xs font-semibold uppercase tracking-wider mb-1">AI Generated</p>
+                                                <h4 className="text-xl font-bold text-[#1A1A2E]">{selectedSet.name} — {selectedDress.name}</h4>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -359,8 +363,8 @@ export function LandingPage() {
                                     transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                                     className="absolute left-0 right-0 h-px z-20"
                                     style={{
-                                        background: 'linear-gradient(90deg, transparent, #6366f1, transparent)',
-                                        boxShadow: '0 0 20px #6366f1'
+                                        background: 'linear-gradient(90deg, transparent, #FF8FAB, transparent)',
+                                        boxShadow: '0 0 20px #FF8FAB'
                                     }}
                                 />
                             )}
@@ -379,22 +383,22 @@ export function LandingPage() {
                         transition={{ duration: 0.6 }}
                         className="p-8 md:p-12 rounded-3xl"
                         style={{
-                            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15))',
-                            border: '1px solid rgba(99, 102, 241, 0.3)'
+                            background: 'linear-gradient(135deg, rgba(201, 160, 255, 0.1), rgba(255, 143, 171, 0.1))',
+                            border: '1px solid rgba(201, 160, 255, 0.2)'
                         }}
                     >
-                        <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                        <h2 className="text-2xl md:text-3xl font-bold text-[#1A1A2E] mb-4">
                             Ready to Try It Yourself?
                         </h2>
-                        <p className="text-zinc-400 mb-8">
+                        <p className="text-[#888] mb-8">
                             Join thousands of users creating virtual try-ons with AI.
                         </p>
                         <Link
                             to={user ? "/studio" : "/login"}
-                            className="inline-block px-8 py-4 rounded-xl text-base font-semibold transition-all hover:scale-105"
+                            className="inline-block px-8 py-4 rounded-2xl text-base font-semibold text-white transition-all hover:scale-105"
                             style={{
-                                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                boxShadow: '0 8px 30px rgba(99, 102, 241, 0.4)'
+                                background: 'linear-gradient(135deg, #C9A0FF, #FF8FAB)',
+                                boxShadow: '0 8px 30px rgba(255, 143, 171, 0.4)'
                             }}
                         >
                             Get Started Free
@@ -404,41 +408,41 @@ export function LandingPage() {
             </section>
 
             {/* Footer */}
-            <footer className="relative z-10 border-t py-12 px-4 md:px-8"
-                style={{ borderColor: 'rgba(255, 255, 255, 0.08)' }}>
+            <footer className="relative z-10 py-12 px-4 md:px-8"
+                style={{ borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}>
                 <div className="max-w-7xl mx-auto">
                     <div className="grid md:grid-cols-3 gap-8">
                         {/* Brand */}
                         <div>
-                            <Link to="/" className="text-xl font-bold">AIWEAR</Link>
-                            <p className="text-sm text-zinc-500 mt-2 max-w-xs">
+                            <Link to="/" className="text-xl font-bold text-[#1A1A2E]">AIWEAR</Link>
+                            <p className="text-sm text-[#AAA] mt-2 max-w-xs">
                                 AI-powered virtual try-on. See yourself in any outfit before you buy.
                             </p>
                         </div>
 
                         {/* Product Links */}
                         <div>
-                            <h4 className="text-sm font-semibold mb-4">Product</h4>
+                            <h4 className="text-sm font-semibold text-[#1A1A2E] mb-4">Product</h4>
                             <div className="space-y-2">
-                                <Link to="/studio" className="block text-sm text-zinc-400 hover:text-white transition-colors">Studio</Link>
-                                <Link to="/pricing" className="block text-sm text-zinc-400 hover:text-white transition-colors">Pricing</Link>
+                                <Link to="/studio" className="block text-sm text-[#AAA] hover:text-[#1A1A2E] transition-colors">Studio</Link>
+                                <Link to="/pricing" className="block text-sm text-[#AAA] hover:text-[#1A1A2E] transition-colors">Pricing</Link>
                             </div>
                         </div>
 
                         {/* Legal Links */}
                         <div>
-                            <h4 className="text-sm font-semibold mb-4">Legal</h4>
+                            <h4 className="text-sm font-semibold text-[#1A1A2E] mb-4">Legal</h4>
                             <div className="space-y-2">
-                                <a href="#" className="block text-sm text-zinc-400 hover:text-white transition-colors">Privacy Policy</a>
-                                <a href="#" className="block text-sm text-zinc-400 hover:text-white transition-colors">Terms of Service</a>
-                                <a href="#" className="block text-sm text-zinc-400 hover:text-white transition-colors">Contact</a>
+                                <a href="#" className="block text-sm text-[#AAA] hover:text-[#1A1A2E] transition-colors">Privacy Policy</a>
+                                <a href="#" className="block text-sm text-[#AAA] hover:text-[#1A1A2E] transition-colors">Terms of Service</a>
+                                <a href="#" className="block text-sm text-[#AAA] hover:text-[#1A1A2E] transition-colors">Contact</a>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-12 pt-8 text-center text-sm text-zinc-600"
-                        style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                        © 2026 AIWEAR. All rights reserved.
+                    <div className="mt-12 pt-8 text-center text-sm text-[#BBB]"
+                        style={{ borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}>
+                        &copy; 2026 AIWEAR. All rights reserved.
                     </div>
                 </div>
             </footer>

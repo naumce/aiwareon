@@ -45,26 +45,33 @@ export function ForgotPasswordPage() {
     };
 
     return (
-        <div className="h-[100dvh] w-full flex items-center justify-center px-4 relative overflow-y-auto overflow-x-hidden bg-zinc-950">
-            {/* Background Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg h-full max-h-lg bg-violet-500/10 blur-[120px] rounded-full -z-10" />
+        <div className="h-[100dvh] w-full flex items-center justify-center px-4 relative overflow-y-auto overflow-x-hidden"
+            style={{ background: '#F7F5F2' }}>
+
+            {/* Animated Mesh Background */}
+            <div className="mesh-bg" />
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="glass p-12 rounded-[2.5rem] max-w-md w-full border-white/5 relative"
+                className="rounded-3xl p-8 md:p-10 max-w-md w-full relative z-10"
+                style={{
+                    background: 'rgba(255, 255, 255, 0.85)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(0, 0, 0, 0.05)',
+                    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.08)',
+                }}
             >
-                <Link to="/login" className="absolute top-8 left-8 text-zinc-600 hover:text-white transition-colors">
+                <Link to="/login" className="absolute top-6 left-6 text-[#AAA] hover:text-[#1A1A2E] transition-colors">
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
 
-                <div className="text-center mb-10">
-                    <div className="text-2xl font-bold tracking-tighter mb-2">
-                        <span className="text-white">AI</span>
-                        <span className="text-zinc-500">WEAR</span>
-                    </div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-extrabold mb-2 text-gradient">
+                        AIWEAR
+                    </h1>
+                    <p className="text-sm text-[#888]">
                         Password Recovery
                     </p>
                 </div>
@@ -75,7 +82,11 @@ export function ForgotPasswordPage() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="mb-6 p-4 rounded-2xl bg-red-500/5 border border-red-500/10 text-red-400 text-[10px] font-bold uppercase tracking-widest text-center"
+                            className="mb-6 p-4 rounded-2xl text-sm text-red-500 text-center"
+                            style={{
+                                background: 'rgba(239, 68, 68, 0.08)',
+                                border: '1px solid rgba(239, 68, 68, 0.15)'
+                            }}
                         >
                             {error}
                         </motion.div>
@@ -91,13 +102,13 @@ export function ForgotPasswordPage() {
                             exit={{ opacity: 0, x: 20 }}
                             transition={{ duration: 0.3 }}
                             onSubmit={handleSubmit}
-                            className="space-y-6"
+                            className="space-y-5"
                         >
-                            <div className="text-center mb-6">
-                                <h2 className="text-lg font-bold text-white uppercase tracking-wide mb-2">
+                            <div className="text-center mb-4">
+                                <h2 className="text-lg font-bold text-[#1A1A2E] mb-2">
                                     Forgot Password?
                                 </h2>
-                                <p className="text-[10px] text-zinc-500 uppercase tracking-widest">
+                                <p className="text-sm text-[#888]">
                                     Enter your email and we'll send you a recovery link
                                 </p>
                             </div>
@@ -122,7 +133,7 @@ export function ForgotPasswordPage() {
                             <div className="text-center">
                                 <Link
                                     to="/login"
-                                    className="text-[9px] font-bold text-zinc-600 hover:text-zinc-400 uppercase tracking-widest transition-colors"
+                                    className="text-sm font-semibold text-[#888] hover:text-[#FF8FAB] transition-colors"
                                 >
                                     Return to Sign In
                                 </Link>
@@ -139,30 +150,35 @@ export function ForgotPasswordPage() {
                         >
                             {/* Mail Icon */}
                             <div className="flex justify-center">
-                                <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center">
+                                <div className="w-20 h-20 rounded-full flex items-center justify-center"
+                                    style={{ background: 'linear-gradient(135deg, #C9A0FF, #FF8FAB)' }}>
                                     <Mail className="w-10 h-10 text-white" />
                                 </div>
                             </div>
 
                             <div>
-                                <h2 className="text-lg font-bold text-white uppercase tracking-wide mb-2">
+                                <h2 className="text-lg font-bold text-[#1A1A2E] mb-2">
                                     Check Your Email
                                 </h2>
-                                <p className="text-[10px] text-zinc-500 uppercase tracking-widest leading-relaxed">
+                                <p className="text-sm text-[#888]">
                                     We've sent a recovery link to
                                 </p>
-                                <p className="text-sm text-violet-400 font-medium mt-2">
+                                <p className="text-sm text-[#FF8FAB] font-semibold mt-2">
                                     {email}
                                 </p>
                             </div>
 
-                            <div className="p-4 rounded-2xl bg-zinc-900/50 border border-white/5">
-                                <p className="text-[9px] text-zinc-500 uppercase tracking-widest">
+                            <div className="p-4 rounded-2xl"
+                                style={{
+                                    background: 'rgba(255, 255, 255, 0.6)',
+                                    border: '1px solid rgba(0, 0, 0, 0.05)',
+                                }}>
+                                <p className="text-xs text-[#888]">
                                     Didn't receive it?{' '}
                                     <button
                                         onClick={handleResend}
                                         disabled={loading}
-                                        className="text-violet-400 hover:text-violet-300 transition-colors underline underline-offset-4"
+                                        className="text-[#FF8FAB] hover:text-[#C9A0FF] transition-colors underline underline-offset-4 font-semibold"
                                     >
                                         {loading ? 'Sending...' : 'Resend'}
                                     </button>
@@ -171,7 +187,7 @@ export function ForgotPasswordPage() {
 
                             <Link
                                 to="/login"
-                                className="inline-block text-[9px] font-bold text-zinc-600 hover:text-zinc-400 uppercase tracking-widest transition-colors"
+                                className="inline-block text-sm font-semibold text-[#888] hover:text-[#FF8FAB] transition-colors"
                             >
                                 Return to Sign In
                             </Link>

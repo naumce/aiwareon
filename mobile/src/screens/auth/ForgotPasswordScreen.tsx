@@ -13,13 +13,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../stores/authStore';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import { useTheme, spacing, borderRadius, typography } from '../../theme';
 
 type FlowState = 'request' | 'sent';
 
 export function ForgotPasswordScreen() {
     const navigation = useNavigation();
     const { requestPasswordReset } = useAuthStore();
+    const { colors } = useTheme();
+    const styles = createStyles(colors);
 
     const [email, setEmail] = useState('');
     const [flowState, setFlowState] = useState<FlowState>('request');
@@ -147,7 +149,7 @@ export function ForgotPasswordScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background.primary,

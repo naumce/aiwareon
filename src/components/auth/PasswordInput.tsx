@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     validatePassword,
@@ -26,7 +26,7 @@ export function PasswordInput({
     showStrengthMeter = false,
     showRequirements = false,
     error,
-    placeholder = '••••••••',
+    placeholder = 'Password',
     className = '',
 }: PasswordInputProps) {
     const [showPassword, setShowPassword] = useState(false);
@@ -49,29 +49,35 @@ export function PasswordInput({
 
     const getSegmentColor = (index: number) => {
         if (!validation || index >= segments) {
-            return 'bg-zinc-800';
+            return 'bg-gray-200';
         }
         switch (validation.strength) {
             case 'weak':
-                return 'bg-red-500';
+                return 'bg-red-400';
             case 'fair':
-                return 'bg-orange-500';
+                return 'bg-orange-400';
             case 'good':
-                return 'bg-yellow-500';
+                return 'bg-yellow-400';
             case 'strong':
-                return index === 0 ? 'bg-violet-500' : index === 1 ? 'bg-violet-400' : index === 2 ? 'bg-pink-400' : 'bg-pink-500';
+                return index === 0 ? 'bg-[#C9A0FF]' : index === 1 ? 'bg-[#FF8FAB]' : index === 2 ? 'bg-[#7DD3C0]' : 'bg-emerald-400';
             default:
-                return 'bg-zinc-800';
+                return 'bg-gray-200';
         }
     };
 
     return (
         <div className={`space-y-2 ${className}`}>
-            <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest px-2">
+            <label className="text-xs font-medium text-[#888] px-1 block">
                 {label}
             </label>
 
             <div className="relative">
+                {/* Lock icon */}
+                <div className={`absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-300 ${isFocused ? 'text-[#FF8FAB]' : 'text-[#AAA]'
+                    }`}>
+                    <Lock className="w-5 h-5" />
+                </div>
+
                 <input
                     type={showPassword ? 'text' : 'password'}
                     value={value}
@@ -80,16 +86,26 @@ export function PasswordInput({
                     onBlur={() => setIsFocused(false)}
                     placeholder={placeholder}
                     minLength={12}
-                    className={`w-full px-5 py-4 pr-12 rounded-2xl bg-zinc-900/50 
-            text-white placeholder-zinc-700 focus:outline-none transition-colors text-sm
-            ${error ? 'border-red-500/50 border' : isFocused ? 'border-violet-500/50 border' : 'border border-white/5'}
-          `}
+                    className="w-full h-14 rounded-2xl text-sm transition-all duration-300 pl-12 pr-12 focus:outline-none"
+                    style={{
+                        background: isFocused ? 'white' : 'rgba(255, 255, 255, 0.6)',
+                        border: error
+                            ? '2px solid rgba(239, 68, 68, 0.5)'
+                            : isFocused
+                                ? '2px solid #FF8FAB'
+                                : '2px solid transparent',
+                        color: '#1A1A2E',
+                        boxShadow: isFocused
+                            ? '0 8px 24px rgba(255, 143, 171, 0.2)'
+                            : '0 4px 16px rgba(0, 0, 0, 0.05)',
+                        backdropFilter: 'blur(10px)',
+                    }}
                 />
 
                 <button
                     type="button"
                     onClick={toggleVisibility}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#AAA] hover:text-[#1A1A2E] transition-colors"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                     {showPassword ? (
@@ -123,10 +139,10 @@ export function PasswordInput({
                         </div>
 
                         <div className="flex justify-between items-center px-1">
-                            <span className={`text-[9px] font-bold uppercase tracking-widest ${validation.strength === 'weak' ? 'text-red-400' :
+                            <span className={`text-xs font-semibold ${validation.strength === 'weak' ? 'text-red-400' :
                                     validation.strength === 'fair' ? 'text-orange-400' :
-                                        validation.strength === 'good' ? 'text-yellow-400' :
-                                            'text-emerald-400'
+                                        validation.strength === 'good' ? 'text-yellow-500' :
+                                            'text-emerald-500'
                                 }`}>
                                 {getStrengthLabel(validation.strength)}
                             </span>
@@ -142,7 +158,7 @@ export function PasswordInput({
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="px-2 space-y-1"
+                        className="px-1 space-y-1"
                     >
                         {validation && (
                             <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -164,9 +180,9 @@ export function PasswordInput({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="text-[9px] font-bold text-red-400 uppercase tracking-widest px-2 flex items-center gap-1"
+                        className="text-xs text-red-400 px-1 flex items-center gap-1"
                     >
-                        <span className="text-red-500">⚠</span> {error}
+                        <span>⚠</span> {error}
                     </motion.p>
                 )}
             </AnimatePresence>
@@ -176,7 +192,7 @@ export function PasswordInput({
 
 function RequirementItem({ met, text }: { met: boolean; text: string }) {
     return (
-        <span className={`text-[8px] font-bold uppercase tracking-widest transition-colors ${met ? 'text-emerald-400' : 'text-zinc-600'
+        <span className={`text-xs font-medium transition-colors ${met ? 'text-emerald-500' : 'text-[#BBB]'
             }`}>
             {met ? '✓' : '○'} {text}
         </span>

@@ -54,7 +54,7 @@ function ShowcaseCarousel() {
 
             {/* Label and indicator dots */}
             <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-3">
-                <p className="text-xs text-white/80 font-medium px-4 py-1.5 rounded-full"
+                <p className="text-xs text-[#1A1A2E]/80 font-medium px-4 py-1.5 rounded-full"
                     style={{ background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(8px)' }}>
                     {SHOWCASE_IMAGES[currentIndex].label}
                 </p>
@@ -65,7 +65,7 @@ function ShowcaseCarousel() {
                             onClick={() => setCurrentIndex(idx)}
                             className={`w-2 h-2 rounded-full transition-all duration-300 ${idx === currentIndex
                                 ? 'bg-white scale-110'
-                                : 'bg-white/30 hover:bg-white/50'
+                                : 'bg-white/30 hover:bg-black/[0.03]0'
                                 }`}
                         />
                     ))}
@@ -74,7 +74,7 @@ function ShowcaseCarousel() {
 
             {/* Subtle "See what's possible" badge */}
             <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-medium"
-                style={{ background: 'rgba(99, 102, 241, 0.3)', backdropFilter: 'blur(8px)' }}>
+                style={{ background: 'rgba(201, 160, 255, 0.3)', backdropFilter: 'blur(8px)' }}>
                 ✨ See What's Possible
             </div>
         </div>
@@ -169,24 +169,24 @@ function RotatingPlaceholderInput({
                 onBlur={() => setIsFocused(false)}
                 placeholder=""
                 rows={2}
-                className="w-full px-4 py-3 rounded-xl text-sm text-white resize-none transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full px-4 py-3 rounded-xl text-sm text-[#1A1A2E] resize-none transition-all focus:outline-none focus:ring-2 focus:ring-[#FF8FAB]/40"
                 style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                    background: 'white',
+                    border: '1px solid rgba(0, 0, 0, 0.08)'
                 }}
             />
             {/* Custom animated placeholder */}
             {!value && (
                 <div
                     className="absolute left-4 top-3 pointer-events-none text-sm"
-                    style={{ color: 'rgba(113, 113, 122, 0.8)' }}
+                    style={{ color: 'rgba(170, 170, 170, 0.8)' }}
                 >
                     <span>{displayedText}</span>
                     <motion.span
                         animate={{ opacity: showCursor ? 1 : 0 }}
                         transition={{ duration: 0.1 }}
                         className="inline-block w-0.5 h-4 ml-0.5 align-middle"
-                        style={{ background: 'rgba(99, 102, 241, 0.7)' }}
+                        style={{ background: 'rgba(255, 143, 171, 0.7)' }}
                     />
                 </div>
             )}
@@ -194,7 +194,7 @@ function RotatingPlaceholderInput({
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="absolute right-3 top-3 flex items-center gap-1 text-[10px] text-zinc-600"
+                    className="absolute right-3 top-3 flex items-center gap-1 text-[10px] text-[#BBB]"
                 >
                     <span>💡</span>
                     <span>Optional</span>
@@ -313,16 +313,16 @@ export function StudioPage() {
                 <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gradient mb-4">
                     AI Image Generator
                 </h1>
-                <p className="text-base md:text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-6">
+                <p className="text-base md:text-lg text-[#888] max-w-2xl mx-auto leading-relaxed mb-6">
                     Try on any garment virtually with AI. Upload your photo and a clothing item to see yourself in a new look.
                 </p>
 
                 {/* Tip Badge */}
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
                     style={{
-                        background: 'rgba(99, 102, 241, 0.15)',
-                        border: '1px solid rgba(99, 102, 241, 0.3)',
-                        color: '#a5b4fc'
+                        background: 'rgba(201, 160, 255, 0.1)',
+                        border: '1px solid rgba(201, 160, 255, 0.25)',
+                        color: '#C9A0FF'
                     }}>
                     <span>💡</span>
                     <span>Tip: Use a full-body photo with good lighting for best results.</span>
@@ -337,17 +337,18 @@ export function StudioPage() {
                     <div className="space-y-6 animate-fade-in-up-delay-1 min-w-0 overflow-hidden">
                         {/* Form Card */}
                         <div className="rounded-2xl p-4 md:p-6" style={{
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            border: '1px solid rgba(255, 255, 255, 0.08)'
+                            background: 'white',
+                            border: '1px solid rgba(0, 0, 0, 0.06)',
+                            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)'
                         }}>
                             {/* Frame Upload Intro */}
-                            <p className="text-sm text-zinc-400 mb-6">
+                            <p className="text-sm text-[#888] mb-6">
                                 Upload your photo and select a garment to try on.
                             </p>
 
                             {/* Person Upload */}
                             <div className="mb-6">
-                                <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3 block">
+                                <label className="text-xs font-semibold text-[#AAA] uppercase tracking-wider mb-3 block">
                                     Your Photo
                                 </label>
 
@@ -358,9 +359,9 @@ export function StudioPage() {
                                         {/* Always visible X button */}
                                         <button
                                             onClick={() => setPersonImage('')}
-                                            className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition-all border border-white/20"
+                                            className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition-all border border-black/[0.1]"
                                         >
-                                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4 text-[#1A1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </button>
@@ -369,7 +370,7 @@ export function StudioPage() {
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                             <button
                                                 onClick={() => personInputRef.current?.click()}
-                                                className="px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors text-xs font-medium flex items-center gap-2"
+                                                className="px-4 py-2 rounded-full bg-black/[0.06] hover:bg-black/[0.06] transition-colors text-xs font-medium flex items-center gap-2"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -386,29 +387,29 @@ export function StudioPage() {
                                         }}
                                         className="aspect-[3/4] rounded-xl flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group"
                                         style={{
-                                            border: '2px dashed rgba(255, 255, 255, 0.2)',
-                                            background: 'rgba(255, 255, 255, 0.02)'
+                                            border: '2px dashed rgba(0, 0, 0, 0.12)',
+                                            background: 'rgba(201, 160, 255, 0.04)'
                                         }}
                                     >
-                                        <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="w-12 h-12 rounded-full bg-[#C9A0FF]/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <svg className="w-6 h-6 text-[#C9A0FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                             </svg>
                                         </div>
-                                        <span className="text-xs font-medium text-zinc-400 group-hover:text-white transition-colors">Add Photo</span>
+                                        <span className="text-xs font-medium text-[#888] group-hover:text-[#1A1A2E] transition-colors">Add Photo</span>
                                     </div>
                                 )}
 
                                 {/* Saved Photos */}
                                 {savedImages.length > 0 && !personImage && (
                                     <div className="mt-4">
-                                        <p className="text-xs text-zinc-500 mb-2">Your saved photos</p>
+                                        <p className="text-xs text-[#AAA] mb-2">Your saved photos</p>
                                         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                                             {savedImages.slice(0, 4).map((img) => (
                                                 <button
                                                     key={img.id}
                                                     onClick={() => handleSavedImageSelect(img.url || '', img.id)}
-                                                    className="flex-shrink-0 w-16 h-20 rounded-lg overflow-hidden border border-white/10 hover:border-indigo-500/50 transition-colors"
+                                                    className="flex-shrink-0 w-16 h-20 rounded-lg overflow-hidden border border-black/[0.06] hover:border-[#FF8FAB]/50 transition-colors"
                                                 >
                                                     <img src={img.url} alt="Saved" className="w-full h-full object-cover" />
                                                 </button>
@@ -420,13 +421,13 @@ export function StudioPage() {
                                 {/* Example Models */}
                                 {!personImage && (
                                     <div className="mt-4">
-                                        <p className="text-xs text-zinc-500 mb-2">Or try with examples</p>
+                                        <p className="text-xs text-[#AAA] mb-2">Or try with examples</p>
                                         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                                             {EXAMPLE_PERSON_IMAGES.map((img) => (
                                                 <button
                                                     key={img.id}
                                                     onClick={() => setPersonImage(img.url)}
-                                                    className="flex-shrink-0 w-16 h-20 rounded-lg overflow-hidden border border-white/10 hover:border-indigo-500/50 transition-colors"
+                                                    className="flex-shrink-0 w-16 h-20 rounded-lg overflow-hidden border border-black/[0.06] hover:border-[#FF8FAB]/50 transition-colors"
                                                 >
                                                     <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
                                                 </button>
@@ -438,7 +439,7 @@ export function StudioPage() {
 
                             {/* Garment Upload */}
                             <div className="mb-6">
-                                <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3 block">
+                                <label className="text-xs font-semibold text-[#AAA] uppercase tracking-wider mb-3 block">
                                     Garment
                                 </label>
 
@@ -449,9 +450,9 @@ export function StudioPage() {
                                         {/* Always visible X button */}
                                         <button
                                             onClick={() => setDressImage('')}
-                                            className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition-all border border-white/20"
+                                            className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition-all border border-black/[0.1]"
                                         >
-                                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4 text-[#1A1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </button>
@@ -460,7 +461,7 @@ export function StudioPage() {
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                             <button
                                                 onClick={() => dressInputRef.current?.click()}
-                                                className="px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors text-xs font-medium flex items-center gap-2"
+                                                className="px-4 py-2 rounded-full bg-black/[0.06] hover:bg-black/[0.06] transition-colors text-xs font-medium flex items-center gap-2"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -477,29 +478,29 @@ export function StudioPage() {
                                         }}
                                         className="w-full aspect-[4/3] rounded-xl flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group"
                                         style={{
-                                            border: '2px dashed rgba(255, 255, 255, 0.2)',
-                                            background: 'rgba(255, 255, 255, 0.02)'
+                                            border: '2px dashed rgba(0, 0, 0, 0.12)',
+                                            background: 'rgba(201, 160, 255, 0.04)'
                                         }}
                                     >
-                                        <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="w-10 h-10 rounded-full bg-[#C9A0FF]/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <svg className="w-5 h-5 text-[#C9A0FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                             </svg>
                                         </div>
-                                        <span className="text-xs font-medium text-zinc-400 group-hover:text-white transition-colors">Add Garment</span>
+                                        <span className="text-xs font-medium text-[#888] group-hover:text-[#1A1A2E] transition-colors">Add Garment</span>
                                     </div>
                                 )}
 
                                 {/* Example Garments */}
                                 {!dressImage && (
                                     <div className="mt-4">
-                                        <p className="text-xs text-zinc-500 mb-2">Example garments</p>
+                                        <p className="text-xs text-[#AAA] mb-2">Example garments</p>
                                         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                                             {EXAMPLE_GARMENT_IMAGES.map((img) => (
                                                 <button
                                                     key={img.id}
                                                     onClick={() => setDressImage(img.url)}
-                                                    className="flex-shrink-0 w-16 h-20 rounded-lg overflow-hidden border border-white/10 hover:border-indigo-500/50 transition-colors"
+                                                    className="flex-shrink-0 w-16 h-20 rounded-lg overflow-hidden border border-black/[0.06] hover:border-[#FF8FAB]/50 transition-colors"
                                                 >
                                                     <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
                                                 </button>
@@ -512,36 +513,36 @@ export function StudioPage() {
                             {/* Quality/Model Controls */}
                             <div className="space-y-4 mb-6">
                                 {/* Quality */}
-                                <div className="flex gap-2 p-1 rounded-xl" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
+                                <div className="flex gap-2 p-1 rounded-xl" style={{ background: 'rgba(0, 0, 0, 0.03)' }}>
                                     <button
                                         onClick={() => setQuality('standard')}
                                         className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${quality === 'standard'
-                                            ? 'bg-white/10 text-white'
-                                            : 'text-zinc-400 hover:text-white'
+                                            ? 'bg-black/[0.04] text-[#1A1A2E]'
+                                            : 'text-[#888] hover:text-[#1A1A2E]'
                                             }`}
                                     >
                                         Standard
-                                        <span className="block text-xs text-indigo-400 mt-0.5">1 Credit</span>
+                                        <span className="block text-xs text-[#C9A0FF] mt-0.5">1 Credit</span>
                                     </button>
                                     <button
                                         onClick={() => setQuality('studio')}
                                         className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${quality === 'studio'
-                                            ? 'bg-indigo-500/20 text-indigo-300'
-                                            : 'text-zinc-400 hover:text-white'
+                                            ? 'bg-[#C9A0FF]/15 text-[#C9A0FF]'
+                                            : 'text-[#888] hover:text-[#1A1A2E]'
                                             }`}
                                     >
                                         Studio
-                                        <span className="block text-xs text-indigo-400 mt-0.5">2 Credits</span>
+                                        <span className="block text-xs text-[#C9A0FF] mt-0.5">2 Credits</span>
                                     </button>
                                 </div>
 
                                 {/* Model */}
-                                <div className="flex gap-2 p-1 rounded-xl" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
+                                <div className="flex gap-2 p-1 rounded-xl" style={{ background: 'rgba(0, 0, 0, 0.03)' }}>
                                     <button
                                         onClick={() => setModelType('fal')}
                                         className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all ${modelType === 'fal'
-                                            ? 'bg-violet-500/20 text-violet-300'
-                                            : 'text-zinc-400 hover:text-white'
+                                            ? 'bg-[#C9A0FF]/15 text-[#C9A0FF]'
+                                            : 'text-[#888] hover:text-[#1A1A2E]'
                                             }`}
                                     >
                                         Fal AI
@@ -549,8 +550,8 @@ export function StudioPage() {
                                     <button
                                         onClick={() => setModelType('gemini2')}
                                         className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all ${modelType === 'gemini2'
-                                            ? 'bg-blue-500/20 text-blue-300'
-                                            : 'text-zinc-400 hover:text-white'
+                                            ? 'bg-[#7DD3C0]/15 text-[#7DD3C0]'
+                                            : 'text-[#888] hover:text-[#1A1A2E]'
                                             }`}
                                     >
                                         Gemini 2
@@ -558,8 +559,8 @@ export function StudioPage() {
                                     <button
                                         onClick={() => setModelType('geminipro')}
                                         className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all ${modelType === 'geminipro'
-                                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg text-white'
-                                            : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                            ? 'bg-gradient-to-r from-[#C9A0FF] to-[#FF8FAB] shadow-lg text-[#1A1A2E]'
+                                            : 'text-[#888] hover:text-[#1A1A2E] hover:bg-black/[0.03]'
                                             }`}
                                     >
                                         Pro
@@ -568,14 +569,14 @@ export function StudioPage() {
 
                                 {/* Fal Category */}
                                 {modelType === 'fal' && (
-                                    <div className="flex gap-2 p-1 rounded-xl" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
+                                    <div className="flex gap-2 p-1 rounded-xl" style={{ background: 'rgba(0, 0, 0, 0.03)' }}>
                                         {(['tops', 'bottoms', 'one-pieces'] as const).map((cat) => (
                                             <button
                                                 key={cat}
                                                 onClick={() => setFalCategory(cat)}
                                                 className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium capitalize transition-all ${falCategory === cat
-                                                    ? 'bg-violet-500/20 text-violet-300'
-                                                    : 'text-zinc-400 hover:text-white'
+                                                    ? 'bg-[#C9A0FF]/15 text-[#C9A0FF]'
+                                                    : 'text-[#888] hover:text-[#1A1A2E]'
                                                     }`}
                                             >
                                                 {cat === 'one-pieces' ? 'Full' : cat}
@@ -589,17 +590,17 @@ export function StudioPage() {
                             <div className="mb-4">
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-2">
-                                        <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                                        <h3 className="text-xs font-semibold text-[#AAA] uppercase tracking-wider">
                                             Style Prompt
                                         </h3>
-                                        <span className="text-[10px] text-zinc-600">
+                                        <span className="text-[10px] text-[#BBB]">
                                             optional · guide the vibe or specify changes
                                         </span>
                                     </div>
                                     {userPrompt && (
                                         <button
                                             onClick={() => setUserPrompt('')}
-                                            className="text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors"
+                                            className="text-[10px] text-[#BBB] hover:text-[#888] transition-colors"
                                         >
                                             Clear
                                         </button>
@@ -657,15 +658,15 @@ export function StudioPage() {
                                     onClick={() => clearResult()}
                                     className="w-full py-4 rounded-xl text-sm font-semibold transition-all"
                                     style={{
-                                        background: 'rgba(255, 255, 255, 0.08)',
-                                        border: '1px solid rgba(255, 255, 255, 0.15)'
+                                        background: 'white',
+                                        border: '1px solid rgba(0, 0, 0, 0.08)'
                                     }}
                                 >
                                     Try Again
                                 </motion.button>
                             ) : (
                                 <motion.button
-                                    whileHover={canGenerate ? { scale: 1.02, boxShadow: '0 10px 30px rgba(99, 102, 241, 0.3)' } : {}}
+                                    whileHover={canGenerate ? { scale: 1.02, boxShadow: '0 10px 30px rgba(255, 143, 171, 0.3)' } : {}}
                                     whileTap={canGenerate ? { scale: 0.98 } : {}}
                                     onClick={() => {
                                         generate(quality, modelType, modelType === 'fal' ? falCategory : undefined);
@@ -678,8 +679,8 @@ export function StudioPage() {
                                     }}
                                     disabled={!canGenerate}
                                     className={`w-full py-4 rounded-xl text-sm font-semibold transition-all ${canGenerate
-                                        ? 'text-white'
-                                        : 'text-zinc-600 cursor-not-allowed'
+                                        ? 'text-[#1A1A2E]'
+                                        : 'text-[#BBB] cursor-not-allowed'
                                         }`}
                                     style={{
                                         background: canGenerate
@@ -695,7 +696,7 @@ export function StudioPage() {
                             {isAnonymous && (
                                 <Link
                                     to="/login"
-                                    className="block text-center text-xs text-indigo-400 hover:text-indigo-300 mt-4 transition-colors"
+                                    className="block text-center text-xs text-[#C9A0FF] hover:text-[#C9A0FF] mt-4 transition-colors"
                                 >
                                     Create account to save your generations →
                                 </Link>
@@ -707,16 +708,17 @@ export function StudioPage() {
                     <div className="space-y-6 animate-fade-in-up-delay-2">
                         {/* Preview Card */}
                         <div ref={previewRef} className="rounded-2xl p-6" style={{
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            border: '1px solid rgba(255, 255, 255, 0.08)'
+                            background: 'white',
+                            border: '1px solid rgba(0, 0, 0, 0.06)',
+                            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)'
                         }}>
-                            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">
+                            <h3 className="text-xs font-semibold text-[#AAA] uppercase tracking-wider mb-4">
                                 Preview
                             </h3>
 
                             {/* Preview Area */}
                             <div className="aspect-[3/4] rounded-xl overflow-hidden relative"
-                                style={{ background: 'rgba(0, 0, 0, 0.4)' }}>
+                                style={{ background: 'rgba(0, 0, 0, 0.03)' }}>
                                 <AnimatePresence mode="wait">
                                     {state === 'generating' ? (
                                         <motion.div
@@ -738,8 +740,8 @@ export function StudioPage() {
                                                     <motion.div
                                                         className="absolute inset-0 rounded-full"
                                                         style={{
-                                                            border: '3px solid rgba(99, 102, 241, 0.2)',
-                                                            borderTopColor: '#6366f1'
+                                                            border: '3px solid rgba(201, 160, 255, 0.2)',
+                                                            borderTopColor: '#C9A0FF'
                                                         }}
                                                         animate={{ rotate: 360 }}
                                                         transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
@@ -747,8 +749,8 @@ export function StudioPage() {
                                                     <motion.div
                                                         className="absolute inset-2 rounded-full"
                                                         style={{
-                                                            border: '3px solid rgba(139, 92, 246, 0.2)',
-                                                            borderBottomColor: '#8b5cf6'
+                                                            border: '3px solid rgba(255, 143, 171, 0.2)',
+                                                            borderBottomColor: '#FF8FAB'
                                                         }}
                                                         animate={{ rotate: -360 }}
                                                         transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
@@ -763,16 +765,16 @@ export function StudioPage() {
                                                     style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
                                                     <motion.div
                                                         className="h-full rounded-full"
-                                                        style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                                                        style={{ background: 'linear-gradient(135deg, #C9A0FF, #FF8FAB)' }}
                                                         animate={{ x: ['-100%', '100%'] }}
                                                         transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
                                                     />
                                                 </div>
 
-                                                <p className="text-sm font-medium text-white mb-1">
+                                                <p className="text-sm font-medium text-[#1A1A2E] mb-1">
                                                     Creating your look...
                                                 </p>
-                                                <p className="text-xs text-indigo-300/70">
+                                                <p className="text-xs text-[#C9A0FF]/70">
                                                     This may take 15-30 seconds
                                                 </p>
                                             </div>
@@ -799,7 +801,7 @@ export function StudioPage() {
                                                     onClick={() => clearResult()}
                                                     className="px-4 py-2 rounded-full text-xs font-medium flex items-center gap-2 transition-all hover:scale-105"
                                                     style={{
-                                                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                                        background: 'linear-gradient(135deg, #C9A0FF, #FF8FAB)',
                                                         border: '1px solid rgba(255, 255, 255, 0.2)'
                                                     }}
                                                 >
@@ -835,23 +837,24 @@ export function StudioPage() {
 
                         {/* Quick Tips */}
                         <div className="rounded-2xl p-6" style={{
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            border: '1px solid rgba(255, 255, 255, 0.08)'
+                            background: 'white',
+                            border: '1px solid rgba(0, 0, 0, 0.06)',
+                            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)'
                         }}>
-                            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">
+                            <h3 className="text-xs font-semibold text-[#AAA] uppercase tracking-wider mb-4">
                                 Quick Tips
                             </h3>
                             <ul className="space-y-3">
-                                <li className="flex items-start gap-3 text-sm text-zinc-400">
-                                    <span className="text-indigo-400 mt-0.5">•</span>
+                                <li className="flex items-start gap-3 text-sm text-[#888]">
+                                    <span className="text-[#C9A0FF] mt-0.5">•</span>
                                     Use high-quality, well-lit photos for best results
                                 </li>
-                                <li className="flex items-start gap-3 text-sm text-zinc-400">
-                                    <span className="text-indigo-400 mt-0.5">•</span>
+                                <li className="flex items-start gap-3 text-sm text-[#888]">
+                                    <span className="text-[#C9A0FF] mt-0.5">•</span>
                                     Full-body shots work better than cropped images
                                 </li>
-                                <li className="flex items-start gap-3 text-sm text-zinc-400">
-                                    <span className="text-indigo-400 mt-0.5">•</span>
+                                <li className="flex items-start gap-3 text-sm text-[#888]">
+                                    <span className="text-[#C9A0FF] mt-0.5">•</span>
                                     Studio quality takes longer but produces sharper images
                                 </li>
                             </ul>
@@ -873,9 +876,9 @@ export function StudioPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4"
+                        className="fixed inset-0 z-50 bg-black/60 flex flex-col items-center justify-center p-4"
                     >
-                        <div className="relative w-full max-w-md aspect-[3/4] rounded-2xl overflow-hidden bg-zinc-900">
+                        <div className="relative w-full max-w-md aspect-[3/4] rounded-2xl overflow-hidden bg-gray-100">
                             <video
                                 ref={videoRef}
                                 autoPlay
@@ -885,7 +888,7 @@ export function StudioPage() {
                             />
                             {!isCapturing && (
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="animate-spin rounded-full h-12 w-12 border-2 border-indigo-500 border-t-transparent" />
+                                    <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#C9A0FF] border-t-transparent" />
                                 </div>
                             )}
                         </div>
@@ -895,8 +898,8 @@ export function StudioPage() {
                                 onClick={handleCloseCamera}
                                 className="px-6 py-3 rounded-xl text-sm font-medium"
                                 style={{
-                                    background: 'rgba(255, 255, 255, 0.1)',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)'
+                                    background: 'rgba(0, 0, 0, 0.04)',
+                                    border: '1px solid rgba(0, 0, 0, 0.1)'
                                 }}
                             >
                                 Cancel
@@ -905,8 +908,8 @@ export function StudioPage() {
                                 onClick={flipCamera}
                                 className="px-6 py-3 rounded-xl flex items-center gap-2"
                                 style={{
-                                    background: 'rgba(255, 255, 255, 0.1)',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)'
+                                    background: 'rgba(0, 0, 0, 0.04)',
+                                    border: '1px solid rgba(0, 0, 0, 0.1)'
                                 }}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -918,7 +921,7 @@ export function StudioPage() {
                                 disabled={!isCapturing}
                                 className="px-8 py-3 rounded-xl text-sm font-semibold disabled:opacity-50"
                                 style={{
-                                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)'
+                                    background: 'linear-gradient(135deg, #C9A0FF, #FF8FAB)'
                                 }}
                             >
                                 Capture
@@ -950,16 +953,17 @@ export function StudioPage() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                             onClick={() => setIsInputMenuOpen(false)}
                         />
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="relative w-full max-w-sm bg-[#18181b] rounded-2xl border border-white/10 p-6 shadow-xl overflow-hidden"
+                            className="relative w-full max-w-sm rounded-2xl border p-6 shadow-xl overflow-hidden"
+                            style={{ background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0, 0, 0, 0.08)' }}
                         >
-                            <h3 className="text-lg font-bold text-white mb-4 text-center">
+                            <h3 className="text-lg font-bold text-[#1A1A2E] mb-4 text-center">
                                 {activeInputType === 'person' ? 'Add Photo' : 'Add Garment'}
                             </h3>
 
@@ -974,16 +978,16 @@ export function StudioPage() {
                                         }
                                         setIsInputMenuOpen(false);
                                     }}
-                                    className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+                                    className="flex items-center gap-4 p-4 rounded-xl bg-black/[0.03] hover:bg-black/[0.06] transition-colors group"
                                 >
-                                    <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="w-10 h-10 rounded-full bg-[#C9A0FF]/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <svg className="w-5 h-5 text-[#C9A0FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                         </svg>
                                     </div>
                                     <div className="text-left">
-                                        <div className="font-medium text-white">Upload Selection</div>
-                                        <div className="text-xs text-zinc-400">Choose from your device</div>
+                                        <div className="font-medium text-[#1A1A2E]">Upload Selection</div>
+                                        <div className="text-xs text-[#888]">Choose from your device</div>
                                     </div>
                                 </button>
 
@@ -994,17 +998,17 @@ export function StudioPage() {
                                             cameraInputRef.current?.click();
                                             setIsInputMenuOpen(false);
                                         }}
-                                        className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+                                        className="flex items-center gap-4 p-4 rounded-xl bg-black/[0.03] hover:bg-black/[0.06] transition-colors group"
                                     >
-                                        <div className="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <svg className="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="w-10 h-10 rounded-full bg-[#C9A0FF]/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <svg className="w-5 h-5 text-[#C9A0FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                             </svg>
                                         </div>
                                         <div className="text-left">
-                                            <div className="font-medium text-white">Take Photo</div>
-                                            <div className="text-xs text-zinc-400">Use your camera</div>
+                                            <div className="font-medium text-[#1A1A2E]">Take Photo</div>
+                                            <div className="text-xs text-[#888]">Use your camera</div>
                                         </div>
                                     </button>
                                 )}
@@ -1016,16 +1020,16 @@ export function StudioPage() {
                                         setIsGalleryOpen(true);
                                         setIsInputMenuOpen(false);
                                     }}
-                                    className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+                                    className="flex items-center gap-4 p-4 rounded-xl bg-black/[0.03] hover:bg-black/[0.06] transition-colors group"
                                 >
-                                    <div className="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <svg className="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="w-10 h-10 rounded-full bg-[#FF8FAB]/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <svg className="w-5 h-5 text-[#FF8FAB]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                     </div>
                                     <div className="text-left">
-                                        <div className="font-medium text-white">From Gallery</div>
-                                        <div className="text-xs text-zinc-400">Select from wardrobe</div>
+                                        <div className="font-medium text-[#1A1A2E]">From Gallery</div>
+                                        <div className="text-xs text-[#888]">Select from wardrobe</div>
                                     </div>
                                 </button>
                             </div>
