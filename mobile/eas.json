@@ -15,6 +15,13 @@
       "distribution": "internal",
       "ios": {
         "buildConfiguration": "Release"
+      },
+      "env": {
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://mrjrsrnttvflefvnjyol.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yanJzcm50dHZmbGVmdm5qeW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0OTM5OTQsImV4cCI6MjA4MjA2OTk5NH0.1IIO31JYYoi3MPtSGgnwVBrYcwyq40mgZQEUIWquR_k",
+        "EXPO_PUBLIC_GEMINI_API_KEY": "AIzaSyALb7oZzByyS1cnHdSXwN_Y5a6j8SPEU6w",
+        "EXPO_PUBLIC_FAL_API_KEY": "26124258-2acb-4d3d-a912-8855618125d2:c95cd799df20e26b21e1bbcdf0929c53"
       }
     },
     "production": {
@@ -28,15 +35,6 @@
     }
   },
   "submit": {
-    "production": {
-      "ios": {
-        "appleId": "",
-        "ascAppId": "",
-        "appleTeamId": "M2265SQHZH"
-      },
-      "android": {
-        "serviceAccountKeyPath": ""
-      }
-    }
+    "production": {}
   }
 }

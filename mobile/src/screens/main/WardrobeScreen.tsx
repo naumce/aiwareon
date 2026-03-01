@@ -359,9 +359,11 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
         gap: spacing.sm,
     },
     filterPill: {
-        paddingVertical: 8,
+        paddingVertical: 12,
         paddingHorizontal: 16,
         borderRadius: 20,
+        minHeight: 44,
+        justifyContent: 'center',
         backgroundColor: 'transparent',
     },
     filterPillActive: {
@@ -498,8 +500,10 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
         marginBottom: spacing.sm,
     },
     categoryOption: {
-        paddingVertical: spacing.sm,
+        paddingVertical: spacing.md,
         paddingHorizontal: spacing.md,
+        minHeight: 44,
+        justifyContent: 'center',
         backgroundColor: colors.background.card,
         borderWidth: 1,
         borderColor: colors.border.subtle,

@@ -29,8 +29,10 @@ import {
     Moon,
     RotateCcw,
     Zap,
+    Shield,
+    CreditCard,
 } from 'lucide-react-native';
-import { colors } from '../../theme';
+import { useTheme } from '../../theme';
 
 // Map of icon names to components
 const iconMap = {
@@ -63,6 +65,8 @@ const iconMap = {
     Moon,
     RotateCcw,
     Zap,
+    Shield,
+    CreditCard,
 } as const;
 
 export type IconName = keyof typeof iconMap;
@@ -81,14 +85,15 @@ interface IconSymbolProps {
 export function IconSymbol({
     name,
     size = 24,
-    color = colors.text.primary,
+    color,
     strokeWidth = 1.5,
-}: IconSymbolProps) {
+}: Readonly<IconSymbolProps>) {
+    const { colors } = useTheme();
     const Icon = iconMap[name];
 
     if (!Icon) {
         return null;
     }
 
-    return <Icon size={size} color={color} strokeWidth={strokeWidth} />;
+    return <Icon size={size} color={color ?? colors.text.primary} strokeWidth={strokeWidth} />;
 }

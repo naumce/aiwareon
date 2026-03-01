@@ -23,6 +23,7 @@ import * as Sharing from 'expo-sharing';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { supabase } from '../../services/supabaseClient';
+import { savePersonImage, markPersonImageUsed } from '../../services/personImageService';
 import { useGenerationStore, useCreditStore, useAuthStore, useWardrobeStore } from '../../stores';
 import { PERSON_EXAMPLES, GARMENT_EXAMPLES, SHOWCASE_RESULTS } from '../../lib/exampleImages';
 import { IconSymbol, PremiumHeader, type IconName } from '../../components/ui';
@@ -370,7 +371,8 @@ function ResultHeroSection({
     onSave,
     onShare,
     onRetake,
-    onFavorite,
+    onAddToWardrobe,
+    isAddingToWardrobe,
     colors,
     isDark,
 }: {
@@ -378,11 +380,12 @@ function ResultHeroSection({
     onSave: () => void;
     onShare: () => void;
     onRetake: () => void;
-    onFavorite: () => void;
+    onAddToWardrobe: () => void;
+    isAddingToWardrobe: boolean;
     colors: ReturnType<typeof useTheme>['colors'];
     isDark: boolean;
 }) {
-    const [isFavorited, setIsFavorited] = useState(false);
+    const [addedToWardrobe, setAddedToWardrobe] = useState(false);
     const scaleAnim = useRef(new Animated.Value(0.92)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
     const btnSlide = useRef(new Animated.Value(30)).current;
@@ -402,10 +405,11 @@ function ResultHeroSection({
         }, 250);
     }, [scaleAnim, opacityAnim, btnSlide, btnOpacity]);
 
-    const handleFavoritePress = () => {
+    const handleWardrobePress = () => {
+        if (addedToWardrobe || isAddingToWardrobe) return;
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        setIsFavorited(prev => !prev);
-        onFavorite();
+        setAddedToWardrobe(true);
+        onAddToWardrobe();
     };
 
     const imageHeight = SCREEN_HEIGHT * 0.72;
@@ -438,10 +442,11 @@ function ResultHeroSection({
                     }}
                 />
 
-                {/* Heart — top right */}
+                {/* Wardrobe — top right */}
                 <TouchableOpacity
-                    onPress={handleFavoritePress}
+                    onPress={handleWardrobePress}
                     activeOpacity={0.7}
+                    disabled={isAddingToWardrobe}
                     style={{
                         position: 'absolute',
                         top: 16,
@@ -449,17 +454,21 @@ function ResultHeroSection({
                         width: 44,
                         height: 44,
                         borderRadius: 22,
-                        backgroundColor: 'rgba(0,0,0,0.3)',
+                        backgroundColor: addedToWardrobe ? 'rgba(201,160,255,0.4)' : 'rgba(0,0,0,0.3)',
                         alignItems: 'center',
                         justifyContent: 'center',
                     }}
                 >
-                    <IconSymbol
-                        name="Heart"
-                        size={22}
-                        color={isFavorited ? '#FF8FAB' : '#FFFFFF'}
-                        strokeWidth={isFavorited ? 2.5 : 1.5}
-                    />
+                    {isAddingToWardrobe ? (
+                        <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                        <IconSymbol
+                            name="Shirt"
+                            size={20}
+                            color={addedToWardrobe ? '#C9A0FF' : '#FFFFFF'}
+                            strokeWidth={addedToWardrobe ? 2.5 : 1.5}
+                        />
+                    )}
                 </TouchableOpacity>
 
                 {/* Action buttons — bottom */}
@@ -531,20 +540,6 @@ export function StudioScreen() {
 
     const { colors, isDark } = useTheme();
     const styles = createStyles(colors);
-
-    // Fetch user data on mount
-    useEffect(() => {
-        const loadData = async () => {
-            setLoadingData(true);
-            await Promise.all([
-                fetchBalance(),
-                fetchWardrobe(),
-                fetchSavedPersonPhotos(),
-            ]);
-            setLoadingData(false);
-        };
-        loadData();
-    }, [fetchBalance, fetchWardrobe]);
 
     const fetchSavedPersonPhotos = useCallback(async () => {
         if (!user) return;
@@ -669,10 +664,15 @@ export function StudioScreen() {
         });
 
         if (!result.canceled && result.assets[0]) {
+            const uri = result.assets[0].uri;
             if (target === 'person') {
-                setPersonImage(result.assets[0].uri);
+                setPersonImage(uri);
+                // Save to Supabase for reuse in the "Saved" bar
+                if (user?.id) {
+                    savePersonImage(user.id, uri).then(() => fetchSavedPersonPhotos());
+                }
             } else {
-                setDressImage(result.assets[0].uri);
+                setDressImage(uri);
             }
         }
     };
@@ -691,10 +691,14 @@ export function StudioScreen() {
         });
 
         if (!result.canceled && result.assets[0]) {
+            const uri = result.assets[0].uri;
             if (target === 'person') {
-                setPersonImage(result.assets[0].uri);
+                setPersonImage(uri);
+                if (user?.id) {
+                    savePersonImage(user.id, uri).then(() => fetchSavedPersonPhotos());
+                }
             } else {
-                setDressImage(result.assets[0].uri);
+                setDressImage(uri);
             }
         }
     };
@@ -804,10 +808,67 @@ export function StudioScreen() {
         scrollViewRef.current?.scrollTo({ y: 0, animated: true });
     }, []);
 
-    const handleFavorite = useCallback(() => {
-        // TODO: persist favorite to backend
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }, []);
+    const [addingToWardrobe, setAddingToWardrobe] = useState(false);
+
+    const handleAddToWardrobe = useCallback(async () => {
+        if (!resultUrl || !user?.id) return;
+        setAddingToWardrobe(true);
+
+        try {
+            let localUri = resultUrl;
+
+            // Download if remote URL or base64
+            if (resultUrl.startsWith('data:')) {
+                const base64Data = resultUrl.split(',')[1];
+                const filename = `wardrobe_${Date.now()}.jpg`;
+                localUri = FileSystem.cacheDirectory + filename;
+                await FileSystem.writeAsStringAsync(localUri, base64Data, {
+                    encoding: FileSystem.EncodingType.Base64,
+                });
+            } else if (resultUrl.startsWith('http')) {
+                const filename = `wardrobe_${Date.now()}.jpg`;
+                localUri = FileSystem.cacheDirectory + filename;
+                await FileSystem.downloadAsync(resultUrl, localUri);
+            }
+
+            // Read as base64 and upload to wardrobe bucket
+            const base64 = await FileSystem.readAsStringAsync(localUri, {
+                encoding: FileSystem.EncodingType.Base64,
+            });
+            const storagePath = `${user.id}/wardrobe_${Date.now()}.jpg`;
+            const binaryString = atob(base64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            const { error: uploadError } = await supabase.storage
+                .from('wardrobe')
+                .upload(storagePath, bytes, { contentType: 'image/jpeg' });
+
+            if (uploadError) throw uploadError;
+
+            // Add to wardrobe store
+            const { addItem: addWardrobeItem } = useWardrobeStore.getState();
+            await addWardrobeItem({
+                user_id: user.id,
+                name: 'Try-On Result',
+                category: 'tops',
+                category_group: 'clothing',
+                image_url: storagePath,
+                ai_suggested: false,
+            });
+
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            Alert.alert('Added', 'Image added to your wardrobe.');
+        } catch (err) {
+            console.error('[Studio] wardrobe save failed:', err);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            Alert.alert('Error', 'Failed to add to wardrobe.');
+        } finally {
+            setAddingToWardrobe(false);
+        }
+    }, [resultUrl, user?.id]);
 
     const canGenerate = personImage && dressImage && state !== 'generating' && balance > 0;
     const isGenerating = state === 'generating';
@@ -839,7 +900,8 @@ export function StudioScreen() {
                             onSave={handleSaveResult}
                             onShare={handleShareResult}
                             onRetake={handleRetake}
-                            onFavorite={handleFavorite}
+                            onAddToWardrobe={handleAddToWardrobe}
+                            isAddingToWardrobe={addingToWardrobe}
                             colors={colors}
                             isDark={isDark}
                         />
@@ -942,7 +1004,12 @@ export function StudioScreen() {
                                                     renderItem={({ item }) => (
                                                         <TouchableOpacity
                                                             style={styles.exampleThumb}
-                                                            onPress={() => setPersonImage(item.url)}
+                                                            onPress={() => {
+                                                                setPersonImage(item.url);
+                                                                if (item.label === 'Saved') {
+                                                                    markPersonImageUsed(item.id);
+                                                                }
+                                                            }}
                                                             activeOpacity={0.7}
                                                         >
                                                             <Image source={{ uri: item.url }} style={styles.exampleImage} />
@@ -1083,7 +1150,7 @@ export function StudioScreen() {
                                 style={styles.generateWrapper}
                             >
                                 <LinearGradient
-                                    colors={canGenerate ? colors.gradient.primary : ['#D4D4D8', '#D4D4D8']}
+                                    colors={canGenerate ? colors.gradient.primary : [colors.fill.primary, colors.fill.primary]}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 0 }}
                                     style={styles.generateButton}
@@ -1096,7 +1163,10 @@ export function StudioScreen() {
                                             </Animated.Text>
                                         </View>
                                     ) : (
-                                        <Text style={styles.generateText}>
+                                        <Text style={[
+                                            styles.generateText,
+                                            !canGenerate && { color: colors.text.disabled },
+                                        ]}>
                                             Generate · {creditCost} {creditCost === 1 ? 'Credit' : 'Credits'}
                                         </Text>
                                     )}

@@ -10,6 +10,8 @@ import {
     Alert,
     RefreshControl,
     Animated,
+    Modal,
+    Pressable,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -100,28 +102,34 @@ export function GalleryScreen() {
                 .order('created_at', { ascending: false })
                 .range(offset, offset + PAGE_SIZE - 1);
 
-            if (error) throw error;
+            if (error) {
+                console.error('[Gallery] media_items query error:', error);
+                throw error;
+            }
 
             const newItems = data || [];
             setHasMore(newItems.length === PAGE_SIZE);
 
             const itemsWithUrls = await Promise.all(
                 newItems.map(async (item) => {
-                    // Full-size URL for detail view
-                    const { data: signedData } = await supabase.storage
-                        .from('aiwear-media')
-                        .createSignedUrl(item.object_path, 3600);
-                    // Thumbnail URL for grid (200px wide, 60% quality)
-                    const { data: thumbData } = await supabase.storage
-                        .from('aiwear-media')
-                        .createSignedUrl(item.object_path, 3600, {
-                            transform: { width: 200, height: 267, resize: 'cover', quality: 60 },
-                        });
-                    return {
-                        ...item,
-                        signedUrl: signedData?.signedUrl,
-                        thumbUrl: thumbData?.signedUrl || signedData?.signedUrl,
-                    };
+                    try {
+                        const { data: signedData, error: signedError } = await supabase.storage
+                            .from('aiwear-media')
+                            .createSignedUrl(item.object_path, 3600);
+
+                        if (signedError) {
+                            console.error('[Gallery] signedUrl error for', item.object_path, signedError);
+                        }
+
+                        return {
+                            ...item,
+                            signedUrl: signedData?.signedUrl,
+                            thumbUrl: signedData?.signedUrl,
+                        };
+                    } catch (urlErr) {
+                        console.error('[Gallery] createSignedUrl threw for', item.object_path, urlErr);
+                        return { ...item, signedUrl: undefined, thumbUrl: undefined };
+                    }
                 })
             );
 
@@ -130,8 +138,8 @@ export function GalleryScreen() {
             } else {
                 setItems(prev => [...prev, ...itemsWithUrls.filter(i => i.signedUrl)]);
             }
-        } catch {
-            // Gallery fetch failed
+        } catch (err) {
+            console.error('[Gallery] fetchGallery failed:', err);
         } finally {
             setLoading(false);
             setLoadingMore(false);
@@ -296,7 +304,7 @@ export function GalleryScreen() {
                 onPress={() => handleDelete(item)}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-                <IconSymbol name="X" size={12} color="#FFF" strokeWidth={3} />
+                <IconSymbol name="X" size={13} color="#FFF" strokeWidth={3} />
             </TouchableOpacity>
 
             {/* Move to wardrobe button overlay */}
@@ -305,7 +313,7 @@ export function GalleryScreen() {
                 onPress={() => handleMoveToWardrobe(item)}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-                <IconSymbol name="Shirt" size={12} color="#FFF" strokeWidth={2.5} />
+                <IconSymbol name="Shirt" size={13} color="#FFF" strokeWidth={2.5} />
             </TouchableOpacity>
         </View>
     );
@@ -372,55 +380,64 @@ export function GalleryScreen() {
                     />
                 )}
 
-                {/* Detail Overlay */}
-                {selectedItem && (
-                    <TouchableOpacity
+                {/* Detail Modal */}
+                <Modal
+                    visible={selectedItem !== null}
+                    transparent
+                    animationType="fade"
+                    statusBarTranslucent
+                    onRequestClose={() => setSelectedItem(null)}
+                >
+                    <Pressable
                         style={styles.overlay}
-                        activeOpacity={1}
                         onPress={() => setSelectedItem(null)}
                     >
-                        <View style={styles.detailCard}>
-                            <Image
-                                source={selectedItem.signedUrl}
-                                style={styles.detailImage}
-                                contentFit="cover"
-                                transition={300}
-                                cachePolicy="memory-disk"
-                            />
-                            <View style={styles.detailActions}>
-                                <TouchableOpacity
-                                    style={styles.detailButton}
-                                    onPress={() => handleSave(selectedItem)}
-                                >
-                                    <IconSymbol name="Download" size={20} color={colors.text.primary} />
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.detailButton}
-                                    onPress={() => handleShare(selectedItem)}
-                                >
-                                    <IconSymbol name="Share" size={20} color={colors.text.primary} />
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.detailButton}
-                                    onPress={() => handleMoveToWardrobe(selectedItem)}
-                                    disabled={movingToWardrobe}
-                                >
-                                    {movingToWardrobe ? (
-                                        <ActivityIndicator size="small" color={colors.brand.primary} />
-                                    ) : (
-                                        <IconSymbol name="Shirt" size={20} color={colors.brand.primary} />
-                                    )}
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[styles.detailButton, styles.detailButtonDestructive]}
-                                    onPress={() => handleDelete(selectedItem)}
-                                >
-                                    <IconSymbol name="Trash2" size={20} color={colors.state.error} />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-                )}
+                        <Pressable style={styles.detailCard} onPress={() => {}}>
+                            {selectedItem && (
+                                <>
+                                    <Image
+                                        source={selectedItem.signedUrl}
+                                        style={styles.detailImage}
+                                        contentFit="cover"
+                                        transition={300}
+                                        cachePolicy="memory-disk"
+                                    />
+                                    <View style={styles.detailActions}>
+                                        <TouchableOpacity
+                                            style={styles.detailButton}
+                                            onPress={() => handleSave(selectedItem)}
+                                        >
+                                            <IconSymbol name="Download" size={20} color={colors.text.primary} />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={styles.detailButton}
+                                            onPress={() => handleShare(selectedItem)}
+                                        >
+                                            <IconSymbol name="Share" size={20} color={colors.text.primary} />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={styles.detailButton}
+                                            onPress={() => handleMoveToWardrobe(selectedItem)}
+                                            disabled={movingToWardrobe}
+                                        >
+                                            {movingToWardrobe ? (
+                                                <ActivityIndicator size="small" color={colors.brand.primary} />
+                                            ) : (
+                                                <IconSymbol name="Shirt" size={20} color={colors.brand.primary} />
+                                            )}
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={[styles.detailButton, styles.detailButtonDestructive]}
+                                            onPress={() => handleDelete(selectedItem)}
+                                        >
+                                            <IconSymbol name="Trash2" size={20} color={colors.state.error} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </>
+                            )}
+                        </Pressable>
+                    </Pressable>
+                </Modal>
             </SafeAreaView>
         </View>
     );
@@ -488,11 +505,11 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     // Delete button on grid card (top-right)
     gridDeleteButton: {
         position: 'absolute',
-        top: 8,
-        right: 8,
-        width: 26,
-        height: 26,
-        borderRadius: 13,
+        top: 4,
+        right: 4,
+        width: 28,
+        height: 28,
+        borderRadius: 14,
         backgroundColor: 'rgba(0,0,0,0.55)',
         alignItems: 'center',
         justifyContent: 'center',
@@ -501,11 +518,11 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     // Move to wardrobe button on grid card (bottom-right)
     gridMoveButton: {
         position: 'absolute',
-        bottom: 8,
-        right: 8,
-        width: 26,
-        height: 26,
-        borderRadius: 13,
+        bottom: 4,
+        right: 4,
+        width: 28,
+        height: 28,
+        borderRadius: 14,
         backgroundColor: 'rgba(0,0,0,0.55)',
         alignItems: 'center',
         justifyContent: 'center',
@@ -544,9 +561,9 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
         textAlign: 'center',
     },
 
-    // Detail overlay
+    // Detail modal backdrop
     overlay: {
-        ...StyleSheet.absoluteFillObject,
+        flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.9)',
         justifyContent: 'center',
         alignItems: 'center',
@@ -568,7 +585,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     },
     detailButton: {
         flex: 1,
-        paddingVertical: spacing.md,
+        minHeight: 44,
+        justifyContent: 'center',
         backgroundColor: colors.fill.secondary,
         borderRadius: borderRadius.sm,
         alignItems: 'center',

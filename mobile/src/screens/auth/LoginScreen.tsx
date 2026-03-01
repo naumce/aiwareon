@@ -211,6 +211,7 @@ export function LoginScreen() {
                                     <TouchableOpacity
                                         onPress={() => navigation.navigate('ForgotPassword')}
                                         style={styles.forgotLink}
+                                        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                                     >
                                         <Text style={styles.forgotText}>Forgot Password?</Text>
                                     </TouchableOpacity>
@@ -244,7 +245,10 @@ export function LoginScreen() {
                                     <Text style={styles.toggleText}>
                                         {isSignUp ? 'Already have an account?' : "Don't have an account?"}
                                     </Text>
-                                    <TouchableOpacity onPress={toggleMode}>
+                                    <TouchableOpacity
+                                        onPress={toggleMode}
+                                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    >
                                         <Text style={styles.toggleLink}>
                                             {isSignUp ? 'Sign In' : 'Create Account'}
                                         </Text>

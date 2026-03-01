@@ -228,6 +228,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors'], isDark: boo
         paddingVertical: 6,
         paddingHorizontal: 12,
         borderRadius: 20,
+        minHeight: 44,
         gap: 4,
     },
     badgeLabel: {
@@ -236,14 +237,14 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors'], isDark: boo
         color: colors.brand.primary,
     },
     avatarGradient: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
         padding: 2,
     },
     avatarInner: {
         flex: 1,
-        borderRadius: 18,
+        borderRadius: 20,
         alignItems: 'center',
         justifyContent: 'center',
     },

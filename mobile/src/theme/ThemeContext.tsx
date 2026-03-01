@@ -13,10 +13,10 @@ export const lightColors = {
     },
     text: {
         primary: '#1A1A2E',
-        secondary: 'rgba(26, 26, 46, 0.55)',
-        tertiary: 'rgba(26, 26, 46, 0.3)',
-        muted: 'rgba(26, 26, 46, 0.4)',
-        disabled: 'rgba(26, 26, 46, 0.18)',
+        secondary: 'rgba(26, 26, 46, 0.7)',
+        tertiary: 'rgba(26, 26, 46, 0.45)',
+        muted: 'rgba(26, 26, 46, 0.5)',
+        disabled: 'rgba(26, 26, 46, 0.25)',
     },
     brand: {
         primary: '#C9A0FF',    // Lavender
@@ -62,10 +62,10 @@ export const darkColors = {
     },
     text: {
         primary: '#F7F5F2',
-        secondary: 'rgba(247, 245, 242, 0.6)',
-        tertiary: 'rgba(247, 245, 242, 0.3)',
-        muted: 'rgba(247, 245, 242, 0.4)',
-        disabled: 'rgba(247, 245, 242, 0.18)',
+        secondary: 'rgba(247, 245, 242, 0.72)',
+        tertiary: 'rgba(247, 245, 242, 0.48)',
+        muted: 'rgba(247, 245, 242, 0.52)',
+        disabled: 'rgba(247, 245, 242, 0.28)',
     },
     brand: {
         primary: '#C9A0FF',    // Lavender

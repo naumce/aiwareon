@@ -14,9 +14,6 @@ const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 const FAL_API_KEY = process.env.EXPO_PUBLIC_FAL_API_KEY || '';
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
 
-// Error Tracking - OPTIONAL
-const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN || '';
-
 // Validate required environment variables at module load
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     const missingVars = [];
@@ -46,11 +43,6 @@ export const config = {
     // Google Gemini - Image generation
     gemini: {
         apiKey: GEMINI_API_KEY,
-    },
-
-    // Sentry - Error tracking
-    sentry: {
-        dsn: SENTRY_DSN,
     },
 
     // Feature flags (auto-enable when keys are present)

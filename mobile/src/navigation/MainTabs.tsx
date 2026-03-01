@@ -38,31 +38,16 @@ function TabBarButton({
     colors: ReturnType<typeof useTheme>['colors'];
 }) {
     const scale = useRef(new Animated.Value(1)).current;
-    const liftY = useRef(new Animated.Value(focused ? -4 : 0)).current;
-    const labelOpacity = useRef(new Animated.Value(focused ? 1 : 0)).current;
-    const labelSlide = useRef(new Animated.Value(focused ? 0 : 5)).current;
+    const liftY = useRef(new Animated.Value(focused ? -2 : 0)).current;
 
     useEffect(() => {
-        Animated.parallel([
-            Animated.spring(liftY, {
-                toValue: focused ? -4 : 0,
-                tension: 300,
-                friction: 20,
-                useNativeDriver: true,
-            }),
-            Animated.timing(labelOpacity, {
-                toValue: focused ? 1 : 0,
-                duration: 200,
-                useNativeDriver: true,
-            }),
-            Animated.spring(labelSlide, {
-                toValue: focused ? 0 : 5,
-                tension: 300,
-                friction: 20,
-                useNativeDriver: true,
-            }),
-        ]).start();
-    }, [focused, liftY, labelOpacity, labelSlide]);
+        Animated.spring(liftY, {
+            toValue: focused ? -2 : 0,
+            tension: 300,
+            friction: 20,
+            useNativeDriver: true,
+        }).start();
+    }, [focused, liftY]);
 
     const handlePressIn = () => {
         Animated.spring(scale, {
@@ -102,16 +87,12 @@ function TabBarButton({
                     color={focused ? colors.brand.secondary : colors.text.tertiary}
                     strokeWidth={focused ? 2 : 1.5}
                 />
-                <Animated.Text style={[
+                <Text style={[
                     styles.tabLabel,
-                    {
-                        color: focused ? colors.brand.secondary : colors.text.tertiary,
-                        opacity: labelOpacity,
-                        transform: [{ translateY: labelSlide }],
-                    },
+                    { color: focused ? colors.brand.secondary : colors.text.tertiary },
                 ]}>
                     {label}
-                </Animated.Text>
+                </Text>
             </Animated.View>
         </Pressable>
     );
@@ -203,8 +184,8 @@ const styles = StyleSheet.create({
     },
     tabLabel: {
         fontFamily: '-apple-system',
-        fontSize: 10,
-        fontWeight: '600',
+        fontSize: 11,
+        fontWeight: '500',
         marginTop: 2,
     },
 });
