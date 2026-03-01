@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "0edb8113-4dc7-4e8c-ba1f-7c7a1d5e6eb3"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.kabom11.aiwear",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

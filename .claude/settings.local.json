@@ -4,7 +4,13 @@
       "Bash(npx vite build:*)",
       "Bash(npx tsc:*)",
       "Bash(npx expo start:*)",
-      "WebFetch(domain:ai.google.dev)"
+      "WebFetch(domain:ai.google.dev)",
+      "Bash(npx expo install:*)",
+      "Bash(npx expo prebuild:*)",
+      "Bash(SENTRY_DISABLE_AUTO_UPLOAD=true npx expo run:ios:*)",
+      "Bash(xcrun xctrace:*)",
+      "Bash(ls:*)",
+      "Bash(npm uninstall:*)"
     ]
   }
 }
